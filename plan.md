@@ -2,7 +2,7 @@
 
 **Version:** 2.0.0  
 **Last updated:** 2026-07-01  
-**Status:** Step 18 complete — Step 19 (Midnight Finance tokens) next
+**Status:** Step 24 complete — Step 25 (ERD review) next
 
 [README.md](README.md) | [docs/README.md](docs/README.md)
 
@@ -547,5 +547,5 @@ Full specification: [docs/design/owner-active-center.md](docs/design/owner-activ
 
 ## Next steps
 
-1. **Development:** **Step 19** — Tailwind tokens — Midnight Finance ([docs/design/design-system.md](docs/design/design-system.md))
+1. **Development:** **Step 25** — Review ERD against requirements ([docs/design/data-model.md](docs/design/data-model.md))
 2. Follow steps **in order** (1 → 120); do not build CSV UI before Step 51 (verification backend)

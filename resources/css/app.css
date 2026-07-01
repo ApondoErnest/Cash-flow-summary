@@ -7,7 +7,170 @@
 @source '../../storage/framework/views/*.php';
 @source '../views/**/*.blade.php';
 
+/*
+ * Midnight Finance — design tokens (Step 19)
+ * @see docs/design/design-system.md
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    /* Brand */
+    --color-midnight-navy: #14213d;
+    --color-emerald-brand: #0f766e;
+    --color-gold-brand: #d6a756;
+    --color-app-bg: #f5f7fa;
+    --color-surface: #ffffff;
+
+    /* Text */
+    --color-text-heading: #111827;
+    --color-text-body: #4b5563;
+    --color-text-muted: #6b7280;
+    --color-text-disabled: #9ca3af;
+
+    /* Status */
+    --color-status-success: #15803d;
+    --color-status-warning: #d97706;
+    --color-status-error: #b91c1c;
+    --color-status-info: #2563eb;
+
+    /* Typography */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Flux primary accent → emerald brand */
+:root {
+    --color-accent: var(--color-emerald-brand);
+    --color-accent-content: var(--color-emerald-brand);
+    --color-accent-foreground: var(--color-surface);
+}
+
+@utility tabular-money {
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Midnight Finance sidebar shell (Step 21) */
+[data-flux-sidebar].midnight-sidebar {
+    background-color: var(--color-midnight-navy);
+    color: rgb(255 255 255 / 0.85);
+}
+
+[data-flux-sidebar].midnight-sidebar [data-flux-sidebar-brand] .truncate {
+    color: #fff;
+}
+
+[data-flux-sidebar].midnight-sidebar .midnight-sidebar-group [class*='text-zinc-500'] {
+    color: rgb(255 255 255 / 0.45);
+}
+
+[data-flux-sidebar].midnight-sidebar [data-flux-sidebar-item] {
+    color: rgb(255 255 255 / 0.78);
+}
+
+[data-flux-sidebar].midnight-sidebar [data-flux-sidebar-item]:hover {
+    background-color: rgb(255 255 255 / 0.08);
+    color: #fff;
+}
+
+[data-flux-sidebar].midnight-sidebar [data-flux-sidebar-item][data-current] {
+    background-color: rgb(15 118 110 / 0.22);
+    border-color: rgb(15 118 110 / 0.35);
+    color: #fff;
+}
+
+[data-flux-sidebar].midnight-sidebar [data-flux-sidebar-item][data-current] svg {
+    color: var(--color-emerald-brand);
+}
+
+[data-flux-sidebar].midnight-sidebar [data-flux-sidebar-profile] {
+    color: rgb(255 255 255 / 0.85);
+}
+
+[data-flux-sidebar].midnight-sidebar [data-flux-sidebar-profile]:hover {
+    background-color: rgb(255 255 255 / 0.08);
+}
+
+/* Midnight Finance UI patterns (Step 23) */
+.mf-btn-secondary {
+    border-color: var(--color-midnight-navy);
+    color: var(--color-midnight-navy);
+}
+
+.mf-btn-secondary:hover {
+    background-color: rgb(20 33 61 / 0.04);
+}
+
+.mf-btn-approval {
+    background-color: var(--color-midnight-navy) !important;
+    border: 1px solid var(--color-gold-brand) !important;
+    color: #fff !important;
+    box-shadow: inset 0 1px 0 rgb(214 167 86 / 0.25);
+}
+
+.mf-btn-approval:hover {
+    background-color: color-mix(in oklab, var(--color-midnight-navy), white 8%) !important;
+}
+
+.mf-btn-destructive-outline {
+    border-color: var(--color-status-error) !important;
+    color: var(--color-status-error) !important;
+}
+
+.mf-btn-destructive-outline:hover {
+    background-color: rgb(185 28 28 / 0.06) !important;
+}
+
+.mf-table-panel [data-flux-column] {
+    color: var(--color-text-heading);
+    font-family: var(--font-display);
+}
+
+.mf-table-panel [data-flux-cell] {
+    color: var(--color-text-body);
+}
+
+.mf-table-panel .tabular-money {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Responsive app shell (Step 24) */
+.mf-app-shell {
+    min-height: 100dvh;
+    width: 100%;
+}
+
+@media (max-width: 1023px) {
+    .mf-app-shell [data-flux-header].mf-app-header {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+    }
+
+    .mf-app-shell [data-flux-sidebar].midnight-sidebar {
+        box-shadow: 4px 0 24px rgb(0 0 0 / 0.18);
+    }
+
+    .mf-app-shell [data-flux-sidebar-backdrop] {
+        background-color: rgb(20 33 61 / 0.45);
+    }
+
+    .mf-page {
+        min-width: 0;
+    }
+
+    .mf-stat-card {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 639px) {
+    .mf-table-panel {
+        border-radius: 0.5rem;
+    }
+
+    .mf-table-panel > .overflow-x-auto {
+        margin-inline: -0.25rem;
+        padding-inline: 0.25rem;
+    }
 }

@@ -2,7 +2,7 @@
 
 [← Documentation hub](../README.md) | **Sprint 1**
 
-**Status:** CI skeleton ready (Step 18). Design shell at Step 19.
+**Status:** Responsive shell (Step 24). Phase 3 checkpoint passed — Step 25 next.
 
 ---
 
@@ -120,6 +120,66 @@ Run Horizon locally: `php artisan horizon` (separate terminal)
 | Redis / Horizon | `PONG`; Horizon supervisor available locally |
 | **Checkpoint (Steps 13–18)** | Passed — stack installation complete |
 
+### Verified environment (Step 19 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Design tokens | [`resources/css/app.css`](../../resources/css/app.css) `@theme` |
+| Fonts | Inter (`font-sans`), Manrope (`font-display`) via Vite |
+| Flux accent | Mapped to `emerald-brand` |
+| `npm run build` | OK |
+| Token preview | `/` welcome page |
+
+### Verified environment (Step 20 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Icon source | Heroicons via `livewire/flux` only |
+| Banned packages | None in `composer.json` / `package.json` |
+| UI demo | Feature-mapping icons on `/` |
+| Policy tests | `tests/Feature/IconPolicyTest.php` |
+
+### Verified environment (Step 21 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| App shell | [`resources/views/components/layouts/shell.blade.php`](../../resources/views/components/layouts/shell.blade.php) |
+| Sidebar | Midnight navy (`midnight-sidebar`) |
+| Top bar | Active center label + user actions |
+| Content | `flux:main` on `app-bg` |
+| Mobile | Collapsible sidebar via `flux:sidebar.toggle` |
+| Tests | `tests/Feature/AppShellLayoutTest.php` |
+
+### Verified environment (Step 22 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Role nav registry | [`app/Support/Navigation/RoleNavigation.php`](../../app/Support/Navigation/RoleNavigation.php) |
+| Roles | Owner (15 items), Manager (6), Cashier (3) |
+| Preview | `?role=owner\|manager\|cashier` or `NAV_PREVIEW_ROLE` |
+| Placeholder routes | [`routes/navigation.php`](../../routes/navigation.php) |
+| Tests | `tests/Feature/RoleNavigationTest.php` |
+
+### Verified environment (Step 23 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| UI components | [`resources/views/components/ui/`](../../resources/views/components/ui/) |
+| Patterns | Card, stat-card, button, table-panel, status-badge |
+| Button variants | primary, secondary, approval, destructive |
+| Tests | `tests/Feature/DesignSystemComponentsTest.php` |
+
+### Verified environment (Step 24 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Mobile sidebar | `collapsible="mobile"` + toggle + backdrop |
+| Header | Sticky on mobile; icon-only actions below `sm` |
+| Main padding | `p-4` → `p-6` → `p-8` breakpoints |
+| Page layout | `x-ui.page` with stacked cards on mobile |
+| Tests | `tests/Feature/ResponsiveShellTest.php` |
+| **Phase 3 checkpoint** | Passed (Steps 19–24) |
+
 ---
 
 ## Database setup (Step 12)
@@ -215,15 +275,24 @@ npm run dev           # separate terminal
 php artisan serve
 ```
 
-### Icons (Flux + Heroicons)
+### Icons (Flux + Heroicons) — Step 20
 
-Heroicons ship with Flux — no extra icon package. To add a Lucide icon when Heroicons has no match:
+Heroicons ship with Flux — **no** separate npm or Composer icon package.
+
+Usage:
+
+```blade
+<flux:icon.home variant="outline" />
+<flux:button icon="arrow-up-tray">Import</flux:button>
+```
+
+Lucide (only when Heroicons has no match):
 
 ```bash
 php artisan flux:icon file-spreadsheet
 ```
 
-Import only icons you need. See [design-system.md](../design/design-system.md).
+Policy test: `php artisan test --filter=IconPolicy`. Banned: Font Awesome, Bootstrap Icons, Material Symbols, full Lucide bundle.
 
 Visit `http://localhost:8000`.
 

@@ -2,6 +2,100 @@
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.21] - 2026-07-01
+
+### Added
+
+- **Step 24** — Responsive app shell: mobile sidebar, sticky header, compact actions
+- `x-ui.page` layout component
+- `tests/Feature/ResponsiveShellTest.php`
+
+### Changed
+
+- Shell wrapped in `mf-app-shell`; nav closes on mobile tap
+- Main padding scales `p-4` → `p-8` across breakpoints
+- **Phase 3 checkpoint passed** (Steps 19–24); **Step 25** next
+
+[2.0.21]: #2021---2026-07-01
+
+## [2.0.20] - 2026-07-01
+
+### Added
+
+- **Step 23** — Reusable Midnight Finance UI components under `resources/views/components/ui/`
+- `x-ui.card`, `x-ui.stat-card`, `x-ui.button`, `x-ui.table-panel`, `x-ui.status-badge`
+- Button variants: primary, secondary, approval (navy/gold), destructive, destructive-outline
+- `tests/Feature/DesignSystemComponentsTest.php`
+
+### Changed
+
+- Welcome page showcases cards, buttons, badges, and sample table
+- Status docs updated; **Step 24** next
+
+[2.0.20]: #2020---2026-07-01
+
+## [2.0.19] - 2026-07-01
+
+### Added
+
+- **Step 22** — Role-based navigation for Owner, Manager, and Cashier
+- [`app/Support/Navigation/RoleNavigation.php`](app/Support/Navigation/RoleNavigation.php) and `UserRole` enum
+- Placeholder routes in [`routes/navigation.php`](routes/navigation.php)
+- `tests/Feature/RoleNavigationTest.php`
+
+### Changed
+
+- Shell sidebar and header now role-aware (`?role=` preview)
+- Status docs updated; **Step 23** next
+
+[2.0.19]: #2019---2026-07-01
+
+## [2.0.18] - 2026-07-01
+
+### Added
+
+- **Step 21** — Flux app shell: midnight navy sidebar, top bar, main content area
+- [`resources/views/components/layouts/shell.blade.php`](resources/views/components/layouts/shell.blade.php)
+- `tests/Feature/AppShellLayoutTest.php`
+
+### Changed
+
+- Sidebar styles in `resources/css/app.css` (`midnight-sidebar`)
+- Status docs updated; **Step 22** next
+
+[2.0.18]: #2018---2026-07-01
+
+## [2.0.17] - 2026-07-01
+
+### Added
+
+- **Step 20** — Heroicons via Flux verified; icon showcase on welcome page
+- `tests/Feature/IconPolicyTest.php` — NFR-002 / AC #36 policy checks
+
+### Changed
+
+- [design-system.md](docs/design/design-system.md) — icon checklist item 1 marked complete
+- [setup.md](docs/operations/setup.md) — icon usage and policy test docs
+- Status docs updated; **Step 21** next
+
+[2.0.17]: #2017---2026-07-01
+
+## [2.0.16] - 2026-07-01
+
+### Added
+
+- **Step 19** — Midnight Finance Tailwind v4 `@theme` tokens in `resources/css/app.css`
+- Inter + Manrope fonts via Vite; `tabular-money` utility
+- Token preview on welcome page
+
+### Changed
+
+- Flux accent color → `emerald-brand`
+- [design-system.md](docs/design/design-system.md) — Tailwind v4 implementation note
+- Status docs updated; **Step 20** next
+
+[2.0.16]: #2016---2026-07-01
+
 ## [2.0.15] - 2026-07-01
 
 ### Added

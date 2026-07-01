@@ -167,7 +167,7 @@ Custom SVG Blade components **only** for brand-specific marks (e.g. official Wha
 
 ### Implementation checklist (Sprint 1)
 
-1. Confirm Flux starter kit includes Heroicons (default — no extra install)
+1. ✓ Heroicons via Flux confirmed (Step 20 — no extra npm/composer icon packages)
 2. Document any Lucide imports in `CHANGELOG` when added
 3. Add `WhatsAppIcon` custom SVG component in S8 (WhatsApp sprint)
 4. Code review: reject PRs that add Font Awesome, Bootstrap Icons, or Material Symbols
@@ -199,7 +199,25 @@ Colors: emerald primary series; muted grid; navy axis labels.
 
 ---
 
-## Tailwind config (implementation note)
+## Tailwind tokens (Tailwind CSS v4)
+
+Implemented in [`resources/css/app.css`](../../resources/css/app.css) via `@theme`:
+
+| Token utility | Hex |
+|---------------|-----|
+| `midnight-navy` | `#14213D` |
+| `emerald-brand` | `#0F766E` |
+| `gold-brand` | `#D6A756` |
+| `app-bg` | `#F5F7FA` |
+| `surface` | `#FFFFFF` |
+| `text-heading` / `text-body` / `text-muted` / `text-disabled` | see Text table above |
+| `status-success` / `warning` / `error` / `info` | see Status table above |
+
+Fonts loaded via Vite (`Inter` → `font-sans`, `Manrope` → `font-display`). Money figures use `@utility tabular-money`.
+
+Flux accent maps to `emerald-brand` in `:root`.
+
+Legacy Tailwind v3 config excerpt (reference only):
 
 ```js
 // tailwind.config.js excerpt

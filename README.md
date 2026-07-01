@@ -2,7 +2,7 @@
 
 Professional financial consolidation and reporting for vehicle technical inspection centers.
 
-**Status:** Step 18 complete — **Step 19** (Midnight Finance tokens) is next
+**Status:** Step 24 complete — **Step 25** (ERD review) is next
 
 ## Local development
 

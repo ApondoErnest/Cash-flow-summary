@@ -27,7 +27,13 @@ Complete **one step at a time**. Do not start Step N+1 until Step N is done. Pas
 | 16 | `.env.example` | ✓ |
 | 17 | `app/Modules/` structure | ✓ |
 | 18 | CI pipeline | ✓ |
-| 19–24 | Design system & shell | Next |
+| 19 | Midnight Finance tokens | ✓ |
+| 20 | Heroicons via Flux | ✓ |
+| 21 | App shell layout | ✓ |
+| 22 | Role-based navigation | ✓ |
+| 23 | Reusable UI patterns | ✓ |
+| 24 | Responsive shell | ✓ |
+| 25+ | Database Wave 1 | Next |
 | 19–24 | **Frontend design system & shell** | |
 | 25–31 | **Database** Wave 1 (admin) | |
 | 32–39 | Auth & security foundation | |
@@ -87,5 +93,5 @@ Shared `CsvVerificationCard` built at Step 72; reused in Steps 80+ and 86+.
 
 | Item | Status |
 |------|--------|
-| Steps 1–18 | Complete |
-| **Next step** | **Step 19** — Midnight Finance tokens ([design-system.md](../design/design-system.md)) |
+| Steps 1–24 | Complete — **Phase 3 checkpoint passed** |
+| **Next step** | **Step 25** — Review ERD ([data-model.md](../design/data-model.md)) |

@@ -26,9 +26,9 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.0.15 |
-| Steps complete | **1–18** |
-| **Next step** | **Step 19** — Tailwind tokens (Midnight Finance) |
+| Doc set | v2.0.21 |
+| Steps complete | **1–24** |
+| **Next step** | **Step 25** — Review ERD against requirements |
 | Guide | [setup.md](../operations/setup.md) |
 
 ---
@@ -55,12 +55,12 @@ flowchart LR
 | 16 | Configure `.env.example` | Laravel & stack installation | S1 | Complete |
 | 17 | Create modular folder structure `app/Modules/` | Laravel & stack installation | S1 | Complete |
 | 18 | CI pipeline skeleton (test + build) | Laravel & stack installation | S1 | Complete |
-| 19 | Tailwind tokens — Midnight Finance colors, fonts | Design system & frontend shell | S1 | Not started |
-| 20 | Heroicons via Flux (no extra icon packages) | Design system & frontend shell | S1 | Not started |
-| 21 | App layout: sidebar (navy), top bar, content area | Design system & frontend shell | S1 | Not started |
-| 22 | Role-based navigation structure (empty routes OK) | Design system & frontend shell | S1 | Not started |
-| 23 | Reusable card, button, table, badge patterns | Design system & frontend shell | S1 | Not started |
-| 24 | Responsive behaviour (mobile sidebar) | Design system & frontend shell | S1 | Not started |
+| 19 | Tailwind tokens — Midnight Finance colors, fonts | Design system & frontend shell | S1 | Complete |
+| 20 | Heroicons via Flux (no extra icon packages) | Design system & frontend shell | S1 | Complete |
+| 21 | App layout: sidebar (navy), top bar, content area | Design system & frontend shell | S1 | Complete |
+| 22 | Role-based navigation structure (empty routes OK) | Design system & frontend shell | S1 | Complete |
+| 23 | Reusable card, button, table, badge patterns | Design system & frontend shell | S1 | Complete |
+| 24 | Responsive behaviour (mobile sidebar) | Design system & frontend shell | S1 | Complete |
 | 25 | Review ERD against requirements | Database Wave 1 — administration | S1 | Not started |
 | 26 | Migration: organizations | Database Wave 1 — administration | S1 | Not started |
 | 27 | Migration: centers, operating_calendars, calendar_exceptions | Database Wave 1 — administration | S1 | Not started |
@@ -384,6 +384,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [design-system.md](../design/design-system.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — `@theme` tokens + Inter/Manrope; Flux accent → emerald ([app.css](../../resources/css/app.css)) |
 
 ### Step 20 — Heroicons via Flux (no extra icon packages)
 
@@ -393,6 +395,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [design-system.md](../design/design-system.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Heroicons only via Flux; policy tests; icon demo on `/` ([IconPolicyTest.php](../../tests/Feature/IconPolicyTest.php)) |
 
 ### Step 21 — App layout: sidebar (navy), top bar, content area
 
@@ -402,6 +406,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Flux sidebar/header/main shell; navy sidebar styling ([shell.blade.php](../../resources/views/components/layouts/shell.blade.php)) |
 
 ### Step 22 — Role-based navigation structure (empty routes OK)
 
@@ -411,6 +417,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — `RoleNavigation` registry; Owner/Manager/Cashier sidebar groups; placeholder routes; preview via `?role=` |
 
 ### Step 23 — Reusable card, button, table, badge patterns
 
@@ -420,6 +428,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [design-system.md](../design/design-system.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — `x-ui.*` Blade components (card, stat-card, button, table-panel, status-badge); demo on `/` |
 
 ### Step 24 — Responsive behaviour (mobile sidebar)
 
@@ -429,6 +439,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Mobile sidebar toggle/backdrop; sticky header; responsive padding; `x-ui.page`; nav auto-close on mobile |
 
 **Checkpoint after Step 24** (end of Design system & frontend shell):
 

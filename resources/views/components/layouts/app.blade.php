@@ -8,8 +8,10 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @fluxAppearance
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800 antialiased">
-        {{ $slot }}
+    <body class="min-h-screen bg-app-bg font-sans text-text-body antialiased">
+        <x-layouts.shell>
+            {{ $slot }}
+        </x-layouts.shell>
 
         @livewireScripts
         @fluxScripts

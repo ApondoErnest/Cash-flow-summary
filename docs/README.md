@@ -1,8 +1,8 @@
 # Documentation Hub
 
-**Doc set version:** 2.0.15  
+**Doc set version:** 2.0.21  
 **Last reviewed:** 2026-07-01  
-**Project phase:** Steps 1–18 complete — **Step 19** (design tokens) next | Doc v2.0.15
+**Project phase:** Steps 1–24 complete — **Step 25** (ERD review) next | Doc v2.0.21
 
 [README](../README.md) | [plan.md](../plan.md)
 
