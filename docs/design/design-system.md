@@ -1,0 +1,219 @@
+# Midnight Finance Design System
+
+[← Documentation hub](../README.md) | [ux-overview.md](ux-overview.md)
+
+**Theme:** Midnight Finance — financial trust, professional control, clarity.
+
+---
+
+## Color palette
+
+| Token | Hex | Tailwind suggestion | Use |
+|-------|-----|---------------------|-----|
+| `midnight-navy` | `#14213D` | custom | Sidebar, top nav, Owner sections |
+| `emerald` | `#0F766E` | `teal-700` base | Primary buttons, active nav, links |
+| `warm-gold` | `#D6A756` | custom | Owner accents, key totals |
+| `app-bg` | `#F5F7FA` | `slate-50` | Page background |
+| `surface` | `#FFFFFF` | `white` | Cards, tables, forms |
+
+### Text
+
+| Role | Hex |
+|------|-----|
+| Heading | `#111827` |
+| Body | `#4B5563` |
+| Muted | `#6B7280` |
+| Disabled | `#9CA3AF` |
+
+### Status
+
+| State | Hex |
+|-------|-----|
+| Success | `#15803D` |
+| Warning | `#D97706` |
+| Error | `#B91C1C` |
+| Info | `#2563EB` |
+
+---
+
+## Typography
+
+| Use | Font | Notes |
+|-----|------|-------|
+| Headings | Manrope | `font-display` |
+| Body / UI | Inter | `font-sans` |
+| Money | Inter + `tabular-nums` | All HT/VAT/TTC figures |
+
+---
+
+## Buttons
+
+| Variant | Style | Use |
+|---------|-------|-----|
+| Primary | Emerald bg, white text | Verify, Import, Save, Create |
+| Secondary | White bg, navy border | Cancel, Return, View, Download |
+| Owner approval | Navy bg, white text, gold accent | Approve revision |
+| Destructive | Red outline or red bg | Reject, Delete |
+
+Import button: primary emerald with loading spinner and disabled state during processing.
+
+---
+
+## Links
+
+Emerald text; darker on hover; underline; visible focus ring.
+
+---
+
+## Cards
+
+- White background, subtle border (`border-slate-200`)
+- Light shadow (`shadow-sm`)
+- Rounded (`rounded-lg`)
+- Compact padding (`p-4`–`p-6`)
+- Strong hierarchy: label → figure → context
+
+Avoid oversized empty cards on dashboards.
+
+---
+
+## Icons
+
+### Primary: Heroicons through Flux UI
+
+Heroicons is the **only** general-purpose icon system at project start. Flux UI uses Heroicons natively — no separate icon package to install or configure when Flux is part of the Livewire starter kit.
+
+**Why Heroicons + Flux**
+
+- Native integration with Flux buttons, inputs, navigation, breadcrumbs, badges, and menus
+- Outline, solid, mini, and micro variants
+- Clean style aligned with Midnight Finance
+- Consistent with Tailwind / Livewire stack
+
+### Variant rules
+
+| Variant | Use |
+|---------|-----|
+| **Outline** | Sidebar navigation, tables, filters, normal actions |
+| **Mini / micro** | Compact buttons, badges, table row actions |
+| **Solid** | Selected navigation item, important status cards, primary dashboard highlights |
+
+Do **not** mix outline and solid on the same control. Do **not** mix multiple icon libraries on the same page.
+
+**Target:** Heroicons for **≥ 90%** of interface icons.
+
+### Feature mapping (Heroicons)
+
+| Application feature | Icon name |
+|---------------------|-----------|
+| Dashboard | `home` or `squares-2x2` |
+| Centers | `building-office-2` |
+| Users | `users` |
+| Cashier | `banknotes` |
+| CSV imports | `arrow-up-tray` |
+| Cash-flow records | `document-currency-dollar` |
+| Reports | `chart-bar-square` |
+| Daily versions | `clock` |
+| Revision approvals | `check-badge` |
+| Duplicate records | `document-duplicate` |
+| Warnings | `exclamation-triangle` |
+| In-app notifications | `bell` |
+| WhatsApp / messages | `chat-bubble-left-right` |
+| Audit logs | `clipboard-document-list` |
+| Settings | `cog-6-tooth` |
+| Search | `magnifying-glass` |
+| Filter | `funnel` |
+| Export | `arrow-down-tray` |
+| Logout | `arrow-right-start-on-rectangle` |
+
+### Import page actions (Heroicons)
+
+| Action | Icon | Variant |
+|--------|------|---------|
+| Verify | `shield-check` | outline on secondary; solid when active |
+| Import confirm | `check-circle` | solid on primary emerald button |
+| Reject | `x-circle` | outline on destructive control |
+
+Use Flux icon components (e.g. `<flux:icon name="arrow-up-tray" />`) — do not paste raw SVG paths inline except for brand icons.
+
+### Secondary: Lucide (selected imports only)
+
+When Heroicons has no suitable icon, Flux can import **individual** Lucide icons:
+
+```bash
+php artisan flux:icon
+# or specify only what you need:
+php artisan flux:icon file-spreadsheet scan-line
+```
+
+Rules:
+
+- Import **only** the icons required — never the full Lucide collection
+- Use Lucide for specialized gaps (e.g. spreadsheet/export variants) after confirming no Heroicon fits
+- Keep Lucide usage under ~10% of total icons
+
+### Brand icons
+
+Custom SVG Blade components **only** for brand-specific marks (e.g. official WhatsApp logo). Brand icons must not define the visual style of the rest of the UI.
+
+### Libraries not used
+
+| Library | Reason |
+|---------|--------|
+| Font Awesome | Large bundle; less consistent with Tailwind/Flux |
+| Bootstrap Icons | Bootstrap-oriented; wrong stack fit |
+| Material Symbols | Distinct Google/Material look; conflicts with premium financial theme |
+| Multiple full icon sets | Style inconsistency; harder maintenance |
+
+### Implementation checklist (Sprint 1)
+
+1. Confirm Flux starter kit includes Heroicons (default — no extra install)
+2. Document any Lucide imports in `CHANGELOG` when added
+3. Add `WhatsAppIcon` custom SVG component in S8 (WhatsApp sprint)
+4. Code review: reject PRs that add Font Awesome, Bootstrap Icons, or Material Symbols
+
+---
+
+## Layout
+
+- Sidebar: midnight navy, white/emerald nav items
+- Main content: app-bg
+- 12-column grid on desktop
+- Responsive: stack cards 1–2 per row on mobile
+
+---
+
+## Flux UI
+
+Use Flux components for forms, tables, modals, badges, dropdowns. Extend with Tailwind tokens above.
+
+---
+
+## Chart.js
+
+- Owner: one wide revenue trend (daily/weekly/monthly toggle)
+- Manager: one compact center trend
+- Cashier: no chart on main dashboard
+
+Colors: emerald primary series; muted grid; navy axis labels.
+
+---
+
+## Tailwind config (implementation note)
+
+```js
+// tailwind.config.js excerpt
+theme: {
+  extend: {
+    colors: {
+      midnight: { DEFAULT: '#14213D' },
+      emerald: { brand: '#0F766E' },
+      gold: { brand: '#D6A756' },
+    },
+    fontFamily: {
+      display: ['Manrope', 'sans-serif'],
+      sans: ['Inter', 'sans-serif'],
+    },
+  },
+},
+```
