@@ -59,7 +59,8 @@ test('verification service dispatches process verification job', function () {
     $verification = startVerificationFor($manager, $center);
 
     Queue::assertPushed(ProcessVerificationJob::class, function (ProcessVerificationJob $job) use ($verification): bool {
-        return $job->token === $verification->token;
+        return $job->token === $verification->token
+            && $job->centerId === $verification->center_id;
     });
 });
 

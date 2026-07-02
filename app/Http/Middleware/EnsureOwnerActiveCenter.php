@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Modules\Centers\Services\ActiveCenterContextService;
+use App\Modules\Centers\Services\OwnerPreferredCenterService;
 use App\Support\Center\OperationalRouteNames;
 use Closure;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ class EnsureOwnerActiveCenter
 {
     public function __construct(
         private readonly ActiveCenterContextService $activeCenterContextService,
+        private readonly OwnerPreferredCenterService $ownerPreferredCenterService,
     ) {}
 
     /**
@@ -40,9 +42,15 @@ class EnsureOwnerActiveCenter
         $context = $this->activeCenterContextService->resolve($user);
 
         if ($context === null) {
+            $clearedInvalidContext = $this->activeCenterContextService->consumedInvalidContextClear();
+
+            if ($clearedInvalidContext) {
+                $this->ownerPreferredCenterService->clearPreferredIfInvalid($user);
+            }
+
             $redirect = redirect()->guest(route((string) config('owner_active_center.selection_route_name')));
 
-            if ($this->activeCenterContextService->consumedInvalidContextClear()) {
+            if ($clearedInvalidContext) {
                 $redirect->with('status', __('center.active_center_cleared'));
             }
 

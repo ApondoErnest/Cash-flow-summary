@@ -1,7 +1,6 @@
 <div class="mf-app-shell min-h-dvh w-full">
     <flux:sidebar
         collapsible="mobile"
-        sticky
         class="midnight-sidebar mf-sidebar !border-e-0"
     >
         <flux:sidebar.header class="mf-sidebar-header">
@@ -9,6 +8,7 @@
                 href="{{ route('dashboard') }}"
                 name="{{ config('app.name') }}"
                 class="mf-sidebar-brand"
+                wire:navigate
             >
                 <x-slot:logo>
                     <div class="mf-sidebar-brand-mark" aria-hidden="true">
@@ -34,31 +34,22 @@
         <div class="mf-header-inner">
             <flux:sidebar.toggle class="mf-header-mobile-toggle lg:hidden" icon="bars-3" />
 
-            <div class="mf-header-center">
-                <div class="mf-header-center-mark" aria-hidden="true">
-                    <flux:icon icon="building-office-2" variant="outline" class="size-4" />
+            @if ($shell->showsCenterSwitcher)
+                <livewire:centers.center-switcher />
+            @else
+                <div class="mf-header-center">
+                    <div class="mf-header-center-mark" aria-hidden="true">
+                        <flux:icon icon="building-office-2" variant="outline" class="size-4" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="mf-header-center-label">{{ $shell->centerLabel }}</p>
+                        <p class="mf-header-center-name">{{ $shell->centerName }}</p>
+                    </div>
                 </div>
-                <div class="min-w-0">
-                    <p class="mf-header-center-label">{{ $shell->centerLabel }}</p>
-                    <p class="mf-header-center-name">{{ $shell->centerName }}</p>
-                </div>
-            </div>
+            @endif
 
             <div class="mf-header-toolbar" data-mf-header-toolbar>
                 <livewire:language-switcher />
-
-                @if ($shell->showsCenterSwitcher)
-                    <span class="mf-header-toolbar-divider" aria-hidden="true"></span>
-                    <flux:button
-                        variant="ghost"
-                        size="sm"
-                        icon="building-office-2"
-                        class="mf-header-tool-btn"
-                        :aria-label="__('navigation.shell.switch_center')"
-                    >
-                        <span class="hidden lg:inline">{{ __('navigation.shell.switch_center') }}</span>
-                    </flux:button>
-                @endif
 
                 <span class="mf-header-toolbar-divider" aria-hidden="true"></span>
 

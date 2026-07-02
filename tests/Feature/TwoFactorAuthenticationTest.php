@@ -2,20 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Models\User;
 use App\Modules\Authentication\Livewire\Login;
 use App\Modules\Authentication\Livewire\TwoFactorChallenge;
 use App\Modules\Authentication\Livewire\TwoFactorSetup;
 use App\Modules\Authentication\Services\TwoFactorService;
 use App\Support\Auth\RoleName;
-use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PragmaRX\Google2FA\Google2FA;
 use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
-
-require __DIR__.'/../Support/TwoFactorHelpers.php';
 
 beforeEach(function () {
     $this->seed(DatabaseSeeder::class);
@@ -87,7 +86,7 @@ test('two-factor challenge rejects invalid codes', function () {
 test('owner can sign in using a recovery code', function () {
     $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
     $owner->forceFill(['must_change_password' => false])->save();
-    $secret = app(\PragmaRX\Google2FA\Google2FA::class)->generateSecretKey();
+    $secret = app(Google2FA::class)->generateSecretKey();
     $recoveryCodes = app(TwoFactorService::class)->enable($owner, $secret);
 
     Livewire::test(Login::class)

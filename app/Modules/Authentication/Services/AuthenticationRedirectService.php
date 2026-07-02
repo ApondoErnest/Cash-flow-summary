@@ -6,6 +6,7 @@ namespace App\Modules\Authentication\Services;
 
 use App\Models\User;
 use App\Modules\Centers\Services\ActiveCenterContextService;
+use App\Modules\Centers\Services\OwnerPreferredCenterService;
 
 final class AuthenticationRedirectService
 {
@@ -13,6 +14,7 @@ final class AuthenticationRedirectService
         private readonly PasswordService $passwordService,
         private readonly TwoFactorService $twoFactorService,
         private readonly ActiveCenterContextService $activeCenterContextService,
+        private readonly OwnerPreferredCenterService $ownerPreferredCenterService,
     ) {}
 
     public function nextRoute(User $user): string
@@ -25,9 +27,12 @@ final class AuthenticationRedirectService
             return route('two-factor.challenge');
         }
 
-        if ($this->activeCenterContextService->appliesTo($user)
-            && $this->activeCenterContextService->resolve($user) === null) {
-            return route((string) config('owner_active_center.selection_route_name'));
+        if ($this->activeCenterContextService->appliesTo($user)) {
+            $this->ownerPreferredCenterService->bootstrapActiveCenter($user);
+
+            if ($this->activeCenterContextService->resolve($user) === null) {
+                return route((string) config('owner_active_center.selection_route_name'));
+            }
         }
 
         return route('dashboard');

@@ -7,15 +7,11 @@ namespace App\Modules\Authentication\Services;
 use App\Models\User;
 use App\Support\Auth\PasswordRules;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 final class PasswordService
 {
-    public function mustChange(User $user): bool
-    {
-        return (bool) $user->must_change_password;
-    }
-
     public function change(User $user, string $currentPassword, string $newPassword): void
     {
         if (! Hash::check($currentPassword, $user->password)) {
@@ -51,5 +47,22 @@ final class PasswordService
                 'password' => [__('password.update_failed')],
             ]);
         }
+    }
+
+    public function mustChange(User $user): bool
+    {
+        return (bool) $user->must_change_password;
+    }
+
+    public function assignTemporaryPassword(User $user): string
+    {
+        $plainPassword = Str::password(16, symbols: true, numbers: true);
+
+        $user->forceFill([
+            'password' => $plainPassword,
+            'must_change_password' => true,
+        ])->save();
+
+        return $plainPassword;
     }
 }

@@ -24,6 +24,8 @@ Application service catalogue. One service class per bounded context; injected v
 | `OperatingCalendarService` | Days, hours, exceptions |
 | `SubmissionStatusService` | Missing submission detection |
 | `ActiveCenterContextService` | Owner session active center get/set/validate/switch |
+| `OwnerPreferredCenterService` | Preferred center persistence; login bootstrap; auto-select when single center |
+| `CenterSelectionService` | List/search active org centers for Center Selection page |
 
 ---
 
@@ -31,8 +33,8 @@ Application service catalogue. One service class per bounded context; injected v
 
 | Service | Responsibility |
 |---------|----------------|
-| `UserService` | CRUD, reassign center, deactivate |
-| `PasswordService` | Reset, must-change flag |
+| `UserService` | CRUD, reassign center, deactivate, temporary password on create |
+| `PasswordService` | Reset, must-change flag, assign temporary password |
 
 ---
 

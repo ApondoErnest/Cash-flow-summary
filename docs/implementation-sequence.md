@@ -26,9 +26,9 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.0.51 |
-| Steps complete | **1–51** |
-| **Next step** | **Step 52** — Center Selection page (post-login) |
+| Doc set | v2.0.85 |
+| Steps complete | **1–85** |
+| **Next step** | **Step 86** — Compact Cashier dashboard |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -89,40 +89,40 @@ flowchart LR
 | 49 | DuplicatePreviewService — exact + probable counts | CSV verification backend | S2 | Complete |
 | 50 | VerificationCleanupService (scheduled) | CSV verification backend | S2 | Complete |
 | 51 | Pest fixtures: FR/EN, mixed headers, invalid rows | CSV verification backend | S2 | Complete |
-| 52 | Center Selection page (post-login) | Owner administration UI | S3 | Not started |
-| 53 | Active-center session + header dropdown | Owner administration UI | S3 | Not started |
-| 54 | Manage Centers — CRUD, Open Center action | Owner administration UI | S3 | Not started |
-| 55 | Operating calendar UI | Owner administration UI | S3 | Not started |
-| 56 | Manage Users — CRUD, reassign, reset password | Owner administration UI | S3 | Not started |
-| 57 | Organization / WhatsApp / security settings shells | Owner administration UI | S3 | Not started |
-| 58 | Audit log list (admin) | Owner administration UI | S3 | Not started |
-| 59 | Migration: imports, import_rows, import_errors | Database Wave 3 — financial | S5 | Not started |
-| 60 | Migration: master_cash_flow_records (unique constraint) | Database Wave 3 — financial | S5 | Not started |
-| 61 | Migration: import_day_comparisons | Database Wave 3 — financial | S5 | Not started |
-| 62 | Migration: daily_versions, memberships, active_daily_snapsho… | Database Wave 3 — financial | S5 | Not started |
-| 63 | Migration: anomalies, summaries, export_requests | Database Wave 3 — financial | S5 | Not started |
-| 64 | Migration: whatsapp_messages, internal_notifications | Database Wave 3 — financial | S5 | Not started |
-| 65 | ImportService — commitFromVerification | Financial & import backend | S5 | Not started |
-| 66 | MasterLedgerService + ExactDuplicateService | Financial & import backend | S5 | Not started |
-| 67 | DailyDatasetService + VersionComparisonService | Financial & import backend | S5 | Not started |
-| 68 | RevisionService + ActiveSnapshotService | Financial & import backend | S5 | Not started |
-| 69 | SummaryGenerationService (queued) | Financial & import backend | S5 | Not started |
-| 70 | Queue jobs use `import.center_id` not session | Financial & import backend | S5 | Not started |
-| 71 | Concurrency + duplicate constraint tests | Financial & import backend | S5 | Not started |
-| 72 | Selected-center dashboard | Owner operational UI | S4–S5 | Not started |
-| 73 | Shared `CsvVerificationCard` — active center read-only | Owner operational UI | S4–S5 | Not started |
-| 74 | Verify → summary → Import/Reject + polling | Owner operational UI | S4–S5 | Not started |
-| 75 | Import result page | Owner operational UI | S4–S5 | Not started |
-| 76 | Imports list & detail (active center) | Owner operational UI | S4–S5 | Not started |
-| 77 | Records explorer | Owner operational UI | S4–S5 | Not started |
-| 78 | Daily versions & revision approval UI | Owner operational UI | S4–S5 | Not started |
-| 79 | Anomalies, WhatsApp history (active center) | Owner operational UI | S4–S5 | Not started |
-| 80 | Manager dashboard (fixed center) | Manager interface | S6 | Not started |
-| 81 | CSV page — reuse CsvVerificationCard | Manager interface | S6 | Not started |
-| 82 | Import history & detail | Manager interface | S6 | Not started |
-| 83 | Records search | Manager interface | S6 | Not started |
-| 84 | Correction submission flow | Manager interface | S6 | Not started |
-| 85 | Manager reports (active center) | Manager interface | S6 | Not started |
+| 52 | Center Selection page (post-login) | Owner administration UI | S3 | Complete |
+| 53 | Active-center session + header dropdown | Owner administration UI | S3 | Complete |
+| 54 | Manage Centers — CRUD, Open Center action | Owner administration UI | S3 | Complete |
+| 55 | Operating calendar UI | Owner administration UI | S3 | Complete |
+| 56 | Manage Users — CRUD, reassign, reset password | Owner administration UI | S3 | Complete |
+| 57 | Organization / WhatsApp / security settings shells | Owner administration UI | S3 | Complete |
+| 58 | Audit log list (admin) | Owner administration UI | S3 | Complete |
+| 59 | Migration: imports, import_rows, import_errors | Database Wave 3 — financial | S5 | Complete |
+| 60 | Migration: master_cash_flow_records (unique constraint) | Database Wave 3 — financial | S5 | Complete |
+| 61 | Migration: import_day_comparisons | Database Wave 3 — financial | S5 | Complete |
+| 62 | Migration: daily_versions, memberships, active_daily_snapshots | Database Wave 3 — financial | S5 | Complete |
+| 63 | Migration: anomalies, summaries, export_requests | Database Wave 3 — financial | S5 | Complete |
+| 64 | Migration: whatsapp_messages, internal_notifications | Database Wave 3 — financial | S5 | Complete |
+| 65 | ImportService — commitFromVerification | Financial & import backend | S5 | Complete |
+| 66 | MasterLedgerService + ExactDuplicateService | Financial & import backend | S5 | Complete |
+| 67 | DailyDatasetService + VersionComparisonService | Financial & import backend | S5 | Complete |
+| 68 | RevisionService + ActiveSnapshotService | Financial & import backend | S5 | Complete |
+| 69 | SummaryGenerationService (queued) | Financial & import backend | S5 | Complete |
+| 70 | Queue jobs use `import.center_id` not session | Financial & import backend | S5 | Complete |
+| 71 | Concurrency + duplicate constraint tests | Financial & import backend | S5 | Complete |
+| 72 | Selected-center dashboard | Owner operational UI | S4–S5 | Complete |
+| 73 | Shared `CsvVerificationCard` — active center read-only | Owner operational UI | S4–S5 | Complete |
+| 74 | Verify → summary → Import/Reject + polling | Owner operational UI | S4–S5 | Complete |
+| 75 | Import result page | Owner operational UI | S4–S5 | Complete |
+| 76 | Imports list & detail (active center) | Owner operational UI | S4–S5 | Complete |
+| 77 | Records explorer | Owner operational UI | S4–S5 | Complete |
+| 78 | Daily versions & revision approval UI | Owner operational UI | S4–S5 | Complete |
+| 79 | Anomalies, WhatsApp history (active center) | Owner operational UI | S4–S5 | Complete |
+| 80 | Manager dashboard (fixed center) | Manager interface | S6 | Complete |
+| 81 | CSV page — reuse CsvVerificationCard | Manager interface | S6 | Complete |
+| 82 | Import history & detail | Manager interface | S6 | Complete |
+| 83 | Records search | Manager interface | S6 | Complete |
+| 84 | Correction submission flow | Manager interface | S6 | Complete |
+| 85 | Manager reports (active center) | Manager interface | S6 | Complete |
 | 86 | Compact Cashier dashboard | Cashier interface | S7 | Not started |
 | 87 | CSV page — reuse CsvVerificationCard | Cashier interface | S7 | Not started |
 | 88 | Recent imports list | Cashier interface | S7 | Not started |
@@ -807,6 +807,8 @@ flowchart LR
 | **Sprint** | S3 |
 | **Reference** | [owner-active-center.md](../design/owner-active-center.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `CenterSelectionService` + Livewire `CenterSelection`; Midnight Finance split layout; searchable center cards; empty state; `Open Center` sets session + intended redirect |
 
 ### Step 53 — Active-center session + header dropdown
 
@@ -816,6 +818,8 @@ flowchart LR
 | **Sprint** | S3 |
 | **Reference** | [owner-active-center.md](../design/owner-active-center.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `ActiveCenterSwitchService` + Livewire `CenterSwitcher`; header dropdown replaces static center display; page filter session keys cleared on switch; EN/FR strings; `OwnerPreferredCenterService` + `users.preferred_center_id` for login bootstrap |
 
 ### Step 54 — Manage Centers — CRUD, Open Center action
 
@@ -825,6 +829,8 @@ flowchart LR
 | **Sprint** | S3 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `CenterService` + Livewire `ManageCenters` / `ManageCenterForm`; CRUD table; Open Center action; default-on-login checkbox; owner-only routes |
 
 ### Step 55 — Operating calendar UI
 
@@ -834,6 +840,8 @@ flowchart LR
 | **Sprint** | S3 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `OperatingCalendarService` + Livewire `OperatingCalendar`; weekly schedule + holiday/closure/special-open exceptions; linked from Manage Centers |
 
 ### Step 56 — Manage Users — CRUD, reassign, reset password
 
@@ -843,6 +851,8 @@ flowchart LR
 | **Sprint** | S3 |
 | **Reference** | [permission-matrix.md](../product/permission-matrix.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `UserService` + `UserPolicy`; Livewire `ManageUsers` / `ManageUserForm`; filters; center reassignment; temporary password reset |
 
 ### Step 57 — Organization / WhatsApp / security settings shells
 
@@ -852,6 +862,8 @@ flowchart LR
 | **Sprint** | S3 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — Livewire `OrganizationSettings`, `WhatsappSettings`, `SecuritySettings`; owner admin routes; read-only shells with REQ-095 field layout |
 
 ### Step 58 — Audit log list (admin)
 
@@ -861,6 +873,8 @@ flowchart LR
 | **Sprint** | S3 |
 | **Reference** | plan.md §33 |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `AuditLogService` + Livewire `AuditLogList`; org-wide filters; detail panel; REQ-100 shell |
 
 **Checkpoint after Step 58** (end of Owner administration UI):
 
@@ -878,6 +892,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `imports`, `import_rows`, `import_errors` migration; `CsvImports` models + enums; FK from `import_verifications.import_id` |
 
 ### Step 60 — Migration: master_cash_flow_records (unique constraint)
 
@@ -887,6 +903,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | ADR [0005](../architecture/decisions/0005-exact-duplicate-ledger.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `master_cash_flow_records` migration; unique `(center_id, normalization_policy_version, exact_canonical_hash)`; FK from `import_rows.master_record_id` |
 
 ### Step 61 — Migration: import_day_comparisons
 
@@ -896,6 +914,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `import_day_comparisons` migration; `DayComparisonResult` enum; `ImportDayComparison` model; unique `(import_id, business_date)` |
 
 ### Step 62 — Migration: daily_versions, memberships, active_daily_snapshots
 
@@ -905,6 +925,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | ADR [0006](../architecture/decisions/0006-daily-versioning.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `daily_versions`, `daily_version_memberships`, `active_daily_snapshots`; `DailyVersions` models; FKs on `import_day_comparisons` version columns |
 
 ### Step 63 — Migration: anomalies, summaries, export_requests
 
@@ -914,6 +936,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `anomalies`, `daily_summaries`, `summary_breakdowns`, `export_requests`; `Reports` models + enums |
 
 ### Step 64 — Migration: whatsapp_messages, internal_notifications
 
@@ -923,6 +947,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `whatsapp_messages`, `internal_notifications` migrations; `WhatsApp` + `Notifications` models; Wave 3 checkpoint |
 
 **Checkpoint after Step 64** (end of Database Wave 3 — financial):
 
@@ -940,6 +966,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [backend-services.md](../architecture/backend-services.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `ImportService::commitFromVerification`, `FileStorageService`, `ImportRowService`; temp→permanent storage; import + import_rows from ready verification; exact file duplicate detection; audit events; `ImportServiceTest` |
 
 ### Step 66 — MasterLedgerService + ExactDuplicateService
 
@@ -949,6 +977,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [calculations.md](../design/calculations.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `ExactDuplicateService` + `MasterLedgerService`; in-file/historical classification; master inserts with unique-constraint handling; wired into `ImportService::commitFromVerification`; `MasterLedgerServiceTest` |
 
 ### Step 67 — DailyDatasetService + VersionComparisonService
 
@@ -958,6 +988,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [calculations.md](../design/calculations.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `DailyDatasetService` builds per-day master datasets + `dataset_hash`; `VersionComparisonService` persists `import_day_comparisons` (new/unchanged/revision/covered-without-rows); wired into import commit; `VersionComparisonServiceTest` |
 
 ### Step 68 — RevisionService + ActiveSnapshotService
 
@@ -967,6 +999,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | ADR [0006](../architecture/decisions/0006-daily-versioning.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `ActiveSnapshotService` activates versions + supersedes prior; `RevisionService` applies import comparisons (auto-activate new days, propose revisions), owner approve/reject; wired into import commit; `RevisionServiceTest` |
 
 ### Step 69 — SummaryGenerationService (queued)
 
@@ -976,6 +1010,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [backend-services.md](../architecture/backend-services.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `SummaryGenerationService` regenerates `daily_summaries` + `summary_breakdowns` from active snapshots; `GenerateDailySummaryJob` queued on import commit and revision approval; `SummaryGenerationServiceTest` |
 
 ### Step 70 — Queue jobs use `import.center_id` not session
 
@@ -985,6 +1021,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | BR-022 |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `JobCenterContextService` binds record `center_id` during job handle; `ProcessVerificationJob` + `GenerateDailySummaryJob` serialize center from DB; `CenterContextResolver` prefers job context over session; `QueueJobCenterContextTest` (AC #47) |
 
 ### Step 71 — Concurrency + duplicate constraint tests
 
@@ -994,6 +1032,8 @@ flowchart LR
 | **Sprint** | S5 |
 | **Reference** | [test-strategy.md](../testing/test-strategy.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `ImportBackendGateTest` covers financial backend checkpoint (AC #18–19, #22–23, #26): end-to-end commit pipeline, `duplicate_in_file` / `duplicate_historical` / `all_duplicate` fixtures, parallel master insert constraint, overlapping-file revenue dedup, active-snapshot-only summaries |
 
 **Checkpoint after Step 71** (end of Financial & import backend):
 
@@ -1011,6 +1051,8 @@ flowchart LR
 | **Sprint** | S4–S5 |
 | **Reference** | [owner-active-center.md](../design/owner-active-center.md), [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `OwnerDashboardService` + `SubmissionStatusService`; Livewire `Dashboard` (owner selected-center view + staff placeholder); period/trend filters; stats from active snapshots; alerts panel; recent imports table; EN/FR lang; `OwnerDashboardTest` |
 
 ### Step 73 — Shared `CsvVerificationCard` — active center read-only
 
@@ -1020,6 +1062,8 @@ flowchart LR
 | **Sprint** | S4–S5 |
 | **Reference** | [csv-verification-flow.md](../design/csv-verification-flow.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — Shared Livewire `CsvVerificationCard` + `ImportCsv` page; read-only active center; import mode selector; file upload + verify; verifying poll; EN/FR lang; `CsvVerificationCardTest` |
 
 ### Step 74 — Verify → summary → Import/Reject + polling
 
@@ -1029,6 +1073,8 @@ flowchart LR
 | **Sprint** | S4–S5 |
 | **Reference** | [csv-verification-flow.md](../design/csv-verification-flow.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `VerificationSummaryService` + summary panel; Import/Reject actions; importing state; polling on verify; EN/FR lang; extended `CsvVerificationCardTest` + `VerificationSummaryServiceTest` |
 
 ### Step 75 — Import result page
 
@@ -1038,6 +1084,8 @@ flowchart LR
 | **Sprint** | S4–S5 |
 | **Reference** | [csv-verification-flow.md](../design/csv-verification-flow.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `ImportResultService` + `ImportResult` Livewire page at `/imports/{import}/result`; row/daily/totals/WhatsApp summary; action links; redirect from `CsvVerificationCard`; EN/FR lang; `ImportResultTest` |
 
 ### Step 76 — Imports list & detail (active center)
 
@@ -1047,6 +1095,8 @@ flowchart LR
 | **Sprint** | S4–S5 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `ImportListService` + `ImportDetailService`; `ImportList` + `ImportDetail` Livewire pages; filters/search; day comparisons table; shared summary partial; dashboard links; EN/FR lang; `ImportsListPageTest` |
 
 ### Step 77 — Records explorer
 
@@ -1056,6 +1106,8 @@ flowchart LR
 | **Sprint** | S4–S5 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `RecordExplorerService` + `RecordsExplorer` Livewire page; search/filters; inline detail panel; link to first import; EN/FR lang; `RecordsExplorerPageTest` |
 
 ### Step 78 — Daily versions & revision approval UI
 
@@ -1065,6 +1117,8 @@ flowchart LR
 | **Sprint** | S4–S5 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `DailyVersionListService` + `RevisionQueueService`; `DailyVersionList` + `RevisionApproval` Livewire pages; old vs proposed totals comparison; owner approve/reject with reason; manager read-only queue; EN/FR lang; `DailyVersionsPageTest` |
 
 ### Step 79 — Anomalies, WhatsApp history (active center)
 
@@ -1074,6 +1128,8 @@ flowchart LR
 | **Sprint** | S4–S5 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `AnomalyListService` + `AnomalyList` Livewire page; `WhatsappHistoryService` + `WhatsappHistoryPage`; filters, inline detail panels, resolve action, import links; EN/FR lang; `AnomalyListPageTest`, `AnomalyListActionsTest`, `WhatsappHistoryPageTest` |
 
 **Checkpoint after Step 79** (end of Owner operational UI):
 
@@ -1091,6 +1147,8 @@ flowchart LR
 | **Sprint** | S6 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — `ManagerDashboardService` + `ManagerDashboardData`; manager branch in `Dashboard` Livewire; fixed-center header with import actions; today/week/month TTC + active records today; trend chart; submission status + manager alerts (correction pending, failed import, probable duplicates); recent imports table; EN/FR lang; `ManagerDashboardPageTest` |
 
 ### Step 81 — CSV page — reuse CsvVerificationCard
 
@@ -1100,6 +1158,8 @@ flowchart LR
 | **Sprint** | S6 |
 | **Reference** | ADR [0010](../architecture/decisions/0010-owner-first-delivery.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Manager `ImportCsv` page header with fixed center; role-aware center label on `CsvVerificationCard` (Owner: Importing for / Manager: Center); full verify → import/reject flow via shared component; EN/FR lang; `ManagerImportCsvPageTest` |
 
 ### Step 82 — Import history & detail
 
@@ -1109,6 +1169,8 @@ flowchart LR
 | **Sprint** | S6 |
 | **Reference** | [user-stories.md](../product/user-stories.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Manager role-aware copy on shared `ImportList` + `ImportDetail`; fixed-center banners; center-scoped list/detail via `HasCenterScope`; filters and day comparisons; EN/FR lang; `ManagerImportsPageTest` |
 
 ### Step 83 — Records search
 
@@ -1118,6 +1180,8 @@ flowchart LR
 | **Sprint** | S6 |
 | **Reference** | [permission-matrix.md](../product/permission-matrix.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Manager role-aware copy on shared `RecordsExplorer`; fixed-center banner; search/filters/detail panel scoped via `HasCenterScope`; link to first import; EN/FR lang; `ManagerRecordsPageTest` |
 
 ### Step 84 — Correction submission flow
 
@@ -1127,6 +1191,8 @@ flowchart LR
 | **Sprint** | S6 |
 | **Reference** | BR-012 |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `CorrectionSubmissionService`; role-aware `ImportMode::availableFor` (manager/owner only); correction UX on shared `CsvVerificationCard` (notices, Submit correction label); manager import page guidance; manager result headline + revisions link; `correction.submitted` audit; EN/FR lang; `ManagerCorrectionSubmissionTest` |
 
 ### Step 85 — Manager reports (active center)
 
@@ -1136,6 +1202,8 @@ flowchart LR
 | **Sprint** | S6 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `ReportQueryService` + `CenterReport` Livewire; period filter + daily breakdown from `daily_summaries`; manager fixed-center copy; missing submission callout; owner export placeholder; EN/FR lang; `ManagerReportsPageTest` |
 
 **Checkpoint after Step 85** (end of Manager interface):
 

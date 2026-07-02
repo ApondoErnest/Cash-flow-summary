@@ -24,6 +24,8 @@ return [
     'operational_route_names' => [
         'dashboard',
         'imports.create',
+        'imports.result',
+        'imports.show',
         'imports.index',
         'records.index',
         'daily-versions.index',
@@ -31,6 +33,23 @@ return [
         'reports.index',
         'anomalies.index',
         'whatsapp-history.index',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Center-dependent page filter session keys
+    |--------------------------------------------------------------------------
+    |
+    | Cleared when the Owner switches active center so filters do not leak
+    | across centers. Add keys here as operational pages introduce filters.
+    |
+    */
+    'page_filter_session_keys' => [
+        'owner.filters.dashboard_period',
+        'owner.filters.dashboard_period_from',
+        'owner.filters.dashboard_period_to',
+        'owner.filters.records_search',
+        'owner.filters.imports_status',
     ],
 
 ];

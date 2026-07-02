@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Centers\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -49,5 +50,10 @@ class Center extends Model
     public function calendarExceptions(): HasMany
     {
         return $this->hasMany(CenterCalendarException::class);
+    }
+
+    public function assignedUsers(): HasMany
+    {
+        return $this->hasMany(User::class);
     }
 }

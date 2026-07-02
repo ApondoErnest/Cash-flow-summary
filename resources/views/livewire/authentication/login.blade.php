@@ -1,6 +1,4 @@
 <div class="mf-login-page relative flex min-h-dvh flex-col lg:flex-row">
-    <x-authentication.guest-logout />
-
     <x-authentication.brand-panel />
 
     <main class="mf-login-main relative flex flex-1 items-center justify-center px-6 py-10 sm:px-10 lg:px-14">

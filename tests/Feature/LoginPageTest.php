@@ -16,6 +16,7 @@ test('login page renders midnight finance guest layout', function () {
     $response->assertSee('data-mf-login-form', false);
     $response->assertSee('Sign in', false);
     $response->assertSee('Username', false);
+    $response->assertDontSee('mf-auth-logout', false);
 });
 
 test('guest is redirected to login from dashboard', function () {

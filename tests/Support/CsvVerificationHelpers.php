@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 use App\Models\User;
 use App\Modules\Centers\Models\Center;
+use App\Modules\CsvImports\Enums\CompletionStatus;
+use App\Modules\CsvImports\Enums\FinancialStatus;
+use App\Modules\CsvImports\Enums\ImportRowStatus;
+use App\Modules\CsvImports\Enums\ImportStatus;
+use App\Modules\CsvImports\Models\Import;
+use App\Modules\CsvImports\Models\ImportRow;
+use App\Modules\CsvImports\Models\MasterCashFlowRecord;
 use App\Modules\CsvVerification\Enums\ImportMode;
 use App\Modules\CsvVerification\Jobs\ProcessVerificationJob;
 use App\Modules\CsvVerification\Models\ImportVerification;
@@ -14,6 +21,8 @@ use App\Modules\CsvVerification\Services\FooterReaderService;
 use App\Modules\CsvVerification\Services\HeaderMappingService;
 use App\Modules\CsvVerification\Services\ReconciliationService;
 use App\Modules\CsvVerification\Services\VerificationService;
+use App\Modules\CsvVerification\Support\CsvInspectionResult;
+use App\Modules\Normalization\Support\CanonicalRecord;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,20 +51,20 @@ function loadCsvFixture(string $filename): string
     $path = csvFixturePath($filename);
 
     if (! is_readable($path)) {
-        throw new \RuntimeException("CSV fixture not found: {$filename}");
+        throw new RuntimeException("CSV fixture not found: {$filename}");
     }
 
     $contents = file_get_contents($path);
 
     if ($contents === false) {
-        throw new \RuntimeException("CSV fixture could not be read: {$filename}");
+        throw new RuntimeException("CSV fixture could not be read: {$filename}");
     }
 
     return $contents;
 }
 
 /**
- * @return array{mapping: array<string, int>, delimiter: string, path: string, inspection: \App\Modules\CsvVerification\Support\CsvInspectionResult}
+ * @return array{mapping: array<string, int>, delimiter: string, path: string, inspection: CsvInspectionResult}
  */
 function parseCsvFixture(string $contents, string $relativePath = 'temp/verifications/parse-fixture.csv'): array
 {
@@ -137,7 +146,7 @@ function sampleCsvContents(): string
     return csvFixture(frenchCsvHeaderLine());
 }
 
-function startVerificationFor(User $user, Center $center, ?string $contents = null): ImportVerification
+function startVerificationFor(User $user, Center $center, ?string $contents = null, ImportMode $importMode = ImportMode::Operational): ImportVerification
 {
     $file = UploadedFile::fake()->createWithContent(
         'cashflow-june.csv',
@@ -148,7 +157,7 @@ function startVerificationFor(User $user, Center $center, ?string $contents = nu
         user: $user,
         center: $center,
         file: $file,
-        importMode: ImportMode::Operational,
+        importMode: $importMode,
     );
 }
 
@@ -159,15 +168,23 @@ function storeInspectionFixture(string $relativePath, string $contents): string
     return Storage::disk('local')->path($relativePath);
 }
 
-function runProcessVerificationJob(string $token): void
+function runProcessVerificationJob(string $token, ?int $centerId = null): void
 {
-    (new ProcessVerificationJob($token))->handle(
+    if ($centerId === null) {
+        $centerId = (int) ImportVerification::query()
+            ->withoutCenterScope()
+            ->where('token', $token)
+            ->value('center_id');
+    }
+
+    (new ProcessVerificationJob($token, $centerId))->handle(
         app(CsvInspectionService::class),
         app(HeaderMappingService::class),
         app(CsvParsingService::class),
         app(FooterReaderService::class),
         app(ReconciliationService::class),
         app(DuplicatePreviewService::class),
+        app(\App\Support\Center\JobCenterContextService::class),
     );
 }
 
@@ -290,35 +307,84 @@ function realPatternDataRows(): array
     ];
 }
 
-function ensureMasterLedgerTable(): void
-{
-    if (\Illuminate\Support\Facades\Schema::hasTable('master_cash_flow_records')) {
-        return;
+function seedMasterLedgerExactHash(
+    int $centerId,
+    string $exactHash,
+    string $policyVersion = 'field_specific_v1',
+    ?CanonicalRecord $canonical = null,
+    array $originalValues = [],
+): void {
+    $center = Center::query()->findOrFail($centerId);
+
+    $user = User::query()
+        ->where('center_id', $centerId)
+        ->first();
+
+    if ($user === null) {
+        $user = User::query()->create([
+            'organization_id' => $center->organization_id,
+            'center_id' => $centerId,
+            'name' => 'Ledger Seed User',
+            'username' => 'ledger-seed-'.uniqid(),
+            'password' => bcrypt('password'),
+            'is_active' => true,
+        ]);
     }
 
-    \Illuminate\Support\Facades\Schema::create('master_cash_flow_records', function (\Illuminate\Database\Schema\Blueprint $table): void {
-        $table->id();
-        $table->unsignedBigInteger('center_id');
-        $table->string('normalization_policy_version');
-        $table->char('exact_canonical_hash', 64);
-        $table->timestamps();
-
-        $table->unique(
-            ['center_id', 'normalization_policy_version', 'exact_canonical_hash'],
-            'master_cash_flow_records_unique',
-        );
-    });
-}
-
-function seedMasterLedgerExactHash(int $centerId, string $exactHash, string $policyVersion = 'field_specific_v1'): void
-{
-    ensureMasterLedgerTable();
-
-    \Illuminate\Support\Facades\DB::table('master_cash_flow_records')->insert([
+    $import = Import::query()->create([
         'center_id' => $centerId,
-        'normalization_policy_version' => $policyVersion,
+        'uploaded_by' => $user->id,
+        'import_mode' => ImportMode::Operational,
+        'source_language' => 'fr',
+        'original_filename' => 'seed-ledger.csv',
+        'storage_path' => 'imports/'.$centerId.'/seed-ledger.csv',
+        'file_hash' => hash('sha256', 'seed-ledger-'.uniqid()),
+        'file_size' => 1024,
+        'status' => ImportStatus::Completed,
+    ]);
+
+    $canonicalFields = $canonical?->canonicalFields() ?? [];
+    $businessDate = (string) ($canonicalFields['registration_date'] ?? '2024-06-15');
+
+    $importRow = ImportRow::query()->create([
+        'import_id' => $import->id,
+        'center_id' => $centerId,
+        'source_row_number' => 1,
+        'business_date' => $businessDate,
+        'original_values' => $originalValues,
+        'canonical_values' => $canonicalFields,
+        'raw_row_checksum' => hash('sha256', 'seed-row-'.uniqid()),
         'exact_canonical_hash' => $exactHash,
-        'created_at' => now(),
-        'updated_at' => now(),
+        'normalization_policy_version' => $policyVersion,
+        'row_status' => ImportRowStatus::Accepted,
+    ]);
+
+    MasterCashFlowRecord::query()->create([
+        'center_id' => $centerId,
+        'registration_date' => $businessDate,
+        'registration_time' => (string) ($canonicalFields['registration_time'] ?? '09:30:00'),
+        'completion_date' => $canonicalFields['completion_date'] ?? null,
+        'customer_name' => (string) ($originalValues['customer_name'] ?? $canonicalFields['customer_name'] ?? 'Seed Customer'),
+        'customer_name_normalized' => (string) ($canonicalFields['customer_name'] ?? 'seed customer'),
+        'category_code' => (string) ($canonicalFields['category_code'] ?? 'CAT1'),
+        'inspection_type_code' => (string) ($canonicalFields['inspection_type_code'] ?? 'VIS'),
+        'licence_plate' => (string) ($originalValues['licence_plate'] ?? 'LT-123-AB'),
+        'licence_plate_normalized' => (string) ($canonicalFields['licence_plate'] ?? 'LT123AB'),
+        'net_amount' => number_format((int) ($canonicalFields['net_amount'] ?? 10000), 2, '.', ''),
+        'vat_amount' => number_format((int) ($canonicalFields['vat_amount'] ?? 1925), 2, '.', ''),
+        'gross_amount' => number_format((int) ($canonicalFields['gross_amount'] ?? 11925), 2, '.', ''),
+        'completion_status' => ($canonicalFields['completion_date'] ?? null) === null
+            ? CompletionStatus::Unfinished
+            : CompletionStatus::Completed,
+        'financial_status' => ((int) ($canonicalFields['net_amount'] ?? 10000)) === 0
+            && ((int) ($canonicalFields['vat_amount'] ?? 1925)) === 0
+            && ((int) ($canonicalFields['gross_amount'] ?? 11925)) === 0
+            ? FinancialStatus::ZeroValue
+            : FinancialStatus::Revenue,
+        'exact_canonical_hash' => $exactHash,
+        'normalization_policy_version' => $policyVersion,
+        'first_import_id' => $import->id,
+        'first_import_row_id' => $importRow->id,
+        'first_seen_at' => now(),
     ]);
 }

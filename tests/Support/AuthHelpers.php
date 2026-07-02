@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Models\Organization;
 use App\Modules\Centers\Services\ActiveCenterContextService;
+use App\Modules\Centers\Services\OwnerPreferredCenterService;
 use App\Support\Auth\RoleName;
 use App\Support\Center\ActiveCenterContext;
 use Database\Seeders\DatabaseSeeder;
@@ -41,6 +42,13 @@ function setOwnerActiveCenter(User $user, ?Center $center = null): ActiveCenterC
     $center ??= createTestCenter($user->organization);
 
     return app(ActiveCenterContextService::class)->set($user, $center);
+}
+
+function setOwnerPreferredCenter(User $user, ?Center $center = null): void
+{
+    $center ??= createTestCenter($user->organization);
+
+    app(OwnerPreferredCenterService::class)->setPreferred($user, $center);
 }
 
 function createTestCenter(?Organization $organization = null, array $attributes = []): Center

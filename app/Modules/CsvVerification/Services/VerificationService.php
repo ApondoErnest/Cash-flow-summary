@@ -43,6 +43,7 @@ final class VerificationService
         bool $notifyOwner = false,
     ): ImportVerification {
         $this->assertUserCanVerifyForCenter($user, $center);
+        app(CorrectionSubmissionService::class)->assertModeAllowed($user, $importMode);
         $this->assertUploadIsValid($file);
 
         $token = (string) Str::uuid();
@@ -93,7 +94,7 @@ final class VerificationService
             throw $exception;
         }
 
-        ProcessVerificationJob::dispatch($verification->token);
+        ProcessVerificationJob::dispatch($verification->token, $verification->center_id);
 
         return $verification;
     }

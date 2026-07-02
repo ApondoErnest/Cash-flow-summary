@@ -11,6 +11,7 @@ return [
         'assigned_center' => 'Centre assigné',
         'demo_center_name' => 'Centre de contrôle technique démo',
         'switch_center' => 'Changer de centre',
+        'no_active_center' => 'Aucun centre sélectionné',
         'notifications' => 'Notifications',
     ],
 

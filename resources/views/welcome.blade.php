@@ -43,30 +43,32 @@
             :title="__('welcome.table.recent_imports')"
             :description="__('welcome.table.recent_imports_description')"
         >
-            <flux:table.columns>
-                <flux:table.column>{{ __('welcome.table.date') }}</flux:table.column>
-                <flux:table.column>{{ __('welcome.table.file') }}</flux:table.column>
-                <flux:table.column align="end">{{ __('welcome.stat.ttc') }}</flux:table.column>
-                <flux:table.column>{{ __('welcome.table.status') }}</flux:table.column>
-            </flux:table.columns>
-            <flux:table.rows>
-                <flux:table.row>
-                    <flux:table.cell>2026-07-01</flux:table.cell>
-                    <flux:table.cell>cashier-july-01.csv</flux:table.cell>
-                    <flux:table.cell align="end" class="tabular-money font-medium">2 450 000,00</flux:table.cell>
-                    <flux:table.cell>
-                        <x-ui.status-badge status="success">{{ __('welcome.badges.complete') }}</x-ui.status-badge>
-                    </flux:table.cell>
-                </flux:table.row>
-                <flux:table.row>
-                    <flux:table.cell>2026-06-30</flux:table.cell>
-                    <flux:table.cell>cashier-june-30.csv</flux:table.cell>
-                    <flux:table.cell align="end" class="tabular-money font-medium">2 118 400,00</flux:table.cell>
-                    <flux:table.cell>
-                        <x-ui.status-badge status="warning">{{ __('welcome.badges.revision_pending') }}</x-ui.status-badge>
-                    </flux:table.cell>
-                </flux:table.row>
-            </flux:table.rows>
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column>{{ __('welcome.table.date') }}</flux:table.column>
+                    <flux:table.column>{{ __('welcome.table.file') }}</flux:table.column>
+                    <flux:table.column align="end">{{ __('welcome.stat.ttc') }}</flux:table.column>
+                    <flux:table.column>{{ __('welcome.table.status') }}</flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+                    <flux:table.row>
+                        <flux:table.cell>2026-07-01</flux:table.cell>
+                        <flux:table.cell>cashier-july-01.csv</flux:table.cell>
+                        <flux:table.cell align="end" class="tabular-money font-medium">2 450 000,00</flux:table.cell>
+                        <flux:table.cell>
+                            <x-ui.status-badge status="success">{{ __('welcome.badges.complete') }}</x-ui.status-badge>
+                        </flux:table.cell>
+                    </flux:table.row>
+                    <flux:table.row>
+                        <flux:table.cell>2026-06-30</flux:table.cell>
+                        <flux:table.cell>cashier-june-30.csv</flux:table.cell>
+                        <flux:table.cell align="end" class="tabular-money font-medium">2 118 400,00</flux:table.cell>
+                        <flux:table.cell>
+                            <x-ui.status-badge status="warning">{{ __('welcome.badges.revision_pending') }}</x-ui.status-badge>
+                        </flux:table.cell>
+                    </flux:table.row>
+                </flux:table.rows>
+            </flux:table>
         </x-ui.table-panel>
 
         <x-ui.card :title="__('welcome.sections.palette')">

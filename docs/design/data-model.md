@@ -103,6 +103,7 @@ Spatie permission tables (`roles`, `permissions`, pivots) link to `users` via `m
 | id | bigint PK | |
 | organization_id | FK | |
 | center_id | FK nullable | **Null for Owner** |
+| preferred_center_id | FK nullable | Owner login default; null for staff |
 | name | string | |
 | username | string unique | Login identifier |
 | phone | string nullable | |

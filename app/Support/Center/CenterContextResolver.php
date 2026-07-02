@@ -18,6 +18,12 @@ final class CenterContextResolver
 
     public function resolve(?User $user = null): ?ResolvedCenterContext
     {
+        $jobContext = app(JobCenterContextService::class)->resolve();
+
+        if ($jobContext !== null) {
+            return $jobContext;
+        }
+
         $user ??= auth()->user();
 
         if ($user === null) {
@@ -53,6 +59,10 @@ final class CenterContextResolver
 
     public function shouldApplyOperationalScope(?User $user = null): bool
     {
+        if (app(JobCenterContextService::class)->isBound()) {
+            return true;
+        }
+
         $user ??= auth()->user();
 
         if ($user === null) {

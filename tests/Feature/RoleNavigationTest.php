@@ -21,7 +21,7 @@ test('owner navigation includes operational and administrative sections', functi
     $response->assertSee('Manage Centers', false);
     $response->assertSee('Organization Settings', false);
     $response->assertSee('Active center', false);
-    $response->assertSee('Switch center', false);
+    $response->assertSee('mf-header-center--switchable', false);
 });
 
 test('manager navigation shows operational items only', function () {
@@ -71,6 +71,6 @@ test('role navigation registry matches ux overview item counts', function () {
 test('placeholder navigation routes render', function () {
     actingAsOwner();
 
-    $this->get(route('imports.create'))->assertOk()->assertSee('Import CSV');
+    $this->get(route('imports.create'))->assertOk()->assertSee(__('csv_verification.card.heading'), false);
     $this->get(route('centers.index'))->assertOk()->assertSee('Manage Centers');
 });

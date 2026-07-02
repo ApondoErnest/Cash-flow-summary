@@ -23,6 +23,30 @@ final class CanonicalRecord
     ) {}
 
     /**
+     * @param  array<string, int|string|null>  $fields
+     */
+    public static function fromCanonicalValues(
+        array $fields,
+        string $normalizationPolicyVersion = NormalizationPolicy::VERSION,
+    ): self {
+        return new self(
+            registrationDate: isset($fields['registration_date']) ? (string) $fields['registration_date'] : null,
+            registrationTime: isset($fields['registration_time']) ? (string) $fields['registration_time'] : null,
+            completionDate: array_key_exists('completion_date', $fields) && $fields['completion_date'] !== null
+                ? (string) $fields['completion_date']
+                : null,
+            customerName: (string) ($fields['customer_name'] ?? ''),
+            categoryCode: (string) ($fields['category_code'] ?? ''),
+            inspectionTypeCode: (string) ($fields['inspection_type_code'] ?? ''),
+            licencePlate: (string) ($fields['licence_plate'] ?? ''),
+            netAmount: isset($fields['net_amount']) ? (int) $fields['net_amount'] : null,
+            vatAmount: isset($fields['vat_amount']) ? (int) $fields['vat_amount'] : null,
+            grossAmount: isset($fields['gross_amount']) ? (int) $fields['gross_amount'] : null,
+            normalizationPolicyVersion: $normalizationPolicyVersion,
+        );
+    }
+
+    /**
      * @return array<string, int|string|null>
      */
     public function canonicalFields(): array

@@ -7,6 +7,7 @@ namespace App\Modules\CsvVerification\Models;
 use App\Models\Concerns\HasCenterScope;
 use App\Models\User;
 use App\Modules\Centers\Models\Center;
+use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvVerification\Enums\ImportMode;
 use App\Modules\CsvVerification\Enums\VerificationStatus;
 use Illuminate\Database\Eloquent\Model;
@@ -79,5 +80,10 @@ class ImportVerification extends Model
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
+    }
+
+    public function import(): BelongsTo
+    {
+        return $this->belongsTo(Import::class);
     }
 }

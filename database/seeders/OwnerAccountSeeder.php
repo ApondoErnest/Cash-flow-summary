@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Modules\Centers\Models\Organization;
 use App\Support\Auth\RoleName;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class OwnerAccountSeeder extends Seeder
 {
@@ -26,6 +25,7 @@ class OwnerAccountSeeder extends Seeder
         );
 
         $username = (string) env('SEED_OWNER_USERNAME', 'owner');
+        $password = (string) env('SEED_OWNER_PASSWORD', 'password');
 
         $owner = User::query()->firstOrNew(['username' => $username]);
 
@@ -37,8 +37,12 @@ class OwnerAccountSeeder extends Seeder
         ];
 
         if (! $owner->exists) {
-            $attributes['password'] = Hash::make((string) env('SEED_OWNER_PASSWORD', 'password'));
             $attributes['must_change_password'] = true;
+        }
+
+        if (! $owner->exists || app()->environment('local')) {
+            // Plain string — User model casts password as hashed.
+            $attributes['password'] = $password;
         }
 
         $owner->fill($attributes)->save();

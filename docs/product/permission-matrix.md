@@ -37,7 +37,7 @@ Legend: ✓ allowed | ✗ denied | △ limited | **AC** = active center scope (O
 | Verify / Import / Reject | ✓ **AC** | ✓ fixed center | ✓ fixed center |
 | Operational import | ✓ | ✓ | ✓ |
 | Historical import | ✓ | ✓ | ✓ |
-| Correction import | ✓ | ✓ | ✗ |
+| Correction import | ✓ | ✓ | ✓ |
 | Center picker on CSV card | ✗ | ✗ | ✗ |
 
 ---

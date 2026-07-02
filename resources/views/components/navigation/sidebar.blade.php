@@ -8,7 +8,7 @@
                 :href="route($item->routeName)"
                 :current="request()->routeIs($item->routeName)"
                 class="mf-sidebar-item"
-                x-on:click="window.matchMedia('(max-width: 1023px)').matches && $dispatch('flux-sidebar-toggle')"
+                wire:navigate
             >
                 {{ $item->label }}
             </flux:sidebar.item>

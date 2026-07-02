@@ -2,7 +2,9 @@
 
 return [
     'imports.create' => 'Import CSV',
+    'imports.result' => 'Import result',
     'imports.index' => 'Imports',
+    'imports.show' => 'Import details',
     'records.index' => 'Records',
     'daily-versions.index' => 'Daily Versions',
     'revisions.index' => 'Revisions',

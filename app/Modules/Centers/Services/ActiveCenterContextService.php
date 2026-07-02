@@ -124,11 +124,28 @@ final class ActiveCenterContextService
             $value = $request->route($key) ?? $request->query($key) ?? $request->input($key);
 
             if ($value !== null && $value !== '') {
-                $ids[] = (int) $value;
+                $centerId = $this->normalizeCenterId($value);
+
+                if ($centerId !== null) {
+                    $ids[] = $centerId;
+                }
             }
         }
 
         return array_values(array_unique($ids));
+    }
+
+    private function normalizeCenterId(mixed $value): ?int
+    {
+        if ($value instanceof Center) {
+            return (int) $value->id;
+        }
+
+        if (is_object($value) && isset($value->id)) {
+            return (int) $value->id;
+        }
+
+        return (int) $value;
     }
 
     private function clearInvalidContext(): void

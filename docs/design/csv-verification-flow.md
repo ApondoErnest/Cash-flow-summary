@@ -23,7 +23,7 @@
 | Prop / context | Owner | Manager | Cashier |
 |----------------|-------|---------|---------|
 | Center | **Active center from session** (read-only on card) | Session center (read-only) | Session center (read-only) |
-| Import mode | All three modes | Operational + historical + correction | Operational + historical |
+| Import mode | All three modes | All three modes | All three modes |
 | Notify Owner (historical) | Checkbox | Checkbox | Checkbox |
 
 Owner selects center on **Center Selection** page after login — not on the CSV card. Display: **Importing for: {active center name}**.

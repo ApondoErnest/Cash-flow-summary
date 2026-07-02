@@ -10,6 +10,8 @@ final readonly class ResolvedCenterContext
 
     public const SOURCE_ASSIGNED = 'assigned';
 
+    public const SOURCE_JOB = 'job';
+
     public function __construct(
         public int $centerId,
         public int $organizationId,

@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\EnsureOwnerActiveCenter;
+use App\Modules\Centers\Models\Organization;
 use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Support\Center\ActiveCenterContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 uses(RefreshDatabase::class);
 
@@ -21,7 +25,7 @@ test('owner can access center selection without an active center', function () {
 
     $this->get(route('center.select'))
         ->assertOk()
-        ->assertSee(__('pages.center.select'), false);
+        ->assertSee(__('center.selection.title'), false);
 });
 
 test('owner can access administrative routes without an active center', function () {
@@ -29,7 +33,7 @@ test('owner can access administrative routes without an active center', function
 
     $this->get(route('centers.index'))
         ->assertOk()
-        ->assertSee(__('pages.centers.index'), false);
+        ->assertSee(__('center.manage.title'), false);
 });
 
 test('owner with active center can access operational routes', function () {
@@ -74,10 +78,10 @@ test('manager bypasses owner active center middleware', function () {
 
 test('active center context is attached to the request for owner operational routes', function () {
     $owner = actingAsOwner();
-    $middleware = app(\App\Http\Middleware\EnsureOwnerActiveCenter::class);
+    $middleware = app(EnsureOwnerActiveCenter::class);
 
     $request = Request::create('/dashboard');
-    $route = new \Illuminate\Routing\Route('GET', '/dashboard', fn () => null);
+    $route = new Route('GET', '/dashboard', fn () => null);
     $route->name('dashboard');
     $route->bind($request);
     $request->setRouteResolver(fn () => $route);
@@ -98,11 +102,11 @@ test('active center context is attached to the request for owner operational rou
 test('active center context service rejects centers outside owner organization', function () {
     $owner = actingAsOwner();
 
-    $foreignOrg = \App\Modules\Centers\Models\Organization::query()->create([
+    $foreignOrg = Organization::query()->create([
         'name' => 'Foreign Organization',
         'code' => 'FRN-'.uniqid(),
     ]);
     $foreignCenter = createTestCenter($foreignOrg);
 
     app(ActiveCenterContextService::class)->set($owner, $foreignCenter);
-})->throws(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+})->throws(HttpException::class);

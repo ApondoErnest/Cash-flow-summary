@@ -6,6 +6,7 @@ namespace App\Modules\CsvVerification\Jobs;
 
 use App\Modules\CsvVerification\Enums\VerificationStatus;
 use App\Modules\CsvVerification\Models\ImportVerification;
+use App\Support\Center\JobCenterContextService;
 use App\Modules\CsvVerification\Services\CsvInspectionService;
 use App\Modules\CsvVerification\Services\CsvParsingService;
 use App\Modules\CsvVerification\Services\DuplicatePreviewService;
@@ -23,6 +24,7 @@ class ProcessVerificationJob implements ShouldQueue
 
     public function __construct(
         public readonly string $token,
+        public readonly int $centerId,
     ) {}
 
     public function handle(
@@ -32,9 +34,38 @@ class ProcessVerificationJob implements ShouldQueue
         FooterReaderService $footerReaderService,
         ReconciliationService $reconciliationService,
         DuplicatePreviewService $duplicatePreviewService,
+        JobCenterContextService $jobCenterContextService,
+    ): void {
+        $jobCenterContextService->runForCenter($this->centerId, function () use (
+            $inspectionService,
+            $headerMappingService,
+            $csvParsingService,
+            $footerReaderService,
+            $reconciliationService,
+            $duplicatePreviewService,
+        ): void {
+            $this->process(
+                $inspectionService,
+                $headerMappingService,
+                $csvParsingService,
+                $footerReaderService,
+                $reconciliationService,
+                $duplicatePreviewService,
+            );
+        });
+    }
+
+    private function process(
+        CsvInspectionService $inspectionService,
+        HeaderMappingService $headerMappingService,
+        CsvParsingService $csvParsingService,
+        FooterReaderService $footerReaderService,
+        ReconciliationService $reconciliationService,
+        DuplicatePreviewService $duplicatePreviewService,
     ): void {
         $verification = ImportVerification::query()
             ->where('token', $this->token)
+            ->where('center_id', $this->centerId)
             ->first();
 
         if ($verification === null) {

@@ -7,6 +7,7 @@ namespace App\Modules\Users\Models;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Models\Organization;
 use App\Support\Auth\RoleName;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -15,7 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
 
     protected $guard_name = 'web';
@@ -26,6 +27,7 @@ class User extends Authenticatable
     protected $fillable = [
         'organization_id',
         'center_id',
+        'preferred_center_id',
         'name',
         'username',
         'phone',
@@ -69,6 +71,11 @@ class User extends Authenticatable
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
+    }
+
+    public function preferredCenter(): BelongsTo
+    {
+        return $this->belongsTo(Center::class, 'preferred_center_id');
     }
 
     public function isOwner(): bool

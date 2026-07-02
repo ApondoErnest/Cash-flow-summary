@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Modules\AuditLogging\Models\AuditLog;
+use App\Modules\Centers\Models\Center;
+use App\Support\Center\CenterContextResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -43,7 +45,7 @@ describe('checkpoint AC #3 — single assigned center for staff', function () {
         $manager = actingAsManager();
 
         expect($manager->center_id)->not->toBeNull()
-            ->and($manager->center)->toBeInstanceOf(\App\Modules\Centers\Models\Center::class)
+            ->and($manager->center)->toBeInstanceOf(Center::class)
             ->and($manager->center->is_active)->toBeTrue();
     });
 
@@ -51,7 +53,7 @@ describe('checkpoint AC #3 — single assigned center for staff', function () {
         $cashier = actingAsCashier();
 
         expect($cashier->center_id)->not->toBeNull()
-            ->and($cashier->center)->toBeInstanceOf(\App\Modules\Centers\Models\Center::class)
+            ->and($cashier->center)->toBeInstanceOf(Center::class)
             ->and($cashier->center->is_active)->toBeTrue();
     });
 });
@@ -91,7 +93,7 @@ describe('checkpoint AC #4 / #52 — staff never use owner center selection UI',
 
     test('owner dashboard shows active center with owner switcher', function () {
         $owner = actingAsOwner();
-        $centerName = app(\App\Support\Center\CenterContextResolver::class)
+        $centerName = app(CenterContextResolver::class)
             ->resolve($owner)?->centerName;
 
         $this->get(route('dashboard'))
@@ -109,7 +111,7 @@ describe('checkpoint AC #1 — owner administration access', function () {
 
         $this->get(route('centers.index'))
             ->assertOk()
-            ->assertSee(__('pages.centers.index'), false);
+            ->assertSee(__('center.manage.title'), false);
     });
 
     test('owner can access manage users without an active center', function () {
@@ -117,7 +119,27 @@ describe('checkpoint AC #1 — owner administration access', function () {
 
         $this->get(route('users.index'))
             ->assertOk()
-            ->assertSee(__('pages.users.index'), false);
+            ->assertSee(__('user.manage.title'), false);
+    });
+
+    test('owner can access settings shells without an active center', function () {
+        actingAsOwnerWithoutActiveCenter();
+
+        $this->get(route('settings.organization'))
+            ->assertOk()
+            ->assertSee(__('settings.organization.title'), false);
+
+        $this->get(route('settings.whatsapp'))
+            ->assertOk()
+            ->assertSee(__('settings.whatsapp.title'), false);
+
+        $this->get(route('security.index'))
+            ->assertOk()
+            ->assertSee(__('settings.security.title'), false);
+
+        $this->get(route('audit-logs.index'))
+            ->assertOk()
+            ->assertSee(__('audit.list.title'), false);
     });
 });
 

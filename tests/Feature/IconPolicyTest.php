@@ -28,12 +28,12 @@ test('npm manifest has no standalone icon libraries', function () {
     }
 });
 
-test('welcome page renders flux heroicons from feature mapping', function () {
+test('owner dashboard renders flux heroicons from actions and navigation', function () {
     actingAsOwner();
 
     $response = $this->get('/');
 
     $response->assertOk();
     $response->assertSee('data-flux-icon', false);
-    $response->assertSee('Heroicons via Flux', false);
+    $response->assertSee(__('dashboard.actions.import_csv'), false);
 });

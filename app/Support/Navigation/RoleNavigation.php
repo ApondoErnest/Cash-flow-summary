@@ -12,7 +12,9 @@ final class RoleNavigation
     {
         return new ShellContext(
             role: $role,
-            centerName: $centerName ?? __('navigation.shell.demo_center_name'),
+            centerName: $centerName ?? ($role === UserRole::Owner
+                ? __('navigation.shell.no_active_center')
+                : __('navigation.shell.demo_center_name')),
             centerLabel: $role === UserRole::Owner
                 ? __('navigation.shell.active_center')
                 : __('navigation.shell.assigned_center'),
