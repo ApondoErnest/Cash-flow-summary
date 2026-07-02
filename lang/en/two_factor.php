@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'challenge_title' => 'Two-factor authentication',
+    'challenge_heading' => 'Verify your identity',
+    'challenge_prompt' => 'Enter the 6-digit code from your authenticator app.',
+    'recovery_prompt' => 'Enter one of your recovery codes.',
+    'setup_title' => 'Two-factor authentication',
+    'setup_heading' => 'Protect your Owner account',
+    'setup_intro' => 'Scan the QR code with an authenticator app (Google Authenticator, Authy, 1Password, etc.), then confirm with a generated code.',
+    'setup_enabled' => 'Two-factor authentication is enabled for your account.',
+    'setup_enabled_hint' => 'You will be asked for a code each time you sign in.',
+    'manual_entry' => 'Manual entry key',
+    'code' => 'Authentication code',
+    'recovery_code' => 'Recovery code',
+    'use_recovery_code' => 'Use a recovery code instead',
+    'use_authenticator_code' => 'Use authenticator app instead',
+    'confirm_enable' => 'Enable two-factor authentication',
+    'disable' => 'Disable two-factor authentication',
+    'continue' => 'Continue to dashboard',
+    'verify' => 'Verify',
+    'invalid_code' => 'The authentication code is invalid.',
+    'invalid_recovery_code' => 'The recovery code is invalid or has already been used.',
+    'recovery_codes_heading' => 'Save your recovery codes',
+    'recovery_codes_hint' => 'Store these codes in a safe place. Each code can be used once if you lose access to your authenticator app.',
+];

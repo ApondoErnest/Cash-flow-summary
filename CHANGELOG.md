@@ -2,6 +2,133 @@
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.29] - 2026-07-01
+
+### Added
+
+- **Step 32** — Midnight Finance login page at `/login`
+- `App\Modules\Authentication\Livewire\Login` (username auth)
+- Guest layout (`components.layouts.guest`)
+- `tests/Feature/LoginPageTest.php`, `tests/Support/AuthHelpers.php`
+
+### Changed
+
+- Dashboard and navigation routes require authentication
+- Feature tests use `actingAsOwner()` helper
+- Status docs updated; **Step 33** next
+
+[2.0.29]: #2029---2026-07-01
+
+## [2.0.28] - 2026-07-01
+
+### Added
+
+- **Step 31** — Wave 1 seeders: `RoleSeeder`, `OwnerAccountSeeder`
+- Default Owner account (`owner` / configurable via `SEED_OWNER_*`)
+- Demo organization (`DEMO`)
+- `tests/Feature/Wave1SeedTest.php`
+
+### Changed
+
+- `DatabaseSeeder` — Wave 1 roles + Owner only
+- `.env.example` — `SEED_OWNER_USERNAME`, `SEED_OWNER_NAME`, `SEED_OWNER_PASSWORD`
+- Local MySQL migrated and seeded; **Wave 1 checkpoint passed**
+- Status docs updated; **Step 32** next
+
+[2.0.28]: #2028---2026-07-01
+
+## [2.0.27] - 2026-07-01
+
+### Added
+
+- **Step 30** — `audit_logs` migration (immutable append-only audit trail)
+- `App\Modules\AuditLogging\Models\AuditLog`
+- `tests/Feature/AuditLogsMigrationTest.php`
+
+### Changed
+
+- Status docs updated; **Step 31** next (seed + local `migrate --seed`)
+
+[2.0.27]: #2027---2026-07-01
+
+## [2.0.26] - 2026-07-01
+
+### Added
+
+- **Step 29** — Spatie Laravel Permission (`spatie/laravel-permission` ^6.25)
+- Permission tables migration, `config/permission.php`
+- `App\Support\Auth\RoleName` — `owner`, `center_manager`, `cashier`
+- `UserRole::spatieName()` mapping for nav preview enum
+- `tests/Feature/RolesPermissionsMigrationTest.php`
+
+### Changed
+
+- `User` model — `HasRoles` trait
+- Status docs updated; **Step 30** next
+
+[2.0.26]: #2026---2026-07-01
+
+## [2.0.25] - 2026-07-01
+
+### Added
+
+- **Step 28** — Cashflow `users` migration (`username` login, org/center FKs, 2FA columns)
+- `App\Modules\Users\Models\User` with `App\Models\User` auth alias
+- `tests/Feature/UsersMigrationTest.php`, `OrganizationFactory`
+
+### Changed
+
+- Laravel default users scaffold moved to Wave 1 migration after organizations/centers
+- `UserFactory` updated for organization binding
+- Status docs updated; **Step 29** next
+
+[2.0.25]: #2025---2026-07-01
+
+## [2.0.24] - 2026-07-01
+
+### Added
+
+- **Step 27** — `centers`, `center_operating_calendars`, `center_calendar_exceptions` migrations
+- `Center`, `CenterOperatingCalendar`, `CenterCalendarException` models
+- `tests/Feature/CentersMigrationTest.php`
+
+### Changed
+
+- `Organization` model — `centers()` relationship
+- Status docs updated; **Step 28** next
+
+[2.0.24]: #2024---2026-07-01
+
+## [2.0.23] - 2026-07-01
+
+### Added
+
+- **Step 26** — `organizations` table migration per data-model
+- `App\Modules\Centers\Models\Organization`
+- `tests/Feature/OrganizationsMigrationTest.php`
+
+### Changed
+
+- Status docs updated; **Step 27** next
+
+[2.0.23]: #2023---2026-07-01
+
+## [2.0.22] - 2026-07-01
+
+### Added
+
+- **Step 25** — ERD requirements review ([docs/design/erd-requirements-review.md](docs/design/erd-requirements-review.md))
+- `organization_settings` table spec in data-model (REQ-095)
+- Administrative ERD appendix in data-model
+- `tests/Feature/ErdRequirementsReviewTest.php`
+
+### Changed
+
+- data-model.md links review doc; Wave 1 migration order updated
+- Status docs updated; **Step 26** next
+
+[2.0.22]: #2022---2026-07-01
+
 ## [2.0.21] - 2026-07-01
 
 ### Added

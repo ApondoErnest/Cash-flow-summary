@@ -4,16 +4,20 @@
 
 Text specification for implementation. Wireframes optional in design tool.
 
+**Design quality:** The entire app must be professional, beautiful, and use well-blended Midnight Finance colors on every screen — not only dashboards. See [design-system.md § Design quality standard](design-system.md#design-quality-standard-project-wide).
+
 ---
 
 ## Global layout
 
 - **Sidebar** (midnight navy): role-based navigation
-- **Top bar:** active center (Owner) or assigned center (Manager/Cashier), user menu
-- **Content area:** app-bg, white cards
+- **Top bar:** active center (Owner) or assigned center (Manager/Cashier), **language toggle (EN/FR)**, user menu
+- **Content area:** app-bg, elevated cards with subtle borders/shadows (avoid flat white-on-white)
 - **Mobile:** collapsible sidebar; stacked cards
 
 Navigation icons per [design-system.md](design-system.md).
+
+**UI language:** English and French — user selects at login; toggle in header after login. See [i18n.md](i18n.md).
 
 ---
 

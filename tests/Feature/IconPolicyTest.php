@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
 test('composer manifest has no banned icon packages', function () {
     $composer = json_decode(file_get_contents(base_path('composer.json')), true);
     $require = json_encode(array_merge(
@@ -25,6 +29,8 @@ test('npm manifest has no standalone icon libraries', function () {
 });
 
 test('welcome page renders flux heroicons from feature mapping', function () {
+    actingAsOwner();
+
     $response = $this->get('/');
 
     $response->assertOk();

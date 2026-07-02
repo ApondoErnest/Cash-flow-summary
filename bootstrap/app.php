@@ -12,7 +12,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectGuestsTo(fn () => route('login'));
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\EnforceSessionTimeout::class,
+        ]);
+
+        $middleware->alias([
+            'two-factor' => \App\Http\Middleware\EnsureTwoFactorVerified::class,
+            'password-changed' => \App\Http\Middleware\EnsurePasswordIsChanged::class,
+            'assigned-center' => \App\Http\Middleware\EnsureAssignedCenter::class,
+            'owner-active-center' => \App\Http\Middleware\EnsureOwnerActiveCenter::class,
+            'owner' => \App\Http\Middleware\EnsureOwner::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Modules\Centers\Models\Center;
+use App\Modules\Centers\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -12,6 +14,8 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
+    protected $model = User::class;
+
     /**
      * The current password being used by the factory.
      */
@@ -25,21 +29,31 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'organization_id' => Organization::factory(),
+            'center_id' => null,
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'username' => fake()->unique()->userName(),
+            'phone' => fake()->optional()->phoneNumber(),
+            'email' => fake()->optional()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
+            'is_active' => true,
+            'must_change_password' => false,
             'remember_token' => Str::random(10),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    public function forCenter(Center $center): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+        return $this->state(fn () => [
+            'organization_id' => $center->organization_id,
+            'center_id' => $center->id,
+        ]);
+    }
+
+    public function mustChangePassword(): static
+    {
+        return $this->state(fn () => [
+            'must_change_password' => true,
         ]);
     }
 }

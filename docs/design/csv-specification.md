@@ -58,6 +58,13 @@ Remove BOM; trim; lowercase; collapse whitespace; normalize accents for comparis
 
 - Label row contains: `Nombre total d'inspections`, `Total`
 - Provides: record count, HT total, VAT total, TTC total
+- **Production layout** (from real cashier exports): leading empty cell; labels include trailing colons; count and amounts use space thousands separators; middle columns may be blank
+
+Example (sanitized):
+
+```text
+;Nombre total d'inspections :;8 560;;;;Total :;126 786 275;24 408 050;151 194 325
+```
 
 ### English
 
@@ -88,8 +95,25 @@ Remove BOM; trim; lowercase; collapse whitespace; normalize accents for comparis
 
 ## Category and type
 
-- **Cat.** displayed as imported (BR-003)
+- **Cat.** displayed as imported (BR-003); real files use `A`, `B`, `B1`, `C`, `D` (and sub-variants such as `B1`) — no lookup validation in v1
 - **Type:** `C` = standard inspection; `CV` = counter-visit (BR-001, BR-002)
+
+---
+
+## Licence plates (source diversity)
+
+Real exports include many formats; normalization strips separators for exact-duplicate comparison:
+
+| Pattern | Example |
+|---------|---------|
+| Standard spaced | `CH 480919`, `EN 734 AK` |
+| Mixed segment | `CH 08 B 245`, `18 P 6649 A` |
+| Prefix codes | `LTSR 330 AO`, `LTTR 620 AP`, `ENRE 019 AA` |
+| Hyphenated | `LT-123-AB` |
+| Numeric-only | `460854` (rare) |
+| Single-letter prefix | `O 124 BC` |
+
+Customer names may be long corporate strings, include parentheses/apostrophes (`ETS YA'A`), or arrive mixed-case — uppercase normalization applies for exact hash only.
 
 ---
 

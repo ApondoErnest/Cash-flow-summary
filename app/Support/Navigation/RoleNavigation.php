@@ -8,12 +8,14 @@ use App\Enums\UserRole;
 
 final class RoleNavigation
 {
-    public static function shellContext(UserRole $role): ShellContext
+    public static function shellContext(UserRole $role, ?string $centerName = null): ShellContext
     {
         return new ShellContext(
             role: $role,
-            centerName: 'Demo Technical Inspection Center',
-            centerLabel: $role === UserRole::Owner ? 'Active center' : 'Assigned center',
+            centerName: $centerName ?? __('navigation.shell.demo_center_name'),
+            centerLabel: $role === UserRole::Owner
+                ? __('navigation.shell.active_center')
+                : __('navigation.shell.assigned_center'),
             showsCenterSwitcher: $role === UserRole::Owner,
             navigationGroups: self::groupsFor($role),
         );
@@ -26,14 +28,14 @@ final class RoleNavigation
     {
         return match ($role) {
             UserRole::Owner => [
-                new NavigationGroup('Operations', self::ownerOperationalItems()),
-                new NavigationGroup('Administration', self::ownerAdministrativeItems()),
+                new NavigationGroup(__('navigation.groups.operations'), self::ownerOperationalItems()),
+                new NavigationGroup(__('navigation.groups.administration'), self::ownerAdministrativeItems()),
             ],
             UserRole::Manager => [
-                new NavigationGroup('Operations', self::managerOperationalItems()),
+                new NavigationGroup(__('navigation.groups.operations'), self::managerOperationalItems()),
             ],
             UserRole::Cashier => [
-                new NavigationGroup('Operations', self::cashierOperationalItems()),
+                new NavigationGroup(__('navigation.groups.operations'), self::cashierOperationalItems()),
             ],
         };
     }
@@ -44,15 +46,15 @@ final class RoleNavigation
     private static function ownerOperationalItems(): array
     {
         return [
-            new NavigationItem('Dashboard', 'home', 'dashboard'),
-            new NavigationItem('Import CSV', 'arrow-up-tray', 'imports.create'),
-            new NavigationItem('Imports', 'inbox-stack', 'imports.index'),
-            new NavigationItem('Records', 'document-currency-dollar', 'records.index'),
-            new NavigationItem('Daily Versions', 'clock', 'daily-versions.index'),
-            new NavigationItem('Revisions', 'check-badge', 'revisions.index'),
-            new NavigationItem('Reports', 'chart-bar-square', 'reports.index'),
-            new NavigationItem('Anomalies', 'exclamation-triangle', 'anomalies.index'),
-            new NavigationItem('WhatsApp History', 'chat-bubble-left-right', 'whatsapp-history.index'),
+            new NavigationItem(__('navigation.items.dashboard'), 'home', 'dashboard'),
+            new NavigationItem(__('navigation.items.import_csv'), 'arrow-up-tray', 'imports.create'),
+            new NavigationItem(__('navigation.items.imports'), 'inbox-stack', 'imports.index'),
+            new NavigationItem(__('navigation.items.records'), 'document-currency-dollar', 'records.index'),
+            new NavigationItem(__('navigation.items.daily_versions'), 'clock', 'daily-versions.index'),
+            new NavigationItem(__('navigation.items.revisions'), 'check-badge', 'revisions.index'),
+            new NavigationItem(__('navigation.items.reports'), 'chart-bar-square', 'reports.index'),
+            new NavigationItem(__('navigation.items.anomalies'), 'exclamation-triangle', 'anomalies.index'),
+            new NavigationItem(__('navigation.items.whatsapp_history'), 'chat-bubble-left-right', 'whatsapp-history.index'),
         ];
     }
 
@@ -62,12 +64,12 @@ final class RoleNavigation
     private static function ownerAdministrativeItems(): array
     {
         return [
-            new NavigationItem('Manage Centers', 'building-office-2', 'centers.index'),
-            new NavigationItem('Manage Users', 'users', 'users.index'),
-            new NavigationItem('Organization Settings', 'cog-6-tooth', 'settings.organization'),
-            new NavigationItem('WhatsApp Settings', 'chat-bubble-left-right', 'settings.whatsapp'),
-            new NavigationItem('Security', 'shield-check', 'security.index'),
-            new NavigationItem('Audit Logs', 'clipboard-document-list', 'audit-logs.index'),
+            new NavigationItem(__('navigation.items.manage_centers'), 'building-office-2', 'centers.index'),
+            new NavigationItem(__('navigation.items.manage_users'), 'users', 'users.index'),
+            new NavigationItem(__('navigation.items.organization_settings'), 'cog-6-tooth', 'settings.organization'),
+            new NavigationItem(__('navigation.items.whatsapp_settings'), 'chat-bubble-left-right', 'settings.whatsapp'),
+            new NavigationItem(__('navigation.items.security'), 'shield-check', 'security.index'),
+            new NavigationItem(__('navigation.items.audit_logs'), 'clipboard-document-list', 'audit-logs.index'),
         ];
     }
 
@@ -77,12 +79,12 @@ final class RoleNavigation
     private static function managerOperationalItems(): array
     {
         return [
-            new NavigationItem('Dashboard', 'home', 'dashboard'),
-            new NavigationItem('Import CSV', 'arrow-up-tray', 'imports.create'),
-            new NavigationItem('Imports', 'inbox-stack', 'imports.index'),
-            new NavigationItem('Records', 'document-currency-dollar', 'records.index'),
-            new NavigationItem('Reports', 'chart-bar-square', 'reports.index'),
-            new NavigationItem('Revisions', 'check-badge', 'revisions.index'),
+            new NavigationItem(__('navigation.items.dashboard'), 'home', 'dashboard'),
+            new NavigationItem(__('navigation.items.import_csv'), 'arrow-up-tray', 'imports.create'),
+            new NavigationItem(__('navigation.items.imports'), 'inbox-stack', 'imports.index'),
+            new NavigationItem(__('navigation.items.records'), 'document-currency-dollar', 'records.index'),
+            new NavigationItem(__('navigation.items.reports'), 'chart-bar-square', 'reports.index'),
+            new NavigationItem(__('navigation.items.revisions'), 'check-badge', 'revisions.index'),
         ];
     }
 
@@ -92,9 +94,9 @@ final class RoleNavigation
     private static function cashierOperationalItems(): array
     {
         return [
-            new NavigationItem('Dashboard', 'home', 'dashboard'),
-            new NavigationItem('Import CSV', 'arrow-up-tray', 'imports.create'),
-            new NavigationItem('Imports', 'inbox-stack', 'imports.index'),
+            new NavigationItem(__('navigation.items.dashboard'), 'home', 'dashboard'),
+            new NavigationItem(__('navigation.items.import_csv'), 'arrow-up-tray', 'imports.create'),
+            new NavigationItem(__('navigation.items.imports'), 'inbox-stack', 'imports.index'),
         ];
     }
 }

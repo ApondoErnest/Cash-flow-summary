@@ -54,7 +54,9 @@ Store under `tests/fixtures/csv/` — **sanitized only**. Primary gate: **Steps 
 | Fixture | Purpose |
 |---------|---------|
 | `sample_fr_valid.csv` | French headers, footer match |
+| `sample_fr_production_footer.csv` | Production footer layout (`;Nombre total d'inspections :;…;;;;Total :;…`) |
 | `sample_en_valid.csv` | English headers incl. Regitration typo |
+| `sample_real_patterns.csv` | Anonymized subset: B1/CV/zero/unfinished/plate variants from UAT sample |
 | `duplicate_in_file.csv` | Same row twice |
 | `duplicate_historical.csv` | Matches seeded master |
 | `all_duplicate.csv` | No new masters |

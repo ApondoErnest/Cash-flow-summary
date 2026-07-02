@@ -1,0 +1,4 @@
+﻿Date Enregistrement;Heure d'enregistrement;Date de fin d'inspection;Client;Cat.;Type;Immatriculation;Montant Hors Taxe;Montant de la TVA;Montant TTC
+not-a-date;10:30;02/06/2026;ACME SARL;VL;C;LT-123-AB;10 000;1 925;11 925
+02/06/2026;10:30;03/06/2026;ACME SARL;VL;C;LT-123-AB;10 000;1 925;11 925
+;Nombre total d'inspections :;1;;;;Total :;10 000;1 925;11 925

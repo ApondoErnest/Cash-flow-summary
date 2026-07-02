@@ -2,7 +2,13 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
 test('app shell includes mobile sidebar toggle and backdrop', function () {
+    actingAsOwner();
+
     $response = $this->get('/');
 
     $response->assertOk();
@@ -14,6 +20,8 @@ test('app shell includes mobile sidebar toggle and backdrop', function () {
 });
 
 test('app shell uses compact mobile main padding classes', function () {
+    actingAsOwner();
+
     $response = $this->get('/');
 
     $response->assertOk();
@@ -22,6 +30,8 @@ test('app shell uses compact mobile main padding classes', function () {
 });
 
 test('welcome page uses responsive page and stat card grids', function () {
+    actingAsOwner();
+
     $response = $this->get('/');
 
     $response->assertOk();

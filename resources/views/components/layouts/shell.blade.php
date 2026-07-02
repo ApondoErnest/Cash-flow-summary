@@ -2,14 +2,20 @@
     <flux:sidebar
         collapsible="mobile"
         sticky
-        class="midnight-sidebar !border-e !border-white/10"
+        class="midnight-sidebar mf-sidebar !border-e-0"
     >
-        <flux:sidebar.header>
+        <flux:sidebar.header class="mf-sidebar-header">
             <flux:sidebar.brand
                 href="{{ route('dashboard') }}"
                 name="{{ config('app.name') }}"
-                class="!text-white"
-            />
+                class="mf-sidebar-brand"
+            >
+                <x-slot:logo>
+                    <div class="mf-sidebar-brand-mark" aria-hidden="true">
+                        <flux:icon icon="chart-bar-square" variant="outline" class="size-4 text-white" />
+                    </div>
+                </x-slot:logo>
+            </flux:sidebar.brand>
         </flux:sidebar.header>
 
         <flux:sidebar.nav>
@@ -18,47 +24,57 @@
 
         <flux:sidebar.spacer />
 
-        <flux:sidebar.profile
-            :name="$shell->role->label()"
-            :initials="$shell->role->initials()"
+        <x-navigation.user-menu
+            :role-label="$shell->role->label()"
+            :role-initials="$shell->role->initials()"
         />
     </flux:sidebar>
 
-    <flux:header class="mf-app-header !border-b !border-slate-200 !bg-surface shadow-sm">
-        <div class="flex w-full items-center gap-3 sm:gap-4">
-            <flux:sidebar.toggle class="lg:hidden shrink-0" icon="bars-3" />
+    <flux:header class="mf-app-header">
+        <div class="mf-header-inner">
+            <flux:sidebar.toggle class="mf-header-mobile-toggle lg:hidden" icon="bars-3" />
 
-            <div class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                <div class="min-w-0">
-                    <p class="text-xs font-medium uppercase tracking-wide text-text-muted">{{ $shell->centerLabel }}</p>
-                    <p class="truncate font-display text-sm font-semibold text-text-heading sm:text-base">
-                        {{ $shell->centerName }}
-                    </p>
+            <div class="mf-header-center">
+                <div class="mf-header-center-mark" aria-hidden="true">
+                    <flux:icon icon="building-office-2" variant="outline" class="size-4" />
                 </div>
+                <div class="min-w-0">
+                    <p class="mf-header-center-label">{{ $shell->centerLabel }}</p>
+                    <p class="mf-header-center-name">{{ $shell->centerName }}</p>
+                </div>
+            </div>
 
-                <div class="mf-header-actions flex shrink-0 items-center gap-1 sm:gap-2">
-                    @if ($shell->showsCenterSwitcher)
-                        <flux:button
-                            variant="ghost"
-                            size="sm"
-                            icon="building-office-2"
-                            class="max-lg:aspect-square max-lg:w-10 max-lg:px-0"
-                            aria-label="Switch center"
-                        >
-                            <span class="hidden lg:inline">Switch center</span>
-                        </flux:button>
-                    @endif
-                    <flux:button variant="ghost" size="sm" icon="bell" square aria-label="Notifications" />
+            <div class="mf-header-toolbar" data-mf-header-toolbar>
+                <livewire:language-switcher />
+
+                @if ($shell->showsCenterSwitcher)
+                    <span class="mf-header-toolbar-divider" aria-hidden="true"></span>
                     <flux:button
                         variant="ghost"
                         size="sm"
-                        icon="user-circle"
-                        class="max-sm:aspect-square max-sm:w-10 max-sm:px-0"
-                        aria-label="{{ $shell->role->label() }}"
+                        icon="building-office-2"
+                        class="mf-header-tool-btn"
+                        :aria-label="__('navigation.shell.switch_center')"
                     >
-                        <span class="hidden sm:inline">{{ $shell->role->label() }}</span>
+                        <span class="hidden lg:inline">{{ __('navigation.shell.switch_center') }}</span>
                     </flux:button>
-                </div>
+                @endif
+
+                <span class="mf-header-toolbar-divider" aria-hidden="true"></span>
+
+                <form method="POST" action="{{ route('logout') }}" class="mf-header-logout-form">
+                    @csrf
+                    <flux:button
+                        type="submit"
+                        variant="ghost"
+                        size="sm"
+                        icon="arrow-right-start-on-rectangle"
+                        class="mf-header-tool-btn mf-header-tool-btn--logout"
+                        :aria-label="__('auth.logout')"
+                    >
+                        <span class="hidden md:inline">{{ __('auth.logout') }}</span>
+                    </flux:button>
+                </form>
             </div>
         </div>
     </flux:header>

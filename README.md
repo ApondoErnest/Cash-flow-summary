@@ -2,7 +2,7 @@
 
 Professional financial consolidation and reporting for vehicle technical inspection centers.
 
-**Status:** Step 24 complete — **Step 25** (ERD review) is next
+**Status:** Step 35 complete — **Step 36** (center middleware) is next
 
 ## Local development
 

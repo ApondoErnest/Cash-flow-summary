@@ -33,7 +33,15 @@ Complete **one step at a time**. Do not start Step N+1 until Step N is done. Pas
 | 22 | Role-based navigation | ✓ |
 | 23 | Reusable UI patterns | ✓ |
 | 24 | Responsive shell | ✓ |
-| 25+ | Database Wave 1 | Next |
+| 25 | ERD requirements review | ✓ |
+| 26 | Organizations migration | ✓ |
+| 27 | Centers & calendars migration | ✓ |
+| 28 | Users migration | ✓ |
+| 29 | Spatie roles & permissions | ✓ |
+| 30 | Audit logs migration | ✓ |
+| 31 | Wave 1 seed + migrate | ✓ |
+| 32 | Login page | ✓ |
+| 33+ | Auth hardening & center context | Next |
 | 19–24 | **Frontend design system & shell** | |
 | 25–31 | **Database** Wave 1 (admin) | |
 | 32–39 | Auth & security foundation | |
@@ -93,5 +101,5 @@ Shared `CsvVerificationCard` built at Step 72; reused in Steps 80+ and 86+.
 
 | Item | Status |
 |------|--------|
-| Steps 1–24 | Complete — **Phase 3 checkpoint passed** |
-| **Next step** | **Step 25** — Review ERD ([data-model.md](../design/data-model.md)) |
+| Steps 1–32 | Complete |
+| **Next step** | **Step 34** — Owner 2FA (TOTP) |

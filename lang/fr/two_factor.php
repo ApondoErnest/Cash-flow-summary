@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'challenge_title' => 'Authentification à deux facteurs',
+    'challenge_heading' => 'Vérifiez votre identité',
+    'challenge_prompt' => 'Saisissez le code à 6 chiffres de votre application d’authentification.',
+    'recovery_prompt' => 'Saisissez l’un de vos codes de récupération.',
+    'setup_title' => 'Authentification à deux facteurs',
+    'setup_heading' => 'Protégez votre compte Propriétaire',
+    'setup_intro' => 'Scannez le code QR avec une application d’authentification (Google Authenticator, Authy, 1Password, etc.), puis confirmez avec un code généré.',
+    'setup_enabled' => 'L’authentification à deux facteurs est activée pour votre compte.',
+    'setup_enabled_hint' => 'Un code vous sera demandé à chaque connexion.',
+    'manual_entry' => 'Clé de saisie manuelle',
+    'code' => 'Code d’authentification',
+    'recovery_code' => 'Code de récupération',
+    'use_recovery_code' => 'Utiliser un code de récupération',
+    'use_authenticator_code' => 'Utiliser l’application d’authentification',
+    'confirm_enable' => 'Activer l’authentification à deux facteurs',
+    'disable' => 'Désactiver l’authentification à deux facteurs',
+    'continue' => 'Continuer vers le tableau de bord',
+    'verify' => 'Vérifier',
+    'invalid_code' => 'Le code d’authentification est invalide.',
+    'invalid_recovery_code' => 'Le code de récupération est invalide ou a déjà été utilisé.',
+    'recovery_codes_heading' => 'Enregistrez vos codes de récupération',
+    'recovery_codes_hint' => 'Conservez ces codes en lieu sûr. Chaque code ne peut être utilisé qu’une seule fois si vous perdez l’accès à votre application.',
+];

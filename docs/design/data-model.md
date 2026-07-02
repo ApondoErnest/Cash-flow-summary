@@ -1,8 +1,10 @@
 # Data Model
 
-[← Documentation hub](../README.md) | [implementation-sequence.md](../implementation-sequence.md) | [calculations.md](calculations.md)
+[← Documentation hub](../README.md) | [implementation-sequence.md](../implementation-sequence.md) | [calculations.md](calculations.md) | [erd-requirements-review.md](erd-requirements-review.md)
 
 MySQL schema for Laravel modular monolith. Implement migrations in phase order: [implementation-sequence.md](../implementation-sequence.md).
+
+**ERD review:** Step 25 complete (2026-07-01) — [erd-requirements-review.md](erd-requirements-review.md)
 
 ---
 
@@ -10,7 +12,7 @@ MySQL schema for Laravel modular monolith. Implement migrations in phase order: 
 
 ### Wave 1 — Steps 25–31 (administration)
 
-organizations, centers, center_operating_calendars, center_calendar_exceptions, users, roles, permissions, role_has_permissions, model_has_roles, model_has_permissions, audit_logs, sessions, cache, jobs, failed_jobs
+organizations, centers, center_operating_calendars, center_calendar_exceptions, users, roles, permissions, role_has_permissions, model_has_roles, model_has_permissions, organization_settings, audit_logs, sessions, cache, jobs, failed_jobs
 
 ### Wave 2 — Steps 40–42 (verification)
 
@@ -41,6 +43,22 @@ erDiagram
   DailyVersion ||--|| ActiveDailySnapshot : current
   Center ||--o{ DailyVersion : versions
 ```
+
+### Administrative entities (Wave 1)
+
+```mermaid
+erDiagram
+  Organization ||--o{ Center : owns
+  Organization ||--o{ User : employs
+  Organization ||--o{ OrganizationSetting : configures
+  Center ||--o{ User : assigns
+  Center ||--o{ CenterOperatingCalendar : schedule
+  Center ||--o{ CenterCalendarException : exceptions
+  User ||--o{ AuditLog : performs
+  Center ||--o{ AuditLog : scoped_to
+```
+
+Spatie permission tables (`roles`, `permissions`, pivots) link to `users` via `model_has_roles`. Laravel framework tables: `sessions`, `cache`, `jobs`, `failed_jobs`.
 
 ---
 
@@ -145,6 +163,23 @@ See [owner-active-center.md](owner-active-center.md) and ADR 0011.
 ## roles and permissions
 
 Spatie Laravel Permission package. Seed: `owner`, `center_manager`, `cashier`. Permissions per [permission-matrix.md](../product/permission-matrix.md).
+
+---
+
+## organization_settings
+
+Organization-scoped configuration (WhatsApp, security defaults). Secrets encrypted at rest. **Added Step 25 review (REQ-095, BR-018).**
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | bigint PK | |
+| organization_id | FK | |
+| key | string | Unique per organization |
+| value | text | JSON or scalar; encrypt sensitive keys in app |
+| updated_by | FK nullable | User who last changed setting |
+| timestamps | | |
+
+**Example keys:** `whatsapp.owner_phone`, `whatsapp.phone_number_id`, `whatsapp.access_token`, `whatsapp.webhook_verify_token`
 
 ---
 
@@ -534,7 +569,7 @@ Denormalized aggregates from active snapshots for report performance. Regenerata
 
 ## Migration order
 
-**Wave 1 (Steps 25–31):** organizations → centers → users → permission tables → operating_calendars → calendar_exceptions → audit_logs
+**Wave 1 (Steps 25–31):** organizations → centers → users → permission tables → operating_calendars → calendar_exceptions → organization_settings → audit_logs
 
 **Wave 2 (Steps 40–42):** csv_format_versions → header_aliases → import_verifications
 

@@ -85,4 +85,4 @@ Business Owner approves: requirements, architecture, UX, UAT, production rollout
 
 The charter, requirements, business rules, permissions, and acceptance criteria are **approved** as the baseline for Sprint 1 implementation. Changes after this date follow [change-control.md](change-control.md).
 
-**Next step:** [Step 25](../implementation-sequence.md) — Review ERD against requirements
+**Next step:** [Step 34](../implementation-sequence.md) — Owner 2FA (TOTP)

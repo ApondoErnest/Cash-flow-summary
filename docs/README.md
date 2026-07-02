@@ -1,8 +1,8 @@
 # Documentation Hub
 
-**Doc set version:** 2.0.21  
+**Doc set version:** 2.0.29  
 **Last reviewed:** 2026-07-01  
-**Project phase:** Steps 1–24 complete — **Step 25** (ERD review) next | Doc v2.0.21
+**Project phase:** Steps 1–34 complete — **Step 35** (forced password change) next | Doc v2.0.33
 
 [README](../README.md) | [plan.md](../plan.md)
 
@@ -66,10 +66,12 @@
 | [design-system.md](design/design-system.md) | Midnight Finance — colors, typography, icons |
 | [csv-verification-flow.md](design/csv-verification-flow.md) | Select → Verify → Import/Reject |
 | [ux-overview.md](design/ux-overview.md) | Layout, dashboards, navigation |
+| [i18n.md](design/i18n.md) | UI localization — English / French |
 | [csv-specification.md](design/csv-specification.md) | Headers, footer, encoding |
 | [normalization-policy.md](design/normalization-policy.md) | Exact duplicate field rules |
 | [import-statuses.md](design/import-statuses.md) | Verification, import, row enums |
 | [data-model.md](design/data-model.md) | Tables, constraints, migration waves |
+| [erd-requirements-review.md](design/erd-requirements-review.md) | Step 25 REQ ↔ schema traceability |
 | [calculations.md](design/calculations.md) | Financial rules, hashing |
 
 ### Architecture
@@ -116,7 +118,9 @@
 | Schema | data-model.md | requirements.md, backend-services.md |
 | Owner active center | owner-active-center.md | ux-overview, permission-matrix, ADR 0011 |
 | Permissions | permission-matrix.md | requirements.md, security-privacy.md |
-| Theme / UI | design-system.md | ux-overview.md |
+| Theme / UI | design-system.md | ux-overview.md, i18n.md |
+
+**UI quality gate (all steps):** Every screen must meet [design-system.md § Design quality standard](design/design-system.md#design-quality-standard-project-wide) — professional, beautiful, blended Midnight Finance colors.
 | Stack decision | ADR in decisions/ | overview.md, setup.md |
 | Implementation order | implementation-sequence.md | roadmap.md, plan.md §37–38 |
 

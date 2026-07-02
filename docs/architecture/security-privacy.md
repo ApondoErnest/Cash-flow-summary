@@ -8,10 +8,10 @@
 
 - Username + password (no public registration)
 - Minimum password strength enforced
-- Temporary password → forced change on first login
+- Temporary password → forced change on first login — **implemented Step 35** (`/password/change`)
 - Login rate limiting (per IP + per username)
 - Session timeout configurable
-- Owner two-factor authentication (TOTP)
+- Owner two-factor authentication (TOTP) — **implemented Step 34** (`/two-factor/setup`, `/two-factor/challenge`)
 - Recovery codes stored encrypted
 
 ---

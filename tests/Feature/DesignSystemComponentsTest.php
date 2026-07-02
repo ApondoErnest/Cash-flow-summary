@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
 test('design system ui component blades exist', function () {
     foreach (['card', 'stat-card', 'button', 'table-panel', 'status-badge'] as $component) {
         expect(file_exists(resource_path("views/components/ui/{$component}.blade.php")))->toBeTrue();
@@ -9,6 +13,8 @@ test('design system ui component blades exist', function () {
 });
 
 test('welcome page renders reusable card button table and badge patterns', function () {
+    actingAsOwner();
+
     $response = $this->get('/');
 
     $response->assertOk();

@@ -3,6 +3,10 @@
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+require __DIR__.'/Support/AuthHelpers.php';
+require __DIR__.'/Support/CenterIsolationHelpers.php';
+require __DIR__.'/Support/CsvVerificationHelpers.php';
+
 /*
 |--------------------------------------------------------------------------
 | Test Case

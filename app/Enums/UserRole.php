@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use App\Support\Auth\RoleName;
+
 enum UserRole: string
 {
     case Owner = 'owner';
@@ -13,9 +15,9 @@ enum UserRole: string
     public function label(): string
     {
         return match ($this) {
-            self::Owner => 'Owner',
-            self::Manager => 'Center Manager',
-            self::Cashier => 'Cashier',
+            self::Owner => __('roles.owner'),
+            self::Manager => __('roles.manager'),
+            self::Cashier => __('roles.cashier'),
         };
     }
 
@@ -31,5 +33,14 @@ enum UserRole: string
     public static function fromPreview(?string $value): self
     {
         return self::tryFrom((string) $value) ?? self::Owner;
+    }
+
+    public function spatieName(): string
+    {
+        return match ($this) {
+            self::Owner => RoleName::Owner,
+            self::Manager => RoleName::CenterManager,
+            self::Cashier => RoleName::Cashier,
+        };
     }
 }

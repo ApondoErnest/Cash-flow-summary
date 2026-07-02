@@ -26,9 +26,10 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.0.21 |
-| Steps complete | **1–24** |
-| **Next step** | **Step 25** — Review ERD against requirements |
+| Doc set | v2.0.51 |
+| Steps complete | **1–51** |
+| **Next step** | **Step 52** — Center Selection page (post-login) |
+| **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
 ---
@@ -61,33 +62,33 @@ flowchart LR
 | 22 | Role-based navigation structure (empty routes OK) | Design system & frontend shell | S1 | Complete |
 | 23 | Reusable card, button, table, badge patterns | Design system & frontend shell | S1 | Complete |
 | 24 | Responsive behaviour (mobile sidebar) | Design system & frontend shell | S1 | Complete |
-| 25 | Review ERD against requirements | Database Wave 1 — administration | S1 | Not started |
-| 26 | Migration: organizations | Database Wave 1 — administration | S1 | Not started |
-| 27 | Migration: centers, operating_calendars, calendar_exceptions | Database Wave 1 — administration | S1 | Not started |
-| 28 | Migration: users | Database Wave 1 — administration | S1 | Not started |
-| 29 | Migration: roles & permissions (Spatie) | Database Wave 1 — administration | S1 | Not started |
-| 30 | Migration: audit_logs | Database Wave 1 — administration | S1 | Not started |
-| 31 | Seed: roles, Owner account | Database Wave 1 — administration | S1 | Not started |
-| 32 | Login page (Midnight Finance) | Authentication, roles & center context | S1 | Not started |
-| 33 | Session, rate limiting, password policy | Authentication, roles & center context | S1 | Not started |
-| 34 | Owner 2FA (TOTP) | Authentication, roles & center context | S1 | Not started |
-| 35 | Temporary password → forced change | Authentication, roles & center context | S1 | Not started |
-| 36 | `EnsureAssignedCenter` middleware (Manager/Cashier) | Authentication, roles & center context | S1 | Not started |
-| 37 | `EnsureOwnerActiveCenter` middleware skeleton | Authentication, roles & center context | S1 | Not started |
-| 38 | Policies and center query scopes | Authentication, roles & center context | S1 | Not started |
-| 39 | Pest: center isolation smoke tests | Authentication, roles & center context | S1 | Not started |
-| 40 | Migration: csv_format_versions, header_aliases | Database Wave 2 — verification | S2 | Not started |
-| 41 | Migration: import_verifications | Database Wave 2 — verification | S2 | Not started |
-| 42 | Seed: header aliases (FR/EN, Regitration variants) | Database Wave 2 — verification | S2 | Not started |
-| 43 | VerificationService — temp file, token, TTL | CSV verification backend | S2 | Not started |
-| 44 | CsvInspectionService — encoding, delimiter, language | CSV verification backend | S2 | Not started |
-| 45 | HeaderMappingService — reject mixed language | CSV verification backend | S2 | Not started |
-| 46 | CsvParsingService — stream rows | CSV verification backend | S2 | Not started |
-| 47 | FooterReaderService + ReconciliationService | CSV verification backend | S2 | Not started |
-| 48 | NormalizationService — `field_specific_v1` | CSV verification backend | S2 | Not started |
-| 49 | DuplicatePreviewService — exact + probable counts | CSV verification backend | S2 | Not started |
-| 50 | VerificationCleanupService (scheduled) | CSV verification backend | S2 | Not started |
-| 51 | Pest fixtures: FR/EN, mixed headers, invalid rows | CSV verification backend | S2 | Not started |
+| 25 | Review ERD against requirements | Database Wave 1 — administration | S1 | Complete |
+| 26 | Migration: organizations | Database Wave 1 — administration | S1 | Complete |
+| 27 | Migration: centers, operating_calendars, calendar_exceptions | Database Wave 1 — administration | S1 | Complete |
+| 28 | Migration: users | Database Wave 1 — administration | S1 | Complete |
+| 29 | Migration: roles & permissions (Spatie) | Database Wave 1 — administration | S1 | Complete |
+| 30 | Migration: audit_logs | Database Wave 1 — administration | S1 | Complete |
+| 31 | Seed: roles, Owner account | Database Wave 1 — administration | S1 | Complete |
+| 32 | Login page (Midnight Finance) | Authentication, roles & center context | S1 | Complete |
+| 33 | Session, rate limiting, password policy | Authentication, roles & center context | S1 | Complete |
+| 34 | Owner 2FA (TOTP) | Authentication, roles & center context | S1 | Complete |
+| 35 | Temporary password → forced change | Authentication, roles & center context | S1 | Complete |
+| 36 | `EnsureAssignedCenter` middleware (Manager/Cashier) | Authentication, roles & center context | S1 | Complete |
+| 37 | `EnsureOwnerActiveCenter` middleware skeleton | Authentication, roles & center context | S1 | Complete |
+| 38 | Policies and center query scopes | Authentication, roles & center context | S1 | Complete |
+| 39 | Pest: center isolation smoke tests | Authentication, roles & center context | S1 | Complete |
+| 40 | Migration: csv_format_versions, header_aliases | Database Wave 2 — verification | S2 | Complete |
+| 41 | Migration: import_verifications | Database Wave 2 — verification | S2 | Complete |
+| 42 | Seed: header aliases (FR/EN, Regitration variants) | Database Wave 2 — verification | S2 | Complete |
+| 43 | VerificationService — temp file, token, TTL | CSV verification backend | S2 | Complete |
+| 44 | CsvInspectionService — encoding, delimiter, language | CSV verification backend | S2 | Complete |
+| 45 | HeaderMappingService — reject mixed language | CSV verification backend | S2 | Complete |
+| 46 | CsvParsingService — stream rows | CSV verification backend | S2 | Complete |
+| 47 | FooterReaderService + ReconciliationService | CSV verification backend | S2 | Complete |
+| 48 | NormalizationService — `field_specific_v1` | CSV verification backend | S2 | Complete |
+| 49 | DuplicatePreviewService — exact + probable counts | CSV verification backend | S2 | Complete |
+| 50 | VerificationCleanupService (scheduled) | CSV verification backend | S2 | Complete |
+| 51 | Pest fixtures: FR/EN, mixed headers, invalid rows | CSV verification backend | S2 | Complete |
 | 52 | Center Selection page (post-login) | Owner administration UI | S3 | Not started |
 | 53 | Active-center session + header dropdown | Owner administration UI | S3 | Not started |
 | 54 | Manage Centers — CRUD, Open Center action | Owner administration UI | S3 | Not started |
@@ -458,6 +459,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — [erd-requirements-review.md](../design/erd-requirements-review.md); added `organization_settings`; administrative ERD appendix |
 
 ### Step 26 — Migration: organizations
 
@@ -467,6 +470,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — `organizations` migration; `App\Modules\Centers\Models\Organization` (local MySQL migrate deferred until Step 31) |
 
 ### Step 27 — Migration: centers, operating_calendars, calendar_exceptions
 
@@ -476,6 +481,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — `centers`, `center_operating_calendars`, `center_calendar_exceptions`; Centers module models |
 
 ### Step 28 — Migration: users
 
@@ -485,6 +492,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Cashflow `users` table; `username` login; org/center FKs; 2FA columns; Users module model |
 
 ### Step 29 — Migration: roles & permissions (Spatie)
 
@@ -494,6 +503,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [permission-matrix.md](../product/permission-matrix.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Spatie permission tables; `HasRoles` on User; `RoleName` constants (seed at Step 31) |
 
 ### Step 30 — Migration: audit_logs
 
@@ -503,6 +514,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Immutable `audit_logs` table; AuditLogging module model; indexes on `created_at`, center, event |
 
 ### Step 31 — Seed: roles, Owner account
 
@@ -512,6 +525,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [setup.md](../operations/setup.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — `RoleSeeder`, `OwnerAccountSeeder`; local `migrate --seed` passed |
 
 **Checkpoint after Step 31** (end of Database Wave 1 — administration):
 
@@ -529,6 +544,8 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [design-system.md](../design/design-system.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-01 — Livewire login; guest layout; username auth; protected app routes; **EN/FR UI localization**; logout; login visual polish (blended palette, frosted form panel) |
 
 ### Step 33 — Session, rate limiting, password policy
 
@@ -536,8 +553,10 @@ flowchart LR
 |---|---|
 | **Group** | Authentication, roles & center context (Phase 5) |
 | **Sprint** | S1 |
-| **Reference** | [security-privacy.md](../architecture/security-privacy.md) |
-| **Done when** | Deliverable complete and locally verified |
+| **Reference** | [security-privacy.md](../architecture/security-privacy.md), [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
+| **Done when** | Deliverable complete and locally verified; any new UI matches project-wide design quality standard |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — Login rate limiting (IP + username); idle session timeout middleware; password policy via `PasswordRules`; `config/auth_security.php` |
 
 ### Step 34 — Owner 2FA (TOTP)
 
@@ -548,6 +567,9 @@ flowchart LR
 | **Reference** | REQ-008 |
 | **Done when** | Deliverable complete and locally verified |
 
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — Owner TOTP via `TwoFactorService`; challenge + setup Livewire; encrypted secrets/recovery codes; `pragmarx/google2fa` |
+
 ### Step 35 — Temporary password → forced change
 
 | | |
@@ -556,6 +578,9 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | REQ-009 |
 | **Done when** | Deliverable complete and locally verified |
+
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — Forced password change page; `PasswordService`; `EnsurePasswordIsChanged` middleware; login → password → 2FA → dashboard flow |
 
 ### Step 36 — `EnsureAssignedCenter` middleware (Manager/Cashier)
 
@@ -566,6 +591,9 @@ flowchart LR
 | **Reference** | [security-privacy.md](../architecture/security-privacy.md) |
 | **Done when** | Deliverable complete and locally verified |
 
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `EnsureAssignedCenter` middleware; `AssignedCenterService` + request context; Manager/Cashier single-center enforcement; tampered `center_id` → 403; Owner bypass |
+
 ### Step 37 — `EnsureOwnerActiveCenter` middleware skeleton
 
 | | |
@@ -574,6 +602,9 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [owner-active-center.md](../design/owner-active-center.md), ADR [0011](../architecture/decisions/0011-owner-active-center.md) |
 | **Done when** | Deliverable complete and locally verified |
+
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `EnsureOwnerActiveCenter` middleware skeleton; `ActiveCenterContextService` + session keys; operational vs admin route split; placeholder `center.select` redirect target; Owner tampered `center_id` → 403 |
 
 ### Step 38 — Policies and center query scopes
 
@@ -584,6 +615,9 @@ flowchart LR
 | **Reference** | [permission-matrix.md](../product/permission-matrix.md) |
 | **Done when** | Deliverable complete and locally verified |
 
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `CenterContextResolver`, `CenterScope` + `HasCenterScope`, `CenterPolicy`, `CenterResourcePolicy`, `AuditLogPolicy`; operational vs admin scope rules |
+
 ### Step 39 — Pest: center isolation smoke tests
 
 | | |
@@ -592,6 +626,9 @@ flowchart LR
 | **Sprint** | S1 |
 | **Reference** | [test-strategy.md](../testing/test-strategy.md) |
 | **Done when** | Deliverable complete and locally verified |
+
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `CenterIsolationSmokeTest` (AC #1–5, #52); cross-center tampering on all operational routes; `EnsureOwner` on `center.select`; shared test helpers |
 
 **Checkpoint after Step 39** (end of Authentication, roles & center context):
 
@@ -609,6 +646,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [data-model.md](../design/data-model.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `csv_format_versions`, `header_aliases` migration; CsvVerification module models; indexes on format code, alias lookup |
 
 ### Step 41 — Migration: import_verifications
 
@@ -618,6 +657,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [data-model.md](../design/data-model.md), ADR [0009](../architecture/decisions/0009-verification-token-flow.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `import_verifications` migration; `ImportVerification` model; `VerificationStatus` + `ImportMode` enums; indexes on token, status/expiry, user/center |
 
 ### Step 42 — Seed: header aliases (FR/EN, Regitration variants)
 
@@ -627,12 +668,15 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [csv-specification.md](../design/csv-specification.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `CsvFormatVersionSeeder`, `HeaderAliasSeeder`; 23 FR/EN aliases incl. Regitration variants; `HeaderNormalizer`; wired into `DatabaseSeeder` |
 
 **Checkpoint after Step 42** (end of Database Wave 2 — verification):
 
 - **Gate:** Verification tables exist; alias seeds load
 - **Requirements:** REQ-032 (seeds)
 - **Gate tests (AC):** —
+- **Status:** Passed — `Wave2SeedTest`; full suite green
 
 ---
 
@@ -644,6 +688,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [backend-services.md](../architecture/backend-services.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `VerificationService` (token, private temp storage, SHA-256, TTL); `ProcessVerificationJob` stub; `config/csv_verification.php` |
 
 ### Step 44 — CsvInspectionService — encoding, delimiter, language
 
@@ -653,6 +699,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [csv-specification.md](../design/csv-specification.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `CsvInspectionService` + `CsvInspectionResult`; UTF-8/BOM/delimiter/column checks; FR/EN language detection via aliases; job integration |
 
 ### Step 45 — HeaderMappingService — reject mixed language
 
@@ -662,6 +710,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | BR-015 |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `HeaderMappingService` + `HeaderMappingResult`; canonical column mapping; mixed FR/EN rejection (BR-015/REQ-031); unknown header suggestions; job integration |
 
 ### Step 46 — CsvParsingService — stream rows
 
@@ -671,6 +721,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [csv-specification.md](../design/csv-specification.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `CsvParsingService` streams rows; parses dates/times/amounts; unfinished/invalid/zero classification; footer skip; `row_stats` + job integration |
 
 ### Step 47 — FooterReaderService + ReconciliationService
 
@@ -680,6 +732,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [calculations.md](../design/calculations.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `FooterReaderService` extracts footer count/HT/VAT/TTC; `ReconciliationService` compares parsed valid-row totals; mismatch fails verification; job stores `footer_summary` + reconciliation checks |
 
 ### Step 48 — NormalizationService — `field_specific_v1`
 
@@ -689,6 +743,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [normalization-policy.md](../design/normalization-policy.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `NormalizationService` + `CanonicalRecord`; `field_specific_v1` rules; deterministic `exact_canonical_hash`; job integration |
 
 ### Step 49 — DuplicatePreviewService — exact + probable counts
 
@@ -698,6 +754,8 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | ADR [0005](../architecture/decisions/0005-exact-duplicate-ledger.md), [0008](../architecture/decisions/0008-probable-duplicates.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `SimilarityFingerprintService` + `DuplicatePreviewService`; in-file/historical exact counts; probable fingerprint warnings; `duplicate_summary` + `ready` status in job |
 
 ### Step 50 — VerificationCleanupService (scheduled)
 
@@ -707,6 +765,9 @@ flowchart LR
 | **Sprint** | S2 |
 | **Reference** | [csv-verification-flow.md](../design/csv-verification-flow.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `VerificationCleanupService` expires abandoned verifications (chunked), deletes temp files, sweeps orphaned rejected files; `VerificationService::reject()`; `csv-verification:cleanup` command scheduled every 15 minutes |
+| **Notes** | Real sample is ~8.5k rows / full-year span — cleanup must not block queue workers; temp files deleted on reject **and** on expiry |
 
 ### Step 51 — Pest fixtures: FR/EN, mixed headers, invalid rows
 
@@ -714,12 +775,25 @@ flowchart LR
 |---|---|
 | **Group** | CSV verification backend (Phase 7) |
 | **Sprint** | S2 |
-| **Reference** | [test-strategy.md](../testing/test-strategy.md) |
+| **Reference** | [test-strategy.md](../testing/test-strategy.md), real sample review (2026-07-02) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-02 — `tests/fixtures/csv/` catalogue (16 files); production footer helpers; `actual_period_*` in job; `CsvVerificationFixturesTest` gate + 500-row perf smoke |
+
+**Step 51 checklist** (derived from production sample):
+
+1. **`tests/fixtures/csv/`** — create catalogue from [test-strategy.md](../testing/test-strategy.md)
+2. **Production footer layout** — fixture footer must match export shape (`;Nombre total d'inspections :;8 560;;;;Total :;…`), not only the simplified test-helper layout; update `frenchFooterLine()` / `englishFooterLine()` accordingly
+3. **Row pattern coverage** — include rows for: spaced amounts; `-` unfinished + `0;0;0`; completed zero CV; categories `A`/`B1`; plates `18 P 6649 A`, `LTSR…`, numeric-only; mixed-case customer names; registration ≠ completion date
+4. **`actual_period_start` / `actual_period_end`** — compute min/max registration dates during verification job (multi-day file: sample spans 01/01/2024–31/12/2024); store on `import_verifications`
+5. **End-to-end gate test** — anonymized subset fixture (~20 rows + production footer) runs full `ProcessVerificationJob` → `Ready`, footer reconciles, row_stats reflect unfinished/zero/CV counts
+6. **Performance smoke** — optional Pest test with ~500-row generated file confirms streaming path stays within reasonable time (full 8.5k sample stays in private UAT storage per test strategy)
+
+**Already covered by Steps 43–49** (confirmed against sample): semicolon delimiter; FR headers; space thousands in amounts; `-` → unfinished; zero amounts valid; `C`/`CV` types; licence plate normalization; footer trailing-numeric fallback for spaced count
 
 **Checkpoint after Step 51** (end of CSV verification backend):
 
-- **Gate:** FR + EN sample CSVs verify via service; footer reconciles; reject/expiry cleanup works
+- **Gate:** FR + EN sample CSVs verify via service; **production-layout** footer reconciles; reject/expiry cleanup works; `actual_period_*` populated for multi-day files
 - **Requirements:** REQ-030–036, REQ-041–043, REQ-047, REQ-050–057, REQ-060–063, REQ-067, REQ-069, REQ-101, NFR-003
 - **Gate tests (AC):** AC #6–21, #16–17, #33
 

@@ -6,6 +6,39 @@
 
 ---
 
+## Design quality standard (project-wide)
+
+**Every screen in Cash Flow Summary must look professional, beautiful, and visually cohesive.** This is not optional polish at the end — it applies to every step from Step 33 onward and to all roles (Owner, Manager, Cashier).
+
+### What “good design” means here
+
+| Principle | Practice |
+|-----------|----------|
+| **Color blend** | Use palette tokens (`midnight-navy`, `emerald-brand`, `gold-brand`, `app-bg`, `surface`) — never raw `#fff` blocks sitting on flat gray without intent |
+| **Hierarchy** | Clear label → value → context; headings in Manrope, body in Inter |
+| **Surfaces** | Cards and forms use subtle borders, soft shadows, and tinted backgrounds — not harsh white-on-white |
+| **Focus & states** | Emerald focus rings; hover/focus/disabled states on all interactive elements |
+| **Consistency** | Reuse `x-ui.*` components and existing CSS patterns (`mf-*` classes in `resources/css/app.css`) before inventing one-off styles |
+| **Guest + auth** | Login and post-login shell must feel like the same product (reference: login page styling, Step 32) |
+
+### Anti-patterns (reject in review)
+
+- Default Flux/Laravel white inputs on white panels with no token tuning
+- Random colors outside the palette
+- Inconsistent spacing or typography between pages
+- Shipping a functional page that “works” but looks unfinished
+
+### Before marking any UI step complete
+
+1. Compare against [design-system.md](design-system.md) tokens and components
+2. Check desktop **and** mobile viewport
+3. Verify EN **and** FR ([i18n.md](i18n.md)) — layout must not break in either language
+4. Visually confirm colors **blend** with the navy sidebar / app shell
+
+**Reference implementation:** login page (`resources/views/livewire/authentication/login.blade.php`, `.mf-login-*` in `app.css`).
+
+---
+
 ## Color palette
 
 | Token | Hex | Tailwind suggestion | Use |

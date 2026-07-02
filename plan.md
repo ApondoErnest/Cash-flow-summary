@@ -2,7 +2,7 @@
 
 **Version:** 2.0.0  
 **Last updated:** 2026-07-01  
-**Status:** Step 24 complete — Step 25 (ERD review) next
+**Status:** Step 33 complete — Step 34 (Owner 2FA) next
 
 [README.md](README.md) | [docs/README.md](docs/README.md)
 
@@ -547,5 +547,5 @@ Full specification: [docs/design/owner-active-center.md](docs/design/owner-activ
 
 ## Next steps
 
-1. **Development:** **Step 25** — Review ERD against requirements ([docs/design/data-model.md](docs/design/data-model.md))
+1. **Development:** **Step 33** — Session, rate limiting, password policy ([docs/architecture/security-privacy.md](docs/architecture/security-privacy.md))
 2. Follow steps **in order** (1 → 120); do not build CSV UI before Step 51 (verification backend)

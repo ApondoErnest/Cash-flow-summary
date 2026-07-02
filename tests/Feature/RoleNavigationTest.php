@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 use App\Enums\UserRole;
 use App\Support\Navigation\RoleNavigation;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('owner navigation includes operational and administrative sections', function () {
+    actingAsOwner();
+
     $response = $this->get('/');
 
     $response->assertOk();
@@ -20,6 +25,8 @@ test('owner navigation includes operational and administrative sections', functi
 });
 
 test('manager navigation shows operational items only', function () {
+    actingAsOwner();
+
     $response = $this->get('/?role=manager');
 
     $response->assertOk();
@@ -34,6 +41,8 @@ test('manager navigation shows operational items only', function () {
 });
 
 test('cashier navigation is compact', function () {
+    actingAsOwner();
+
     $response = $this->get('/?role=cashier');
 
     $response->assertOk();
@@ -60,6 +69,8 @@ test('role navigation registry matches ux overview item counts', function () {
 });
 
 test('placeholder navigation routes render', function () {
+    actingAsOwner();
+
     $this->get(route('imports.create'))->assertOk()->assertSee('Import CSV');
     $this->get(route('centers.index'))->assertOk()->assertSee('Manage Centers');
 });

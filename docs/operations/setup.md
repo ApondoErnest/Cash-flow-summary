@@ -2,7 +2,17 @@
 
 [← Documentation hub](../README.md) | **Sprint 1**
 
-**Status:** Responsive shell (Step 24). Phase 3 checkpoint passed — Step 25 next.
+**Status:** Steps 1–33 complete. Session hardening (Step 33) done; **Step 34** (Owner 2FA) next.
+
+### Wave 1 local migrate policy
+
+Migration files were added at Steps 26–30. After **Step 31**, run once on local MySQL:
+
+```bash
+php artisan migrate --seed
+```
+
+**Checkpoint passed 2026-07-01** — `cashflow_summary` database migrated and seeded.
 
 ---
 
@@ -179,6 +189,89 @@ Run Horizon locally: `php artisan horizon` (separate terminal)
 | Page layout | `x-ui.page` with stacked cards on mobile |
 | Tests | `tests/Feature/ResponsiveShellTest.php` |
 | **Phase 3 checkpoint** | Passed (Steps 19–24) |
+
+### Verified environment (Step 25 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| ERD review | [`docs/design/erd-requirements-review.md`](../../docs/design/erd-requirements-review.md) |
+| Outcome | Approved with amendments |
+| Schema update | `organization_settings` table added to data-model |
+| Tests | `tests/Feature/ErdRequirementsReviewTest.php` |
+
+### Verified environment (Step 26 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Migration | [`database/migrations/2026_07_01_100000_create_organizations_table.php`](../../database/migrations/2026_07_01_100000_create_organizations_table.php) |
+| Model | [`app/Modules/Centers/Models/Organization.php`](../../app/Modules/Centers/Models/Organization.php) |
+| Tests | `tests/Feature/OrganizationsMigrationTest.php` |
+| Local MySQL | Deferred — migrate after Step 31 (see Wave 1 policy above) |
+
+### Verified environment (Step 27 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Migration | [`database/migrations/2026_07_01_100001_create_centers_and_calendars_tables.php`](../../database/migrations/2026_07_01_100001_create_centers_and_calendars_tables.php) |
+| Models | `Center`, `CenterOperatingCalendar`, `CenterCalendarException` |
+| Tests | `tests/Feature/CentersMigrationTest.php` |
+| Local MySQL | Deferred until Step 31 |
+
+### Verified environment (Step 28 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Migration | [`database/migrations/2026_07_01_100002_create_users_table.php`](../../database/migrations/2026_07_01_100002_create_users_table.php) |
+| Model | [`app/Modules/Users/Models/User.php`](../../app/Modules/Users/Models/User.php) (auth via `App\Models\User`) |
+| Login field | `username` unique — email optional, not used for auth |
+| Tests | `tests/Feature/UsersMigrationTest.php` |
+| Local MySQL | Deferred until Step 31 |
+
+### Verified environment (Step 29 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Package | `spatie/laravel-permission` ^6.25 |
+| Migration | [`database/migrations/2026_07_01_100003_create_permission_tables.php`](../../database/migrations/2026_07_01_100003_create_permission_tables.php) |
+| Config | [`config/permission.php`](../../config/permission.php) |
+| Role names | `owner`, `center_manager`, `cashier` via `App\Support\Auth\RoleName` |
+| User trait | `HasRoles` on Users module model |
+| Tests | `tests/Feature/RolesPermissionsMigrationTest.php` |
+| Local MySQL | Deferred until Step 31 |
+
+### Verified environment (Step 30 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Migration | [`database/migrations/2026_07_01_100004_create_audit_logs_table.php`](../../database/migrations/2026_07_01_100004_create_audit_logs_table.php) |
+| Model | [`app/Modules/AuditLogging/Models/AuditLog.php`](../../app/Modules/AuditLogging/Models/AuditLog.php) |
+| Immutability | `created_at` only — no `updated_at` |
+| Tests | `tests/Feature/AuditLogsMigrationTest.php` |
+| Local MySQL | Deferred until Step 31 |
+
+### Verified environment (Step 31 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Seeders | `RoleSeeder`, `OwnerAccountSeeder` |
+| Roles | `owner`, `center_manager`, `cashier` |
+| Owner account | username `owner` — `must_change_password` true, `center_id` null |
+| Demo org | code `DEMO` |
+| Env | `SEED_OWNER_*` in `.env.example` |
+| Tests | `tests/Feature/Wave1SeedTest.php` |
+| Local MySQL | `php artisan migrate --seed` — **passed** |
+| **Wave 1 checkpoint** | **Passed** (REQ-001, REQ-002, REQ-003, REQ-022) |
+
+### Verified environment (Step 32 — 2026-07-01)
+
+| Item | Status |
+|------|--------|
+| Login route | `/login` (guest) |
+| Component | `App\Modules\Authentication\Livewire\Login` |
+| Layout | Guest split-panel — midnight navy brand + Flux form |
+| Auth | Username + password; inactive users rejected |
+| App routes | `auth` middleware on dashboard + navigation |
+| Tests | `tests/Feature/LoginPageTest.php` |
 
 ---
 
