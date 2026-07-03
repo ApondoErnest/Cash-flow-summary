@@ -109,12 +109,77 @@
         @endif
     </x-ui.table-panel>
 
-    @if (! $this->isManagerView)
-        <flux:callout variant="secondary" icon="arrow-down-tray">
-            <flux:callout.heading>{{ __('reports.export.coming_soon_title') }}</flux:callout.heading>
-            <flux:callout.text>{{ __('reports.export.coming_soon_description') }}</flux:callout.text>
-        </flux:callout>
-    @endif
+    <div @if ($this->hasPendingExports) wire:poll.5s @endif>
+        <x-ui.card
+            :title="__('reports.export.title')"
+            class="mf-center-report-export"
+        >
+            <flux:text class="mb-4 text-text-muted!">
+                {{ __('reports.export.description') }}
+            </flux:text>
+        <div class="flex flex-wrap gap-3">
+            @foreach ($exportFormats as $exportFormat)
+                <x-ui.button
+                    variant="secondary"
+                    icon="arrow-down-tray"
+                    wire:click="requestExport('{{ $exportFormat->value }}')"
+                    wire:loading.attr="disabled"
+                    wire:target="requestExport"
+                >
+                    {{ __('reports.export.formats.'.$exportFormat->value) }}
+                </x-ui.button>
+            @endforeach
+        </div>
+
+        @if ($this->recentExports->isNotEmpty())
+            <div class="mt-6 space-y-3">
+                <flux:heading size="sm" class="font-display text-text-heading!">
+                    {{ __('reports.export.recent_title') }}
+                </flux:heading>
+
+                <flux:table>
+                    <flux:table.columns>
+                        <flux:table.column>{{ __('reports.export.columns.requested_at') }}</flux:table.column>
+                        <flux:table.column>{{ __('reports.export.columns.format') }}</flux:table.column>
+                        <flux:table.column>{{ __('reports.export.columns.period') }}</flux:table.column>
+                        <flux:table.column>{{ __('reports.export.columns.status') }}</flux:table.column>
+                        <flux:table.column>{{ __('reports.export.columns.expires_at') }}</flux:table.column>
+                        <flux:table.column>{{ __('reports.export.columns.actions') }}</flux:table.column>
+                    </flux:table.columns>
+
+                    <flux:table.rows>
+                        @foreach ($this->recentExports as $exportRow)
+                            <flux:table.row wire:key="export-row-{{ $exportRow->id }}">
+                                <flux:table.cell>{{ $exportRow->requestedAt }}</flux:table.cell>
+                                <flux:table.cell>{{ $exportRow->formatLabel }}</flux:table.cell>
+                                <flux:table.cell>{{ $exportRow->periodLabel }}</flux:table.cell>
+                                <flux:table.cell>
+                                    <x-ui.status-badge :status="$exportRow->statusVariant">
+                                        {{ $exportRow->statusLabel }}
+                                    </x-ui.status-badge>
+                                </flux:table.cell>
+                                <flux:table.cell>{{ $exportRow->expiresAt ?? '—' }}</flux:table.cell>
+                                <flux:table.cell>
+                                    @if ($exportRow->downloadUrl)
+                                        <x-ui.button
+                                            variant="secondary"
+                                            icon="arrow-down-tray"
+                                            href="{{ $exportRow->downloadUrl }}"
+                                        >
+                                            {{ __('reports.export.actions.download') }}
+                                        </x-ui.button>
+                                    @else
+                                        <flux:text class="text-sm text-text-muted!">—</flux:text>
+                                    @endif
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @endforeach
+                    </flux:table.rows>
+                </flux:table>
+            </div>
+        @endif
+        </x-ui.card>
+    </div>
 
     <flux:modal
         wire:model.self="showCustomPeriodModal"

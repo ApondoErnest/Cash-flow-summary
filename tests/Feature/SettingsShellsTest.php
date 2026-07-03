@@ -27,7 +27,7 @@ test('owner can access whatsapp settings without an active center', function () 
         ->assertOk()
         ->assertSee(__('settings.whatsapp.title'), false)
         ->assertSee(__('settings.whatsapp.fields.owner_phone'), false)
-        ->assertSee(__('settings.whatsapp.deployment_notice'), false);
+        ->assertSee(__('settings.whatsapp.incomplete_notice'), false);
 });
 
 test('owner can access security settings without an active center', function () {
@@ -70,13 +70,14 @@ test('security settings shows two-factor disabled state for owner without 2fa', 
         ->assertSee(__('settings.security.setup_two_factor'), false);
 });
 
-test('whatsapp settings shell shows api credential fields', function () {
+test('whatsapp settings page shows editable api credential fields', function () {
     actingAsOwnerWithoutActiveCenter();
 
     Livewire::test(WhatsappSettings::class)
         ->assertSee(__('settings.whatsapp.fields.phone_number_id'), false)
         ->assertSee(__('settings.whatsapp.fields.access_token'), false)
-        ->assertSee(__('settings.whatsapp.fields.webhook_verify_token'), false);
+        ->assertSee(__('settings.whatsapp.fields.webhook_verify_token'), false)
+        ->assertSee(__('settings.common.save_changes'), false);
 });
 
 test('staff cannot access settings shell pages', function () {

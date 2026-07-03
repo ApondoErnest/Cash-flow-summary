@@ -30,8 +30,41 @@ return [
         'and_more' => '…and :count more',
     ],
     'export' => [
-        'coming_soon_title' => 'Exports coming soon',
-        'coming_soon_description' => 'CSV, Excel, and PDF export will be available in a future update.',
+        'title' => 'Export report',
+        'description' => 'Generate a file for the selected period. Downloads remain available until they expire.',
+        'recent_title' => 'Recent exports',
+        'queued' => ':format export queued — your file will be ready shortly.',
+        'invalid_period' => 'Choose a valid custom date range before exporting.',
+        'formats' => [
+            'csv' => 'CSV',
+            'xlsx' => 'Excel',
+            'pdf' => 'PDF',
+        ],
+        'statuses' => [
+            'pending' => 'Queued',
+            'processing' => 'Generating',
+            'completed' => 'Ready',
+            'failed' => 'Failed',
+            'expired' => 'Expired',
+        ],
+        'columns' => [
+            'requested_at' => 'Requested',
+            'format' => 'Format',
+            'period' => 'Period',
+            'status' => 'Status',
+            'expires_at' => 'Expires',
+            'actions' => 'Actions',
+        ],
+        'actions' => [
+            'download' => 'Download',
+        ],
+        'file' => [
+            'title' => 'Center report',
+            'center' => 'Center',
+            'period' => 'Period',
+            'totals' => 'Totals',
+            'generated_at' => 'Generated on :datetime',
+        ],
     ],
     'page' => [
         'manager' => [

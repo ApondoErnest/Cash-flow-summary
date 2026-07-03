@@ -7,15 +7,17 @@ namespace App\Modules\Reports\Livewire;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Modules\Dashboards\Enums\DashboardPeriod;
+use App\Modules\Reports\Enums\ExportFormat;
+use App\Modules\Reports\Services\ExportService;
 use App\Modules\Reports\Services\ReportQueryService;
 use App\Modules\Reports\Support\CenterReportData;
 use App\Support\Auth\RoleName;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Illuminate\Support\Carbon;
 
 #[Layout('components.layouts.app')]
 class CenterReport extends Component
@@ -122,6 +124,50 @@ class CenterReport extends Component
         $this->showCustomPeriodModal = false;
     }
 
+    public function requestExport(string $format): void
+    {
+        $exportFormat = ExportFormat::tryFrom($format);
+
+        if ($exportFormat === null) {
+            return;
+        }
+
+        $period = DashboardPeriod::tryFrom($this->period) ?? DashboardPeriod::Month;
+
+        if ($period === DashboardPeriod::Custom && ! $this->hasValidCustomRange()) {
+            session()->flash('error', __('reports.export.invalid_period'));
+
+            return;
+        }
+
+        $user = auth()->user();
+
+        if ($user === null) {
+            abort(403);
+        }
+
+        $customFrom = null;
+        $customTo = null;
+
+        if ($period === DashboardPeriod::Custom) {
+            $customFrom = Carbon::parse($this->fromDate)->startOfDay();
+            $customTo = Carbon::parse($this->toDate)->endOfDay();
+        }
+
+        app(ExportService::class)->requestCenterReportExport(
+            user: $user,
+            center: $this->resolvedCenter(),
+            format: $exportFormat,
+            period: $period,
+            customFrom: $customFrom,
+            customTo: $customTo,
+        );
+
+        session()->flash('status', __('reports.export.queued', [
+            'format' => __('reports.export.formats.'.$exportFormat->value),
+        ]));
+    }
+
     public function cancelCustomPeriod(): void
     {
         $this->showCustomPeriodModal = false;
@@ -181,6 +227,27 @@ class CenterReport extends Component
     }
 
     #[Computed]
+    public function recentExports()
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return collect();
+        }
+
+        return app(ExportService::class)->recentExportsForCenter(
+            user: $user,
+            center: $this->resolvedCenter(),
+        );
+    }
+
+    #[Computed]
+    public function hasPendingExports(): bool
+    {
+        return $this->recentExports->contains(fn ($row): bool => $row->isInProgress);
+    }
+
+    #[Computed]
     public function report(): CenterReportData
     {
         $period = DashboardPeriod::tryFrom($this->period) ?? DashboardPeriod::Month;
@@ -207,6 +274,7 @@ class CenterReport extends Component
         return view('livewire.reports.center-report', [
             'report' => $report,
             'periods' => DashboardPeriod::filterOptions(),
+            'exportFormats' => ExportFormat::cases(),
         ])->title(__('reports.page_title'));
     }
 

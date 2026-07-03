@@ -3,8 +3,12 @@
 declare(strict_types=1);
 
 use App\Modules\Centers\Services\ActiveCenterContextService;
+use App\Modules\DailyVersions\Enums\DailyVersionStatus;
+use App\Modules\DailyVersions\Models\ActiveDailySnapshot;
+use App\Modules\DailyVersions\Models\DailyVersion;
 use App\Modules\Dashboards\Enums\DashboardPeriod;
 use App\Modules\Reports\Livewire\CenterReport;
+use App\Modules\Reports\Models\DailySummary;
 use App\Modules\Reports\Services\ReportQueryService;
 use App\Modules\Reports\Services\SummaryGenerationService;
 use Database\Seeders\HeaderAliasSeeder;
@@ -60,7 +64,8 @@ test('manager reports page shows fixed center header and period totals', functio
         ->assertSee('11 925,00', false)
         ->assertSee('01/06/2026', false)
         ->assertDontSee(__('reports.description'), false)
-        ->assertDontSee(__('reports.export.coming_soon_title'), false);
+        ->assertSee(__('reports.export.title'), false)
+        ->assertSee(__('reports.export.formats.csv'), false);
 });
 
 test('manager can access reports page without owner active center session', function () {
@@ -139,7 +144,8 @@ test('owner reports page shows active center totals', function () {
         ->assertSee(__('reports.description'), false)
         ->assertSee('Owner Center', false)
         ->assertSee('11 925,00', false)
-        ->assertSee(__('reports.export.coming_soon_title'), false);
+        ->assertSee(__('reports.export.title'), false)
+        ->assertSee(__('reports.export.formats.pdf'), false);
 });
 
 test('owner without active center is redirected from reports page', function () {
@@ -205,13 +211,13 @@ test('owner reports custom period applies selected date range', function () {
 test('reports page ignores stale daily summary totals in ui', function () {
     [$manager, $center] = managerReportsFixture();
 
-    $activeVersion = \App\Modules\DailyVersions\Models\DailyVersion::query()
+    $activeVersion = DailyVersion::query()
         ->withoutCenterScope()
         ->where('center_id', $center->id)
-        ->where('status', \App\Modules\DailyVersions\Enums\DailyVersionStatus::Active)
+        ->where('status', DailyVersionStatus::Active)
         ->firstOrFail();
 
-    $supersededVersion = \App\Modules\DailyVersions\Models\DailyVersion::query()->create([
+    $supersededVersion = DailyVersion::query()->create([
         'center_id' => $center->id,
         'business_date' => '2026-06-01',
         'version_number' => 99,
@@ -220,10 +226,10 @@ test('reports page ignores stale daily summary totals in ui', function () {
         'total_ht' => '30000.00',
         'total_vat' => '5775.00',
         'total_ttc' => '35775.00',
-        'status' => \App\Modules\DailyVersions\Enums\DailyVersionStatus::Superseded,
+        'status' => DailyVersionStatus::Superseded,
     ]);
 
-    \App\Modules\Reports\Models\DailySummary::query()
+    DailySummary::query()
         ->withoutCenterScope()
         ->where('center_id', $center->id)
         ->whereDate('business_date', '2026-06-01')
@@ -235,7 +241,7 @@ test('reports page ignores stale daily summary totals in ui', function () {
             'total_ttc' => '35775.00',
         ]);
 
-    expect(\App\Modules\DailyVersions\Models\ActiveDailySnapshot::query()
+    expect(ActiveDailySnapshot::query()
         ->withoutCenterScope()
         ->where('center_id', $center->id)
         ->whereDate('business_date', '2026-06-01')

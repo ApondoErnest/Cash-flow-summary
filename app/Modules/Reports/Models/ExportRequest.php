@@ -51,4 +51,15 @@ class ExportRequest extends Model
     {
         return $this->belongsTo(Center::class);
     }
+
+    public function isExpired(): bool
+    {
+        if ($this->status === ExportRequestStatus::Expired) {
+            return true;
+        }
+
+        return $this->status === ExportRequestStatus::Completed
+            && $this->expires_at !== null
+            && $this->expires_at->isPast();
+    }
 }

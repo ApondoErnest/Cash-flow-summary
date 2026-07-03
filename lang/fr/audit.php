@@ -53,6 +53,7 @@ return [
         'revision_approved' => 'Révision approuvée',
         'revision_rejected' => 'Révision rejetée',
         'export_requested' => 'Export demandé',
+        'export_downloaded' => 'Export téléchargé',
         'whatsapp_resent' => 'Message WhatsApp renvoyé',
         'settings_updated' => 'Paramètres mis à jour',
     ],

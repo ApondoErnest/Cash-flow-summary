@@ -53,6 +53,7 @@ return [
         'revision_approved' => 'Revision approved',
         'revision_rejected' => 'Revision rejected',
         'export_requested' => 'Export requested',
+        'export_downloaded' => 'Export downloaded',
         'whatsapp_resent' => 'WhatsApp message resent',
         'settings_updated' => 'Settings updated',
     ],

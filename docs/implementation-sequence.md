@@ -26,9 +26,9 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.0.91 |
-| Steps complete | **1–91** |
-| **Next step** | **Step 92** — ExportService — CSV, Excel, PDF queue |
+| Doc set | v2.0.94 |
+| Steps complete | **1–94** |
+| **Next step** | **Step 95** — WhatsAppCloudApiClient + notification service |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -129,9 +129,9 @@ flowchart LR
 | 89 | Error report download | Cashier interface | S7 | Complete |
 | 90 | ReportQueryService — active snapshots only | Reports & exports | S5–S6 | Complete |
 | 91 | Report UI — Owner (active center), Manager | Reports & exports | S5–S6 | Complete |
-| 92 | ExportService — CSV, Excel, PDF queue | Reports & exports | S5–S6 | Not started |
-| 93 | Export download + expiry | Reports & exports | S5–S6 | Not started |
-| 94 | WhatsApp settings UI (Owner admin) | WhatsApp integration | S8 | Not started |
+| 92 | ExportService — CSV, Excel, PDF queue | Reports & exports | S5–S6 | Complete |
+| 93 | Export download + expiry | Reports & exports | S5–S6 | Complete |
+| 94 | WhatsApp settings UI (Owner admin) | WhatsApp integration | S8 | Complete |
 | 95 | WhatsAppCloudApiClient + notification service | WhatsApp integration | S8 | Not started |
 | 96 | Idempotency keys + queue jobs | WhatsApp integration | S8 | Not started |
 | 97 | Webhook endpoint + delivery status | WhatsApp integration | S8 | Not started |
@@ -1295,6 +1295,8 @@ flowchart LR
 | **Sprint** | S5–S6 |
 | **Reference** | [backend-services.md](../architecture/backend-services.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — `ExportService` + `GenerateExportJob`; `CenterReportExportBuilder` (CSV, minimal XLSX, PDF); `config/exports.php`; Center Report export buttons (owner + manager); audit `export.requested`; EN/FR lang; `ExportServiceTest` |
 
 ### Step 93 — Export download + expiry
 
@@ -1304,6 +1306,8 @@ flowchart LR
 | **Sprint** | S5–S6 |
 | **Reference** | [import-statuses.md](../design/import-statuses.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — `ExportDownloadController` + `ExportRequestPolicy`; download/expiry in `ExportService`; `ExportCleanupService` + hourly `exports:cleanup`; recent exports table on Center Report with auto-refresh; audit `export.downloaded`; EN/FR lang; `ExportDownloadTest` |
 
 **Checkpoint after Step 93** (end of Reports & exports):
 
@@ -1321,6 +1325,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [api/README.md](../api/README.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — `organization_settings` migration + `SettingsService`; owner `WhatsappSettings` save UI (owner phone, phone number ID, encrypted access/webhook tokens); audit `settings.updated`; EN/FR lang; `WhatsappSettingsTest` |
 
 ### Step 95 — WhatsAppCloudApiClient + notification service
 
