@@ -74,10 +74,26 @@ class ImportList extends Component
     }
 
     #[Computed]
+    public function isCashierView(): bool
+    {
+        return auth()->user()?->hasRole(RoleName::Cashier) === true;
+    }
+
+    #[Computed]
+    public function isStaffView(): bool
+    {
+        return $this->isManagerView || $this->isCashierView;
+    }
+
+    #[Computed]
     public function pageDescription(): string
     {
         if ($this->isManagerView) {
             return __('csv_import.page.manager.list.subtitle', ['center' => $this->centerName]);
+        }
+
+        if ($this->isCashierView) {
+            return __('csv_import.page.cashier.list.subtitle_compact');
         }
 
         return __('csv_import.list.description');
@@ -86,8 +102,8 @@ class ImportList extends Component
     #[Computed]
     public function centerBannerLabel(): string
     {
-        if ($this->isManagerView) {
-            return __('csv_import.page.manager.center_label');
+        if ($this->isStaffView) {
+            return __('csv_import.page.staff.center_label');
         }
 
         return __('csv_import.list.center_label');

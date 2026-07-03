@@ -77,6 +77,7 @@ return [
             'import_details' => 'Import details',
             'import_another' => 'Import another',
             'view_revisions' => 'View pending revisions',
+            'download_errors' => 'Download error report',
         ],
     ],
     'list' => [
@@ -132,13 +133,39 @@ return [
         ],
         'actions' => [
             'view_result' => 'View import result',
+            'download_errors' => 'Download error report',
+        ],
+    ],
+    'errors' => [
+        'report' => [
+            'download' => 'Download error report',
+            'columns' => [
+                'row_number' => 'Source row',
+                'field' => 'Field',
+                'error_code' => 'Error code',
+                'message' => 'Message',
+                'original_value' => 'Original value',
+                'raw_row' => 'Raw row',
+            ],
         ],
     ],
     'page' => [
+        'staff' => [
+            'center_label' => 'Center',
+        ],
         'manager' => [
             'center_label' => 'Center',
             'list' => [
                 'subtitle' => 'Import history for :center.',
+            ],
+            'detail' => [
+                'subtitle' => 'Review import metadata, totals, and daily comparisons for :center.',
+            ],
+        ],
+        'cashier' => [
+            'list' => [
+                'subtitle' => 'Import history for :center.',
+                'subtitle_compact' => 'Recent imports for your assigned center.',
             ],
             'detail' => [
                 'subtitle' => 'Review import metadata, totals, and daily comparisons for :center.',

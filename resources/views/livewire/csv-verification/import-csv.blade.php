@@ -1,25 +1,32 @@
-<x-ui.page class="max-w-3xl mf-import-csv">
-    @if ($this->isManagerView)
-        <header class="mb-6 space-y-4">
-            <div class="space-y-2">
-                <flux:heading size="xl" class="font-display text-text-heading!">
-                    {{ __('csv_verification.page.manager.title') }}
-                </flux:heading>
-                <flux:text class="text-text-muted!">
-                    {{ __('csv_verification.page.manager.subtitle', ['center' => $this->centerName]) }}
-                </flux:text>
-            </div>
+<x-ui.page
+    @class([
+        'max-w-3xl mf-import-csv',
+        'mf-import-csv--compact' => $this->isStaffView,
+    ])
+>
+    @if ($this->isStaffView)
+        <header class="mf-import-csv-header mb-4">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0 space-y-1">
+                    <flux:heading size="lg" class="font-display text-text-heading!">
+                        {{ $this->isCashierView
+                            ? __('csv_verification.page.cashier.title')
+                            : __('csv_verification.page.manager.title') }}
+                    </flux:heading>
+                    <flux:text class="text-sm text-text-muted!">
+                        {{ $this->isCashierView
+                            ? __('csv_verification.page.cashier.subtitle_compact')
+                            : __('csv_verification.page.manager.subtitle_compact') }}
+                    </flux:text>
+                </div>
 
-            <div class="mf-import-list-center rounded-lg border border-slate-200/80 bg-white/70 px-4 py-3">
-                <p class="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    {{ __('csv_verification.card.assigned_center_label') }}
-                </p>
-                <p class="mt-1 text-sm font-medium text-text-heading">{{ $this->centerName }}</p>
+                <div class="mf-import-csv-center-pill shrink-0 rounded-lg border border-slate-200/80 bg-white/70 px-3 py-2">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                        {{ __('csv_verification.card.assigned_center_label') }}
+                    </p>
+                    <p class="mt-0.5 text-sm font-medium text-text-heading">{{ $this->centerName }}</p>
+                </div>
             </div>
-
-            <flux:callout variant="info" icon="information-circle" class="text-sm">
-                {{ __('csv_verification.page.manager.correction_help') }}
-            </flux:callout>
         </header>
     @endif
 

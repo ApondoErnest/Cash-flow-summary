@@ -4,31 +4,47 @@
     @endif
 >
 <x-ui.card
-    class="mf-csv-verification-card"
-    :title="__('csv_verification.card.heading')"
+    @class([
+        'mf-csv-verification-card',
+        'mf-csv-verification-card--compact' => $this->isCompactLayout,
+    ])
+    :compact="$this->isCompactLayout"
+    :title="$this->isCompactLayout ? null : __('csv_verification.card.heading')"
     data-mf-csv-verification-card
 >
-    <div class="space-y-6">
-        <div class="mf-csv-verification-center">
-            <flux:text class="text-xs font-semibold uppercase tracking-wide text-text-muted!">
-                {{ $this->centerLabel }}
-            </flux:text>
-            <div class="mt-1 flex items-center gap-2">
-                <span class="mf-csv-verification-center-icon" aria-hidden="true">
-                    <flux:icon icon="building-office-2" variant="outline" class="size-4 text-emerald-brand" />
-                </span>
-                <flux:heading size="md" class="font-display text-text-heading!">
-                    {{ $this->centerName }}
-                </flux:heading>
+    <div @class([
+        'space-y-4' => $this->isCompactLayout,
+        'space-y-6' => ! $this->isCompactLayout,
+    ])>
+        @unless ($this->isCompactLayout)
+            <div class="mf-csv-verification-center">
+                <flux:text class="text-xs font-semibold uppercase tracking-wide text-text-muted!">
+                    {{ $this->centerLabel }}
+                </flux:text>
+                <div class="mt-1 flex items-center gap-2">
+                    <span class="mf-csv-verification-center-icon" aria-hidden="true">
+                        <flux:icon icon="building-office-2" variant="outline" class="size-4 text-emerald-brand" />
+                    </span>
+                    <flux:heading size="md" class="font-display text-text-heading!">
+                        {{ $this->centerName }}
+                    </flux:heading>
+                </div>
             </div>
-        </div>
 
-        <flux:callout variant="info" icon="information-circle" class="text-sm">
-            {{ __('csv_verification.card.format_note') }}
-        </flux:callout>
+            <flux:callout variant="info" icon="information-circle" class="text-sm">
+                {{ __('csv_verification.card.format_note') }}
+            </flux:callout>
+        @else
+            <flux:text class="text-xs text-text-muted!">
+                {{ __('csv_verification.card.format_note') }}
+            </flux:text>
+        @endunless
 
         @if ($this->cardPhase() === \App\Modules\CsvVerification\Enums\CsvVerificationCardPhase::Empty || $this->cardPhase() === \App\Modules\CsvVerification\Enums\CsvVerificationCardPhase::FileSelected)
-            <div class="space-y-5">
+            <div @class([
+                'space-y-3' => $this->isCompactLayout,
+                'space-y-5' => ! $this->isCompactLayout,
+            ])>
                 <flux:field>
                     <flux:label>{{ __('csv_verification.card.import_mode_label') }}</flux:label>
                     <flux:select
@@ -48,20 +64,20 @@
                     <flux:checkbox wire:model.live="notifyOwner">
                         {{ __('csv_verification.card.notify_owner_label') }}
                     </flux:checkbox>
-                    <flux:text class="-mt-3 text-sm text-text-muted!">
+                    <flux:text class="-mt-2 text-sm text-text-muted!">
                         {{ __('csv_verification.card.notify_owner_help') }}
                     </flux:text>
                 @endif
 
                 @if ($this->isCorrectionMode)
                     <flux:callout variant="warning" icon="exclamation-triangle" class="text-sm">
-                        {{ $this->isManagerView
+                        {{ $this->isStaffView
                             ? __('csv_verification.correction.manager_notice')
                             : __('csv_verification.correction.owner_notice') }}
                     </flux:callout>
                 @endif
 
-                <div class="space-y-3">
+                <div class="space-y-2">
                     <flux:label>{{ __('csv_verification.card.file_label') }}</flux:label>
 
                     @if ($this->cardPhase() === \App\Modules\CsvVerification\Enums\CsvVerificationCardPhase::FileSelected)
@@ -88,10 +104,10 @@
                                 class="sr-only"
                             />
                             <flux:icon icon="arrow-up-tray" variant="outline" class="mx-auto size-6 text-emerald-brand" />
-                            <span class="mt-3 block font-medium text-text-heading">
+                            <span class="mt-2 block font-medium text-text-heading">
                                 {{ __('csv_verification.card.file_drop_title') }}
                             </span>
-                            <span class="mt-1 block text-sm text-text-muted">
+                            <span class="mt-0.5 block text-sm text-text-muted">
                                 {{ __('csv_verification.card.file_hint') }}
                             </span>
                         </label>
@@ -106,10 +122,16 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-3 border-t border-slate-200/80 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                    <flux:text class="text-sm text-text-muted!">
-                        {{ __('csv_verification.card.verify_help') }}
-                    </flux:text>
+                <div @class([
+                    'flex flex-col border-t border-slate-200/80 sm:flex-row sm:items-center sm:justify-between',
+                    'gap-2 pt-3' => $this->isCompactLayout,
+                    'gap-3 pt-5' => ! $this->isCompactLayout,
+                ])>
+                    @unless ($this->isCompactLayout)
+                        <flux:text class="text-sm text-text-muted!">
+                            {{ __('csv_verification.card.verify_help') }}
+                        </flux:text>
+                    @endunless
 
                     <x-ui.button
                         variant="primary"
@@ -118,11 +140,18 @@
                         wire:loading.attr="disabled"
                         wire:target="verify,csvFile"
                         :disabled="$this->cardPhase() !== \App\Modules\CsvVerification\Enums\CsvVerificationCardPhase::FileSelected"
+                        @class(['w-full sm:w-auto' => $this->isCompactLayout])
                     >
                         <span wire:loading.remove wire:target="verify">{{ __('csv_verification.card.verify') }}</span>
                         <span wire:loading wire:target="verify">{{ __('csv_verification.card.verifying') }}</span>
                     </x-ui.button>
                 </div>
+
+                @if ($this->isCompactLayout)
+                    <flux:text class="text-xs text-text-muted!">
+                        {{ __('csv_verification.card.verify_help') }}
+                    </flux:text>
+                @endif
             </div>
         @endif
 

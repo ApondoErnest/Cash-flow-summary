@@ -185,11 +185,11 @@ test('owner dashboard shows revision pending alert when import awaits approval',
         ->assertSee('revision approval', false);
 });
 
-test('cashier dashboard shows staff placeholder instead of owner dashboard', function () {
+test('cashier dashboard shows compact dashboard instead of owner dashboard', function () {
     actingAsCashier();
 
     $this->get(route('dashboard'))
         ->assertOk()
-        ->assertSee(__('dashboard.staff.placeholder_title'), false)
+        ->assertSee(__('dashboard.cashier.stats.today_ttc'), false)
         ->assertDontSee('Cash-Flow Dashboard', false);
 });

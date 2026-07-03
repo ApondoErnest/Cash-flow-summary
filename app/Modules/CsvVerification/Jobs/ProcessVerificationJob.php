@@ -10,6 +10,7 @@ use App\Support\Center\JobCenterContextService;
 use App\Modules\CsvVerification\Services\CsvInspectionService;
 use App\Modules\CsvVerification\Services\CsvParsingService;
 use App\Modules\CsvVerification\Services\DuplicatePreviewService;
+use App\Modules\CsvImports\Services\ImportErrorRecorderService;
 use App\Modules\CsvVerification\Services\FooterReaderService;
 use App\Modules\CsvVerification\Services\HeaderMappingService;
 use App\Modules\CsvVerification\Services\ReconciliationService;
@@ -34,6 +35,7 @@ class ProcessVerificationJob implements ShouldQueue
         FooterReaderService $footerReaderService,
         ReconciliationService $reconciliationService,
         DuplicatePreviewService $duplicatePreviewService,
+        ImportErrorRecorderService $importErrorRecorderService,
         JobCenterContextService $jobCenterContextService,
     ): void {
         $jobCenterContextService->runForCenter($this->centerId, function () use (
@@ -43,6 +45,7 @@ class ProcessVerificationJob implements ShouldQueue
             $footerReaderService,
             $reconciliationService,
             $duplicatePreviewService,
+            $importErrorRecorderService,
         ): void {
             $this->process(
                 $inspectionService,
@@ -51,6 +54,7 @@ class ProcessVerificationJob implements ShouldQueue
                 $footerReaderService,
                 $reconciliationService,
                 $duplicatePreviewService,
+                $importErrorRecorderService,
             );
         });
     }
@@ -62,6 +66,7 @@ class ProcessVerificationJob implements ShouldQueue
         FooterReaderService $footerReaderService,
         ReconciliationService $reconciliationService,
         DuplicatePreviewService $duplicatePreviewService,
+        ImportErrorRecorderService $importErrorRecorderService,
     ): void {
         $verification = ImportVerification::query()
             ->where('token', $this->token)
@@ -112,6 +117,15 @@ class ProcessVerificationJob implements ShouldQueue
         }
 
         $parseResult = $csvParsingService->parseVerification($verification, $mapping);
+
+        $importErrorRecorderService->clearForVerification($verification->id);
+
+        foreach ($parseResult->invalidRows as $invalidRow) {
+            $importErrorRecorderService->recordFromParsedRow(
+                $invalidRow,
+                importVerificationId: $verification->id,
+            );
+        }
 
         $validationResult = array_merge(
             $validationResult,

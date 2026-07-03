@@ -16,7 +16,7 @@
                 {{ $result->headline }}
             </flux:callout>
 
-            @if ($this->isManagerView && $this->isCorrectionSubmission && $result->revisionsPending > 0)
+            @if ($this->isStaffView && $this->isCorrectionSubmission && $result->revisionsPending > 0)
                 <flux:callout variant="info" icon="information-circle" class="text-sm">
                     {{ __('csv_import.result.correction.manager_follow_up') }}
                 </flux:callout>
@@ -33,6 +33,17 @@
             <flux:button variant="outline" :href="route('imports.show', $this->import)" wire:navigate class="mf-btn-secondary">
                 {{ __('csv_import.result.actions.import_details') }}
             </flux:button>
+
+            @if ($result->invalidRows > 0)
+                <flux:button
+                    variant="outline"
+                    icon="arrow-down-tray"
+                    :href="route('imports.errors.download', $this->import)"
+                    class="mf-btn-secondary"
+                >
+                    {{ __('csv_import.result.actions.download_errors') }}
+                </flux:button>
+            @endif
 
             @if ($this->isManagerView && $result->revisionsPending > 0)
                 <flux:button variant="outline" :href="route('revisions.index')" wire:navigate class="mf-btn-secondary">

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Modules\CsvImports\Models\Import;
+use App\Modules\CsvVerification\Enums\ImportMode;
 use App\Modules\CsvVerification\Enums\VerificationStatus;
 use App\Modules\CsvVerification\Jobs\ProcessVerificationJob;
 use App\Modules\CsvVerification\Livewire\CsvVerificationCard;
@@ -28,10 +29,10 @@ beforeEach(function () {
     test()->seed(HeaderAliasSeeder::class);
 });
 
-function readyManagerVerificationCardComponent(): \Livewire\Features\SupportTesting\Testable
+function readyCashierVerificationCardComponent(): \Livewire\Features\SupportTesting\Testable
 {
-    $center = createTestCenter(attributes: ['name' => 'Manager Center']);
-    $manager = actingAsManager($center);
+    $center = createTestCenter(attributes: ['name' => 'Cashier Center']);
+    $cashier = actingAsCashier($center);
 
     $component = Livewire::test(CsvVerificationCard::class)
         ->set('csvFile', UploadedFile::fake()->createWithContent(
@@ -45,35 +46,37 @@ function readyManagerVerificationCardComponent(): \Livewire\Features\SupportTest
     return $component->call('refreshVerification');
 }
 
-test('manager import csv page shows compact header and shared verification card', function () {
+test('cashier import csv page shows compact header and shared verification card', function () {
     $center = createTestCenter(attributes: ['name' => 'NACHO Douala']);
-    actingAsManager($center);
+    actingAsCashier($center);
 
     $this->get(route('imports.create'))
         ->assertOk()
-        ->assertSee(__('csv_verification.page.manager.title'), false)
-        ->assertSee('Upload and verify cash-flow exports', false)
+        ->assertSee(__('csv_verification.page.cashier.title'), false)
+        ->assertSee('Verify and import today', false)
         ->assertSee(__('csv_verification.card.assigned_center_label'), false)
         ->assertSee('NACHO Douala', false)
+        ->assertSee(__('csv_verification.import_mode.correction'), false)
         ->assertSee('data-mf-csv-verification-card', false)
         ->assertSee('mf-import-csv--compact', false)
+        ->assertSee('mf-csv-verification-card--compact', false)
         ->assertDontSee(__('csv_verification.card.heading'), false);
 });
 
-test('manager can access import csv page without owner active center session', function () {
-    $manager = actingAsManager();
+test('cashier can access import csv page without owner active center session', function () {
+    $cashier = actingAsCashier();
 
     app(ActiveCenterContextService::class)->clear();
 
-    $this->actingAs($manager)
+    $this->actingAs($cashier)
         ->get(route('imports.create'))
         ->assertOk()
-        ->assertSee($manager->center->name, false);
+        ->assertSee($cashier->center->name, false);
 });
 
-test('manager verification card starts verify using assigned center', function () {
+test('cashier verification card starts verify using assigned center', function () {
     $center = createTestCenter(attributes: ['name' => 'Assigned Center']);
-    actingAsManager($center);
+    actingAsCashier($center);
 
     Livewire::test(CsvVerificationCard::class)
         ->set('csvFile', UploadedFile::fake()->createWithContent('cashflow-june.csv', verificationReadyFrenchCsv([completedFrenchDataRow()])))
@@ -86,15 +89,15 @@ test('manager verification card starts verify using assigned center', function (
     });
 });
 
-test('manager import csv page completes verify import reject flow', function () {
-    readyManagerVerificationCardComponent()
+test('cashier import csv page completes verify import reject flow', function () {
+    readyCashierVerificationCardComponent()
         ->assertSee(__('csv_verification.summary.footer_totals'), false)
         ->assertSee(__('csv_verification.card.import'), false)
         ->assertSee(__('csv_verification.card.reject'), false);
 });
 
-test('manager verification card import commits ready verification and redirects to import result', function () {
-    $component = readyManagerVerificationCardComponent();
+test('cashier verification card import commits ready verification and redirects to import result', function () {
+    $component = readyCashierVerificationCardComponent();
 
     $token = $component->get('verificationToken');
 
@@ -111,18 +114,27 @@ test('manager verification card import commits ready verification and redirects 
     )->toBe(VerificationStatus::Imported);
 });
 
-test('manager with tampered center_id on import csv route is blocked', function () {
-    actingAsManager();
+test('cashier with tampered center_id on import csv route is blocked', function () {
+    actingAsCashier();
     $otherCenter = createTestCenter();
 
     $this->get(route('imports.create', ['center_id' => $otherCenter->id]))
         ->assertForbidden();
 });
 
-test('manager import csv page renders shared verification card component', function () {
-    actingAsManager();
+test('cashier import csv page shows correction guidance on verification card', function () {
+    actingAsCashier();
+
+    Livewire::test(CsvVerificationCard::class)
+        ->set('importMode', ImportMode::Correction->value)
+        ->assertSee(__('csv_verification.correction.manager_notice'), false);
+});
+
+test('cashier import csv page renders shared verification card component', function () {
+    actingAsCashier();
 
     Livewire::test(ImportCsv::class)
-        ->assertSee(__('csv_verification.page.manager.title'), false)
-        ->assertSee('data-mf-csv-verification-card', false);
+        ->assertSee(__('csv_verification.page.cashier.title'), false)
+        ->assertSee('data-mf-csv-verification-card', false)
+        ->assertSee('mf-import-csv--compact', false);
 });

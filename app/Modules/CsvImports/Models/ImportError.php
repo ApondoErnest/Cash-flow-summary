@@ -19,6 +19,7 @@ class ImportError extends Model
         'source_row_number',
         'field',
         'error_code',
+        'message',
         'original_value',
         'raw_row',
     ];

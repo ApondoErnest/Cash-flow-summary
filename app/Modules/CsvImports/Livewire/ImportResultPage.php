@@ -31,6 +31,12 @@ class ImportResultPage extends Component
     }
 
     #[Computed]
+    public function isStaffView(): bool
+    {
+        return auth()->user()?->isCenterStaff() === true;
+    }
+
+    #[Computed]
     public function isManagerView(): bool
     {
         return auth()->user()?->hasRole(RoleName::CenterManager) === true;

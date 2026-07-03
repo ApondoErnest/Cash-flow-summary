@@ -33,6 +33,18 @@ class ImportCsv extends Component
         return auth()->user()?->hasRole(RoleName::CenterManager) === true;
     }
 
+    #[Computed]
+    public function isCashierView(): bool
+    {
+        return auth()->user()?->hasRole(RoleName::Cashier) === true;
+    }
+
+    #[Computed]
+    public function isStaffView(): bool
+    {
+        return $this->isManagerView || $this->isCashierView;
+    }
+
     public function render(): View
     {
         return view('livewire.csv-verification.import-csv')

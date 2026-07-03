@@ -72,13 +72,17 @@ function readyManagerCorrectionComponent(): \Livewire\Features\SupportTesting\Te
     return $component->call('refreshVerification');
 }
 
-test('manager import csv page explains correction submission flow', function () {
+test('manager import csv page shows correction guidance when correction mode is selected', function () {
     $center = createTestCenter(attributes: ['name' => 'NACHO Douala']);
     actingAsManager($center);
 
     $this->get(route('imports.create'))
         ->assertOk()
-        ->assertSee(__('csv_verification.page.manager.correction_help'), false);
+        ->assertDontSee(__('csv_verification.page.manager.correction_help'), false);
+
+    Livewire::test(CsvVerificationCard::class)
+        ->set('importMode', ImportMode::Correction->value)
+        ->assertSee(__('csv_verification.correction.manager_notice'), false);
 });
 
 test('manager sees correction mode guidance on verification card', function () {
@@ -140,23 +144,63 @@ test('manager correction result page shows submission headline and revisions lin
         ->assertSee(__('csv_import.result.headline.correction_submitted'), false);
 });
 
-test('cashier cannot start verification in correction mode', function () {
-    $center = createTestCenter();
+test('cashier can submit correction import that awaits owner approval', function () {
+    $center = createTestCenter(attributes: ['name' => 'Correction Center']);
     $cashier = actingAsCashier($center);
 
-    Livewire::test(CsvVerificationCard::class)
+    DailyVersion::query()->create([
+        'center_id' => $center->id,
+        'business_date' => '2026-06-01',
+        'version_number' => 1,
+        'dataset_hash' => hash('sha256', 'stale-active-dataset-cashier'),
+        'record_count' => 1,
+        'total_ht' => '10000.00',
+        'total_vat' => '1925.00',
+        'total_ttc' => '11925.00',
+        'status' => DailyVersionStatus::Active,
+    ]);
+
+    $activeVersion = DailyVersion::query()->where('center_id', $center->id)->firstOrFail();
+
+    ActiveDailySnapshot::query()->create([
+        'center_id' => $center->id,
+        'business_date' => '2026-06-01',
+        'daily_version_id' => $activeVersion->id,
+        'activated_at' => now(),
+    ]);
+
+    $component = Livewire::test(CsvVerificationCard::class)
         ->set('importMode', ImportMode::Correction->value)
         ->set('csvFile', UploadedFile::fake()->createWithContent(
             'cashflow-june.csv',
             verificationReadyFrenchCsv([completedFrenchDataRow()]),
         ))
-        ->call('verify')
-        ->assertHasErrors(['importMode']);
+        ->call('verify');
+
+    runProcessVerificationJob($component->get('verificationToken'));
+    $component->call('refreshVerification')
+        ->assertSee(__('csv_verification.card.submit_correction'), false);
+
+    $component->call('import');
+
+    $import = Import::query()->latest('id')->firstOrFail();
+
+    expect($import->import_mode)->toBe(ImportMode::Correction)
+        ->and($import->status)->toBe(ImportStatus::AwaitingOwnerApproval);
+
+    $this->actingAs($cashier)
+        ->get(route('imports.result', $import))
+        ->assertOk()
+        ->assertSee(__('csv_import.result.headline.correction_submitted'), false)
+        ->assertSee(__('csv_import.result.correction.manager_follow_up'), false)
+        ->assertDontSee(__('csv_import.result.actions.view_revisions'), false);
 });
 
-test('manager import csv page renders correction guidance via livewire page', function () {
+test('manager import csv page renders compact verification card component', function () {
     actingAsManager();
 
     Livewire::test(ImportCsv::class)
-        ->assertSee(__('csv_verification.page.manager.correction_help'), false);
+        ->assertSee(__('csv_verification.page.manager.title'), false)
+        ->assertSee('data-mf-csv-verification-card', false)
+        ->assertSee('mf-csv-verification-card--compact', false);
 });

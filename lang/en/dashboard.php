@@ -32,6 +32,21 @@ return [
             'correction_pending' => '{1} :count correction awaits owner approval.|[2,*] :count corrections await owner approval.',
         ],
     ],
+    'cashier' => [
+        'title' => ':center',
+        'subtitle' => 'Today: :date',
+        'center_label' => 'Center',
+        'submission_title' => 'Submission status',
+        'submission_clear' => 'All recent operating days have an active submission.',
+        'missing_days_count' => '{1} :count operating day is missing a submission.|[2,*] :count operating days are missing submissions.',
+        'latest_missing' => 'Most recent missing day: :date',
+        'recent_imports_title' => 'Recent imports',
+        'stats' => [
+            'today_ttc' => 'Today TTC',
+            'yesterday_ttc' => 'Yesterday TTC',
+            'active_records_today' => 'Active records today',
+        ],
+    ],
     'period' => [
         'today' => 'Today',
         'yesterday' => 'Yesterday',

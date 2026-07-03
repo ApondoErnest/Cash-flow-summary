@@ -32,6 +32,21 @@ return [
             'correction_pending' => '{1} :count correction attend l\'approbation du propriétaire.|[2,*] :count corrections attendent l\'approbation du propriétaire.',
         ],
     ],
+    'cashier' => [
+        'title' => ':center',
+        'subtitle' => 'Aujourd\'hui : :date',
+        'center_label' => 'Centre',
+        'submission_title' => 'Statut de soumission',
+        'submission_clear' => 'Tous les jours ouvrés récents ont une soumission active.',
+        'missing_days_count' => '{1} :count jour ouvré sans soumission.|[2,*] :count jours ouvrés sans soumission.',
+        'latest_missing' => 'Dernier jour manquant : :date',
+        'recent_imports_title' => 'Imports récents',
+        'stats' => [
+            'today_ttc' => 'TTC aujourd\'hui',
+            'yesterday_ttc' => 'TTC hier',
+            'active_records_today' => 'Enregistrements actifs aujourd\'hui',
+        ],
+    ],
     'period' => [
         'today' => 'Aujourd\'hui',
         'yesterday' => 'Hier',

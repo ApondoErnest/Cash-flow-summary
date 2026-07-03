@@ -23,12 +23,17 @@ final class CsvParsingService
     public function parseFile(string $filePath, string $delimiter, array $mapping): CsvParseResult
     {
         $summary = new CsvParseSummary();
+        $invalidRows = [];
 
         foreach ($this->streamRows($filePath, $delimiter, $mapping) as $row) {
             $summary->add($row);
+
+            if ($row->status === CsvRowStatus::Invalid) {
+                $invalidRows[] = $row;
+            }
         }
 
-        return new CsvParseResult($summary);
+        return new CsvParseResult($summary, $invalidRows);
     }
 
     public function parseVerification(ImportVerification $verification, HeaderMappingResult $mapping): CsvParseResult

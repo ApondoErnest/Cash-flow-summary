@@ -235,9 +235,42 @@ class CsvVerificationCard extends Component
     }
 
     #[Computed]
+    public function canDownloadErrorReport(): bool
+    {
+        $summary = $this->summary;
+
+        return $summary !== null
+            && $summary->invalidRows > 0
+            && is_string($this->verificationToken)
+            && $this->verificationToken !== '';
+    }
+
+    #[Computed]
+    public function errorReportDownloadUrl(): ?string
+    {
+        if (! $this->canDownloadErrorReport) {
+            return null;
+        }
+
+        return route('verifications.errors.download', $this->verificationToken);
+    }
+
+    #[Computed]
     public function importModes(): array
     {
         return ImportMode::availableFor($this->user());
+    }
+
+    #[Computed]
+    public function isStaffView(): bool
+    {
+        return $this->user()->isCenterStaff();
+    }
+
+    #[Computed]
+    public function isCompactLayout(): bool
+    {
+        return $this->isStaffView;
     }
 
     #[Computed]

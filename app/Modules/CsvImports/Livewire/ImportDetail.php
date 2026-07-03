@@ -30,6 +30,18 @@ class ImportDetail extends Component
     }
 
     #[Computed]
+    public function isCashierView(): bool
+    {
+        return auth()->user()?->hasRole(RoleName::Cashier) === true;
+    }
+
+    #[Computed]
+    public function isStaffView(): bool
+    {
+        return $this->isManagerView || $this->isCashierView;
+    }
+
+    #[Computed]
     public function centerName(): string
     {
         return $this->import->center?->name

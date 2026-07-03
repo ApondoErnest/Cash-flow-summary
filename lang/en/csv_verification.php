@@ -90,6 +90,7 @@ return [
         'submitting_correction' => 'Submitting…',
     ],
     'summary' => [
+        'download_errors' => 'Download error report',
         'file_information' => 'File information',
         'footer_totals' => 'Footer summary',
         'verification_status' => 'Verification status',
@@ -135,6 +136,13 @@ return [
         'manager' => [
             'title' => 'Import CSV',
             'subtitle' => 'Upload and verify cash-flow exports for :center.',
+            'subtitle_compact' => 'Upload and verify cash-flow exports.',
+            'correction_help' => 'Use Correction mode when source data changed after a day was already imported. Corrections require owner approval before they become active.',
+        ],
+        'cashier' => [
+            'title' => 'Import CSV',
+            'subtitle' => 'Verify and import today\'s cash-flow export for :center.',
+            'subtitle_compact' => 'Verify and import today\'s cash-flow export.',
             'correction_help' => 'Use Correction mode when source data changed after a day was already imported. Corrections require owner approval before they become active.',
         ],
     ],

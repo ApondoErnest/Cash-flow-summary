@@ -86,13 +86,14 @@ test('manager dashboard shows correction pending alert for awaiting approval imp
         ->assertSee(trans_choice('dashboard.manager.alerts.correction_pending', 1, ['count' => 1]), false);
 });
 
-test('cashier dashboard still shows staff placeholder', function () {
+test('cashier dashboard shows compact stats instead of manager dashboard', function () {
     actingAsCashier();
 
     $this->get(route('dashboard'))
         ->assertOk()
-        ->assertSee(__('dashboard.staff.placeholder_title'), false)
-        ->assertDontSee(__('dashboard.manager.stats.today_ttc'), false);
+        ->assertSee(__('dashboard.cashier.submission_title'), false)
+        ->assertDontSee(__('dashboard.manager.stats.week_ttc'), false)
+        ->assertDontSee(__('dashboard.sections.revenue_trend'), false);
 });
 
 test('manager dashboard scopes data to assigned center only', function () {

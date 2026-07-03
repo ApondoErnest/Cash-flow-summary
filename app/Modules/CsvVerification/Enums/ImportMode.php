@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\CsvVerification\Enums;
 
 use App\Models\User;
-use App\Support\Auth\RoleName;
 
 enum ImportMode: string
 {
@@ -23,7 +22,7 @@ enum ImportMode: string
             self::Historical,
         ];
 
-        if ($user->isOwner() || $user->hasRole(RoleName::CenterManager)) {
+        if ($user->isOwner() || $user->isCenterStaff()) {
             $modes[] = self::Correction;
         }
 

@@ -6,8 +6,12 @@ namespace App\Modules\CsvVerification\Support;
 
 final class CsvParseResult
 {
+    /**
+     * @param  list<ParsedCsvRow>  $invalidRows
+     */
     public function __construct(
         public readonly CsvParseSummary $summary,
+        public readonly array $invalidRows = [],
     ) {}
 
     /**

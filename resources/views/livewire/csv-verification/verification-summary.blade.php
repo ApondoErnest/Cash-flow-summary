@@ -4,7 +4,7 @@
     <div class="mf-csv-verification-summary space-y-6" data-mf-csv-verification-summary>
         @if ($this->isCorrectionMode)
             <flux:callout variant="warning" icon="exclamation-triangle" class="text-sm">
-                {{ $this->isManagerView
+                {{ $this->isStaffView
                     ? __('csv_verification.correction.manager_submit_notice')
                     : __('csv_verification.correction.owner_submit_notice') }}
             </flux:callout>
@@ -94,6 +94,19 @@
                     @endforeach
                 </div>
             </x-ui.card>
+        @endif
+
+        @if ($this->canDownloadErrorReport)
+            <div class="flex justify-end">
+                <flux:button
+                    variant="outline"
+                    icon="arrow-down-tray"
+                    :href="$this->errorReportDownloadUrl"
+                    class="mf-btn-secondary"
+                >
+                    {{ __('csv_verification.summary.download_errors') }}
+                </flux:button>
+            </div>
         @endif
 
         @error('import')

@@ -77,6 +77,7 @@ return [
             'import_details' => 'Détails de l\'import',
             'import_another' => 'Importer un autre',
             'view_revisions' => 'Voir les révisions en attente',
+            'download_errors' => 'Télécharger le rapport d\'erreurs',
         ],
     ],
     'list' => [
@@ -132,13 +133,39 @@ return [
         ],
         'actions' => [
             'view_result' => 'Voir le résultat de l\'import',
+            'download_errors' => 'Télécharger le rapport d\'erreurs',
+        ],
+    ],
+    'errors' => [
+        'report' => [
+            'download' => 'Télécharger le rapport d\'erreurs',
+            'columns' => [
+                'row_number' => 'Ligne source',
+                'field' => 'Champ',
+                'error_code' => 'Code d\'erreur',
+                'message' => 'Message',
+                'original_value' => 'Valeur d\'origine',
+                'raw_row' => 'Ligne brute',
+            ],
         ],
     ],
     'page' => [
+        'staff' => [
+            'center_label' => 'Centre',
+        ],
         'manager' => [
             'center_label' => 'Centre',
             'list' => [
                 'subtitle' => 'Historique des importations pour :center.',
+            ],
+            'detail' => [
+                'subtitle' => 'Consultez les métadonnées, totaux et comparaisons journalières pour :center.',
+            ],
+        ],
+        'cashier' => [
+            'list' => [
+                'subtitle' => 'Historique des importations pour :center.',
+                'subtitle_compact' => 'Importations récentes pour votre centre assigné.',
             ],
             'detail' => [
                 'subtitle' => 'Consultez les métadonnées, totaux et comparaisons journalières pour :center.',

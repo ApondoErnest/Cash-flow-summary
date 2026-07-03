@@ -75,26 +75,28 @@ test('owner verification card starts verify using active center not request inpu
     });
 });
 
-test('manager verification card shows assigned center read-only', function () {
+test('manager verification card uses compact layout without duplicate center block', function () {
     $center = createTestCenter(attributes: ['name' => 'Manager Center']);
     actingAsManager($center);
 
     Livewire::test(CsvVerificationCard::class)
-        ->assertSee('Manager Center', false)
-        ->assertSee(__('csv_verification.card.assigned_center_label'), false)
-        ->assertDontSee(__('csv_verification.card.center_label'), false);
+        ->assertSee('mf-csv-verification-card--compact', false)
+        ->assertDontSee(__('csv_verification.card.center_label'), false)
+        ->assertDontSee('Manager Center', false);
 });
 
-test('cashier cannot select correction import mode', function () {
+test('cashier can select correction import mode', function () {
     $center = createTestCenter();
     $cashier = actingAsCashier($center);
 
-    expect(ImportMode::availableFor($cashier))->toHaveCount(2)
+    expect(ImportMode::availableFor($cashier))->toHaveCount(3)
         ->and(collect(ImportMode::availableFor($cashier))->map->value->all())
-        ->toBe(['operational', 'historical']);
+        ->toBe(['operational', 'historical', 'correction']);
 
     Livewire::test(CsvVerificationCard::class)
-        ->assertDontSee(__('csv_verification.import_mode.correction'), false);
+        ->set('importMode', ImportMode::Correction->value)
+        ->assertSee(__('csv_verification.import_mode.correction'), false)
+        ->assertSee(__('csv_verification.correction.manager_notice'), false);
 });
 
 test('owner sees all import modes including correction', function () {

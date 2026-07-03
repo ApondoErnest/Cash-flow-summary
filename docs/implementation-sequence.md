@@ -26,9 +26,9 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.0.85 |
-| Steps complete | **1–85** |
-| **Next step** | **Step 86** — Compact Cashier dashboard |
+| Doc set | v2.0.90 |
+| Steps complete | **1–90** |
+| **Next step** | **Step 91** — Report UI — Owner (active center), Manager |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -123,11 +123,11 @@ flowchart LR
 | 83 | Records search | Manager interface | S6 | Complete |
 | 84 | Correction submission flow | Manager interface | S6 | Complete |
 | 85 | Manager reports (active center) | Manager interface | S6 | Complete |
-| 86 | Compact Cashier dashboard | Cashier interface | S7 | Not started |
-| 87 | CSV page — reuse CsvVerificationCard | Cashier interface | S7 | Not started |
-| 88 | Recent imports list | Cashier interface | S7 | Not started |
-| 89 | Error report download | Cashier interface | S7 | Not started |
-| 90 | ReportQueryService — active snapshots only | Reports & exports | S5–S6 | Not started |
+| 86 | Compact Cashier dashboard | Cashier interface | S7 | Complete |
+| 87 | CSV page — reuse CsvVerificationCard | Cashier interface | S7 | Complete |
+| 88 | Recent imports list | Cashier interface | S7 | Complete |
+| 89 | Error report download | Cashier interface | S7 | Complete |
+| 90 | ReportQueryService — active snapshots only | Reports & exports | S5–S6 | Complete |
 | 91 | Report UI — Owner (active center), Manager | Reports & exports | S5–S6 | Not started |
 | 92 | ExportService — CSV, Excel, PDF queue | Reports & exports | S5–S6 | Not started |
 | 93 | Export download + expiry | Reports & exports | S5–S6 | Not started |
@@ -1221,6 +1221,8 @@ flowchart LR
 | **Sprint** | S7 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — `CashierDashboardService` + `CashierDashboardData`; cashier branch in `Dashboard` Livewire; compact header with center/date + import action; today TTC + active records; submission card; short recent imports (3 max); EN/FR lang; `CashierDashboardPageTest` |
 
 ### Step 87 — CSV page — reuse CsvVerificationCard
 
@@ -1230,6 +1232,8 @@ flowchart LR
 | **Sprint** | S7 |
 | **Reference** | [csv-verification-flow.md](../design/csv-verification-flow.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — Cashier `ImportCsv` page header with fixed center; shared `CsvVerificationCard` (operational/historical only); full verify → import/reject flow; EN/FR lang; `CashierImportCsvPageTest` |
 
 ### Step 88 — Recent imports list
 
@@ -1239,6 +1243,8 @@ flowchart LR
 | **Sprint** | S7 |
 | **Reference** | [user-stories.md](../product/user-stories.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — Cashier role-aware copy on shared `ImportList` + `ImportDetail`; compact list header with center pill; center-scoped list/detail/filters; EN/FR lang; `CashierImportsPageTest` |
 
 ### Step 89 — Error report download
 
@@ -1248,6 +1254,8 @@ flowchart LR
 | **Sprint** | S7 |
 | **Reference** | [user-stories.md](../product/user-stories.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — `ImportErrorRecorderService` + `ImportErrorReportService`; verification/import CSV error downloads; UI on verification summary, import result, and import detail; center-scoped authorization; EN/FR lang; `CashierErrorReportDownloadTest` |
 
 **Checkpoint after Step 89** (end of Cashier interface):
 
@@ -1265,6 +1273,8 @@ flowchart LR
 | **Sprint** | S5–S6 |
 | **Reference** | [calculations.md](../design/calculations.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — `ReportQueryService` drives reports from `active_daily_snapshots` (Active status only); uses matching `daily_summaries` cache or falls back to snapshot version totals; stale/superseded summary rows excluded; proposed revisions excluded until snapshot activates; `ReportQueryServiceTest` |
 
 ### Step 91 — Report UI — Owner (active center), Manager
 

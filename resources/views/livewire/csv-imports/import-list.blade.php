@@ -1,25 +1,59 @@
-<x-ui.page wide class="mf-import-list">
-    <header class="space-y-4">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div class="space-y-2">
-                <flux:heading size="xl" class="font-display text-text-heading!">
-                    {{ __('csv_import.list.title') }}
-                </flux:heading>
-                <flux:text class="text-text-muted!">
-                    {{ $this->pageDescription }}
-                </flux:text>
+<x-ui.page
+    wide
+    @class([
+        'mf-import-list',
+        'mf-import-list--compact' => $this->isCashierView,
+    ])
+>
+    @if ($this->isCashierView)
+        <header class="mf-import-list-header mb-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0 space-y-1">
+                    <flux:heading size="lg" class="font-display text-text-heading!">
+                        {{ __('csv_import.list.title') }}
+                    </flux:heading>
+                    <flux:text class="text-sm text-text-muted!">
+                        {{ $this->pageDescription }}
+                    </flux:text>
+                </div>
+
+                <div class="flex shrink-0 flex-col gap-2 sm:items-end">
+                    <div class="mf-import-list-center-pill rounded-lg border border-slate-200/80 bg-white/70 px-3 py-2">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-text-muted">
+                            {{ $this->centerBannerLabel }}
+                        </p>
+                        <p class="mt-0.5 text-sm font-medium text-text-heading">{{ $this->centerName }}</p>
+                    </div>
+
+                    <flux:button variant="primary" icon="arrow-up-tray" :href="route('imports.create')" wire:navigate class="mf-btn-primary w-full sm:w-auto">
+                        {{ __('csv_import.list.import_csv') }}
+                    </flux:button>
+                </div>
+            </div>
+        </header>
+    @else
+        <header class="space-y-4">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div class="space-y-2">
+                    <flux:heading size="xl" class="font-display text-text-heading!">
+                        {{ __('csv_import.list.title') }}
+                    </flux:heading>
+                    <flux:text class="text-text-muted!">
+                        {{ $this->pageDescription }}
+                    </flux:text>
+                </div>
+
+                <flux:button variant="primary" icon="arrow-up-tray" :href="route('imports.create')" wire:navigate class="mf-btn-primary shrink-0">
+                    {{ __('csv_import.list.import_csv') }}
+                </flux:button>
             </div>
 
-            <flux:button variant="primary" icon="arrow-up-tray" :href="route('imports.create')" wire:navigate class="mf-btn-primary shrink-0">
-                {{ __('csv_import.list.import_csv') }}
-            </flux:button>
-        </div>
-
-        <div class="mf-import-list-center rounded-lg border border-slate-200/80 bg-white/70 px-4 py-3">
-            <p class="text-xs font-semibold uppercase tracking-wide text-text-muted">{{ $this->centerBannerLabel }}</p>
-            <p class="mt-1 text-sm font-medium text-text-heading">{{ $this->centerName }}</p>
-        </div>
-    </header>
+            <div class="mf-import-list-center rounded-lg border border-slate-200/80 bg-white/70 px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-text-muted">{{ $this->centerBannerLabel }}</p>
+                <p class="mt-1 text-sm font-medium text-text-heading">{{ $this->centerName }}</p>
+            </div>
+        </header>
+    @endif
 
     <x-ui.table-panel
         :title="__('csv_import.list.table_title')"

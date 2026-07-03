@@ -9,8 +9,10 @@ use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Modules\CsvImports\Enums\ImportStatus;
 use App\Modules\Dashboards\Enums\DashboardPeriod;
 use App\Modules\Dashboards\Enums\DashboardTrendGranularity;
+use App\Modules\Dashboards\Services\CashierDashboardService;
 use App\Modules\Dashboards\Services\ManagerDashboardService;
 use App\Modules\Dashboards\Services\OwnerDashboardService;
+use App\Modules\Dashboards\Support\CashierDashboardData;
 use App\Modules\Dashboards\Support\ManagerDashboardData;
 use App\Modules\Dashboards\Support\OwnerDashboardData;
 use App\Support\Auth\RoleName;
@@ -153,6 +155,24 @@ class Dashboard extends Component
     }
 
     #[Computed]
+    public function cashierDashboard(): ?CashierDashboardData
+    {
+        $user = auth()->user();
+
+        if ($user === null || ! $user->hasRole(RoleName::Cashier)) {
+            return null;
+        }
+
+        $center = $user->center;
+
+        if ($center === null) {
+            return null;
+        }
+
+        return app(CashierDashboardService::class)->build($center);
+    }
+
+    #[Computed]
     public function managerDashboard(): ?ManagerDashboardData
     {
         $user = auth()->user();
@@ -242,6 +262,18 @@ class Dashboard extends Component
                 'dashboard' => $dashboard,
                 'trendOptions' => DashboardTrendGranularity::cases(),
             ])->title(__('dashboard.manager.title', ['center' => $dashboard->centerName]));
+        }
+
+        if ($user?->hasRole(RoleName::Cashier) === true) {
+            $dashboard = $this->cashierDashboard;
+
+            if ($dashboard === null) {
+                abort(403);
+            }
+
+            return view('livewire.dashboards.cashier-dashboard', [
+                'dashboard' => $dashboard,
+            ])->title(__('dashboard.cashier.title', ['center' => $dashboard->centerName]));
         }
 
         return view('livewire.dashboards.staff-dashboard', [

@@ -1655,6 +1655,35 @@
 }
 
 /* CSV verification card (Step 73) */
+.mf-csv-verification-card--compact .mf-csv-verification-dropzone {
+    min-height: 6.5rem;
+    padding: 1rem;
+}
+
+.mf-import-csv--compact.mf-page {
+    gap: 1rem;
+}
+
+.mf-import-csv--compact .mf-import-csv-header {
+    margin-bottom: 0;
+}
+
+.mf-import-csv--compact .mf-import-csv-center-pill {
+    min-width: 8rem;
+}
+
+.mf-import-list--compact.mf-page {
+    gap: 1rem;
+}
+
+.mf-import-list--compact .mf-import-list-header {
+    margin-bottom: 0;
+}
+
+.mf-import-list--compact .mf-import-list-center-pill {
+    min-width: 8rem;
+}
+
 .mf-csv-verification-card {
     overflow: visible;
 }

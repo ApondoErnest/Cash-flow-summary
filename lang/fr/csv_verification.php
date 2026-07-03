@@ -90,6 +90,7 @@ return [
         'submitting_correction' => 'Soumission…',
     ],
     'summary' => [
+        'download_errors' => 'Télécharger le rapport d\'erreurs',
         'file_information' => 'Informations fichier',
         'footer_totals' => 'Totaux du pied de page',
         'verification_status' => 'Statut de vérification',
@@ -135,6 +136,13 @@ return [
         'manager' => [
             'title' => 'Importer CSV',
             'subtitle' => 'Téléversez et vérifiez les exports cash-flow pour :center.',
+            'subtitle_compact' => 'Téléversez et vérifiez les exports cash-flow.',
+            'correction_help' => 'Utilisez le mode Correction lorsque les données source ont changé après l\'import d\'un jour. Les corrections nécessitent l\'approbation du propriétaire avant activation.',
+        ],
+        'cashier' => [
+            'title' => 'Importer CSV',
+            'subtitle' => 'Vérifiez et importez l\'export cash-flow du jour pour :center.',
+            'subtitle_compact' => 'Vérifiez et importez l\'export cash-flow du jour.',
             'correction_help' => 'Utilisez le mode Correction lorsque les données source ont changé après l\'import d\'un jour. Les corrections nécessitent l\'approbation du propriétaire avant activation.',
         ],
     ],

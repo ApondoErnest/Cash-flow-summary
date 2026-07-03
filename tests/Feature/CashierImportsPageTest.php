@@ -24,88 +24,91 @@ beforeEach(function () {
     test()->seed(HeaderAliasSeeder::class);
 });
 
-test('manager imports list page shows fixed center header and import history', function () {
+test('cashier imports list page shows compact header and import history', function () {
     [$verification, $manager] = readyVerificationForCommit(
         verificationReadyFrenchCsv([completedFrenchDataRow()]),
     );
 
+    $cashier = actingAsCashier($manager->center);
     $import = commitVerificationFor($manager, $verification);
-    $centerName = $manager->center->name;
+    $centerName = $cashier->center->name;
 
-    $this->actingAs($manager)
+    $this->actingAs($cashier)
         ->get(route('imports.index'))
         ->assertOk()
         ->assertSee(__('csv_import.list.title'), false)
-        ->assertSee(__('csv_import.page.manager.list.subtitle', ['center' => $centerName]), false)
+        ->assertSee('Recent imports for your assigned center', false)
         ->assertSee(__('csv_import.page.staff.center_label'), false)
         ->assertSee($centerName, false)
         ->assertSee($import->original_filename, false)
         ->assertSee(__('csv_import.list.view_detail'), false)
+        ->assertSee('mf-import-list--compact', false)
         ->assertDontSee(__('csv_import.list.description'), false);
 });
 
-test('manager can access imports list without owner active center session', function () {
-    $manager = actingAsManager();
+test('cashier can access imports list without owner active center session', function () {
+    $cashier = actingAsCashier();
 
     app(ActiveCenterContextService::class)->clear();
 
-    $this->actingAs($manager)
+    $this->actingAs($cashier)
         ->get(route('imports.index'))
         ->assertOk()
-        ->assertSee($manager->center->name, false);
+        ->assertSee($cashier->center->name, false);
 });
 
-test('manager imports list scopes to assigned center only', function () {
+test('cashier imports list scopes to assigned center only', function () {
     $owner = actingAsOwner();
     $assignedCenter = createTestCenter($owner->organization, ['name' => 'Assigned Center']);
     $otherCenter = createTestCenter($owner->organization, ['name' => 'Other Center']);
-    $manager = actingAsManager($assignedCenter);
+    $cashier = actingAsCashier($assignedCenter);
 
-    $otherManager = actingAsManager($otherCenter);
+    $otherCashier = actingAsCashier($otherCenter);
     $verification = startVerificationFor(
-        $otherManager,
+        $otherCashier,
         $otherCenter,
         verificationReadyFrenchCsv([completedFrenchDataRow()]),
     );
     runProcessVerificationJob($verification->token);
-    commitVerificationFor($otherManager, $verification->fresh());
+    commitVerificationFor($otherCashier, $verification->fresh());
 
-    $this->actingAs($manager)
+    $this->actingAs($cashier)
         ->get(route('imports.index'))
         ->assertOk()
         ->assertSee(__('csv_import.list.empty'), false)
         ->assertDontSee('cashflow-june.csv', false);
 });
 
-test('manager cannot view import detail from another center', function () {
+test('cashier cannot view import detail from another center', function () {
     $owner = actingAsOwner();
     $assignedCenter = createTestCenter($owner->organization, ['name' => 'Assigned Center']);
     $otherCenter = createTestCenter($owner->organization, ['name' => 'Other Center']);
-    $manager = actingAsManager($assignedCenter);
+    $cashier = actingAsCashier($assignedCenter);
 
-    $otherManager = actingAsManager($otherCenter);
+    $otherCashier = actingAsCashier($otherCenter);
     $verification = startVerificationFor(
-        $otherManager,
+        $otherCashier,
         $otherCenter,
         verificationReadyFrenchCsv([completedFrenchDataRow()]),
     );
     runProcessVerificationJob($verification->token);
-    $import = commitVerificationFor($otherManager, $verification->fresh());
+    $import = commitVerificationFor($otherCashier, $verification->fresh());
 
-    $this->actingAs($manager)
+    $this->actingAs($cashier)
         ->get(route('imports.show', $import))
         ->assertNotFound();
 });
 
-test('manager import detail page shows metadata day comparisons and center banner', function () {
+test('cashier import detail page shows metadata day comparisons and center banner', function () {
     [$verification, $manager] = readyVerificationForCommit(
         verificationReadyFrenchCsv([completedFrenchDataRow()]),
     );
 
+    $cashier = actingAsCashier($manager->center);
     $import = commitVerificationFor($manager, $verification);
-    $centerName = $manager->center->name;
+    $centerName = $cashier->center->name;
 
-    $this->actingAs($manager)
+    $this->actingAs($cashier)
         ->get(route('imports.show', $import))
         ->assertOk()
         ->assertSee(__('csv_import.page.staff.center_label'), false)
@@ -116,36 +119,38 @@ test('manager import detail page shows metadata day comparisons and center banne
         ->assertSee('11 925,00', false);
 });
 
-test('manager import detail livewire component loads assigned center import', function () {
+test('cashier import detail livewire component loads assigned center import', function () {
     [$verification, $manager] = readyVerificationForCommit(
         verificationReadyFrenchCsv([completedFrenchDataRow()]),
     );
 
+    $cashier = actingAsCashier($manager->center);
     $import = commitVerificationFor($manager, $verification);
 
-    Livewire::actingAs($manager)
+    Livewire::actingAs($cashier)
         ->test(ImportDetail::class, ['import' => $import])
         ->assertSee($import->original_filename, false)
-        ->assertSee($manager->center->name, false)
+        ->assertSee($cashier->center->name, false)
         ->assertSee(__('csv_import.result.stats.source_rows'), false);
 });
 
-test('manager with tampered center_id on imports routes is blocked', function () {
-    actingAsManager();
+test('cashier with tampered center_id on imports routes is blocked', function () {
+    actingAsCashier();
     $otherCenter = createTestCenter();
 
     $this->get(route('imports.index', ['center_id' => $otherCenter->id]))
         ->assertForbidden();
 });
 
-test('manager imports list filters remain available', function () {
+test('cashier imports list filters remain available', function () {
     [$verification, $manager] = readyVerificationForCommit(
         verificationReadyFrenchCsv([completedFrenchDataRow()]),
     );
 
+    $cashier = actingAsCashier($manager->center);
     commitVerificationFor($manager, $verification);
 
-    Livewire::actingAs($manager)
+    Livewire::actingAs($cashier)
         ->test(ImportList::class)
         ->set('search', 'cashflow-june')
         ->assertSee('cashflow-june.csv', false);

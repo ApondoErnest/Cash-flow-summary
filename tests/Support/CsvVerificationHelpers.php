@@ -184,6 +184,7 @@ function runProcessVerificationJob(string $token, ?int $centerId = null): void
         app(FooterReaderService::class),
         app(ReconciliationService::class),
         app(DuplicatePreviewService::class),
+        app(\App\Modules\CsvImports\Services\ImportErrorRecorderService::class),
         app(\App\Support\Center\JobCenterContextService::class),
     );
 }

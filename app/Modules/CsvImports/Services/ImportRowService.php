@@ -24,6 +24,7 @@ final class ImportRowService
         private readonly HeaderMappingService $headerMappingService,
         private readonly NormalizationService $normalizationService,
         private readonly SimilarityFingerprintService $similarityFingerprintService,
+        private readonly ImportErrorRecorderService $errorRecorder,
     ) {}
 
     public function persistRows(Import $import, ImportVerification $verification, string $filePath): int
@@ -47,7 +48,7 @@ final class ImportRowService
 
         foreach ($this->csvParsingService->streamRows($filePath, $delimiter, $mapping->mapping) as $row) {
             if ($row->status === CsvRowStatus::Invalid) {
-                ImportRow::query()->create([
+                $importRow = ImportRow::query()->create([
                     'import_id' => $import->id,
                     'center_id' => $import->center_id,
                     'source_row_number' => $row->rowNumber,
@@ -60,6 +61,8 @@ final class ImportRowService
                     'row_status' => ImportRowStatus::Invalid,
                     'validation_errors' => $row->errors,
                 ]);
+
+                $this->errorRecorder->recordFromImportRow($importRow);
             } else {
                 $canonical = $this->normalizationService->normalizeParsedRow($row);
 

@@ -25,10 +25,10 @@
             </div>
         </div>
 
-        @if ($this->isManagerView)
+        @if ($this->isStaffView)
             <div class="mf-import-list-center rounded-lg border border-slate-200/80 bg-white/70 px-4 py-3">
                 <p class="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    {{ __('csv_import.page.manager.center_label') }}
+                    {{ __('csv_import.page.staff.center_label') }}
                 </p>
                 <p class="mt-1 text-sm font-medium text-text-heading">{{ $this->centerName }}</p>
             </div>
@@ -92,6 +92,17 @@
             <flux:button variant="outline" :href="route('imports.result', $import)" wire:navigate class="mf-btn-secondary">
                 {{ __('csv_import.detail.actions.view_result') }}
             </flux:button>
+
+            @if ($detail->errorCount > 0)
+                <flux:button
+                    variant="outline"
+                    icon="arrow-down-tray"
+                    :href="route('imports.errors.download', $import)"
+                    class="mf-btn-secondary"
+                >
+                    {{ __('csv_import.detail.actions.download_errors') }}
+                </flux:button>
+            @endif
 
             <flux:button variant="outline" :href="route('dashboard')" wire:navigate class="mf-btn-secondary">
                 {{ __('csv_import.result.actions.dashboard') }}
