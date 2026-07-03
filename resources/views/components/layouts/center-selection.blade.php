@@ -6,7 +6,7 @@
         <title>{{ $title ?? config('app.name') }} — {{ __('center.selection.title') }}</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @fluxAppearance
+        <x-flux.forced-light-appearance />
     </head>
     <body class="min-h-dvh font-sans text-text-body antialiased">
         {{ $slot }}

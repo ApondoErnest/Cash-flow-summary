@@ -10,6 +10,7 @@ use App\Modules\Centers\Models\Center;
 use App\Modules\Users\Services\UserService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -60,6 +61,30 @@ class ManageUsers extends Component
         $this->temporaryPasswordUsername = $user->username;
 
         session()->flash('status', __('user.manage.password_reset'));
+    }
+
+    public function deleteUser(int $userId, UserService $userService): void
+    {
+        $user = User::query()->findOrFail($userId);
+        $this->authorize('delete', $user);
+
+        $owner = auth()->user();
+
+        if ($owner === null) {
+            return;
+        }
+
+        try {
+            $userService->delete($owner, $user);
+        } catch (ValidationException $exception) {
+            session()->flash('error', $exception->validator->errors()->first('user'));
+
+            return;
+        }
+
+        session()->flash('status', __('user.manage.deleted'));
+
+        unset($this->users);
     }
 
     public function dismissTemporaryPassword(): void

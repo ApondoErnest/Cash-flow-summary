@@ -20,7 +20,16 @@
         :heading="__('center.selection.brand_heading')"
         :description="__('center.selection.brand_description')"
         class="mf-center-selection-brand"
-    />
+    >
+        @if ($canReturnToDashboard)
+            <x-slot:actions>
+                <a href="{{ route('dashboard') }}" class="mf-center-selection-dashboard-btn">
+                    <flux:icon icon="arrow-left" variant="mini" class="size-4 shrink-0" />
+                    <span>{{ __('center.selection.back_to_dashboard') }}</span>
+                </a>
+            </x-slot:actions>
+        @endif
+    </x-authentication.brand-panel>
 
     <main class="mf-center-selection-main relative flex flex-1 items-center justify-center px-6 py-10 sm:px-10 lg:px-14">
         <div class="mf-center-selection-panel w-full max-w-xl rounded-2xl p-8 sm:p-10" data-mf-center-selection-panel>
@@ -120,6 +129,17 @@
                         <span wire:loading wire:target="openCenter">{{ __('center.selection.opening') }}</span>
                     </x-ui.button>
 
+                    @if ($canReturnToDashboard)
+                        <x-ui.button
+                            variant="secondary"
+                            icon="arrow-left"
+                            href="{{ route('dashboard') }}"
+                            class="mf-center-selection-back w-full justify-center"
+                        >
+                            {{ __('center.selection.back_to_dashboard') }}
+                        </x-ui.button>
+                    @endif
+
                     @if ($centerCount > 1)
                         <flux:text class="text-center text-sm text-text-muted!">
                             {{ trans_choice('center.selection.center_count', $centerCount, ['count' => $centerCount]) }}
@@ -143,11 +163,21 @@
                         variant="primary"
                         icon="plus-circle"
                         href="{{ route('centers.index') }}"
-                        wire:navigate
                         class="mf-btn-primary mf-center-selection-submit mt-8 w-full justify-center sm:w-auto"
                     >
                         {{ __('center.selection.create_center') }}
                     </flux:button>
+
+                    @if ($canReturnToDashboard)
+                        <x-ui.button
+                            variant="secondary"
+                            icon="arrow-left"
+                            href="{{ route('dashboard') }}"
+                            class="mf-center-selection-back mt-4 w-full justify-center sm:mx-auto sm:w-auto"
+                        >
+                            {{ __('center.selection.back_to_dashboard') }}
+                        </x-ui.button>
+                    @endif
                 </div>
             @endif
         </div>

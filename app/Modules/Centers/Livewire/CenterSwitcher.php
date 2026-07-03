@@ -6,7 +6,6 @@ namespace App\Modules\Centers\Livewire;
 
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\ActiveCenterContextService;
-use App\Modules\Centers\Services\ActiveCenterSwitchService;
 use App\Modules\Centers\Services\CenterSelectionService;
 use App\Support\Center\ActiveCenterContext;
 use Illuminate\Support\Collection;
@@ -41,21 +40,6 @@ class CenterSwitcher extends Component
         }
 
         return app(CenterSelectionService::class)->activeCentersFor($user);
-    }
-
-    public function switchCenter(
-        int $centerId,
-        ActiveCenterSwitchService $switchService,
-    ): void {
-        $user = auth()->user();
-
-        if ($user === null || ! $user->isOwner()) {
-            return;
-        }
-
-        $switchService->switch($user, $centerId);
-
-        $this->redirect(route('dashboard'), navigate: true);
     }
 
     public function render(CenterSelectionService $centerSelectionService): View

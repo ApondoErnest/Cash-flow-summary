@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use App\Models\User;
 use App\Modules\Centers\Models\Organization;
+use App\Modules\CsvImports\Enums\ImportStatus;
+use App\Modules\CsvImports\Models\Import;
 use App\Modules\Users\Livewire\ManageUserForm;
 use App\Modules\Users\Livewire\ManageUsers;
+use App\Modules\CsvVerification\Enums\ImportMode;
 use App\Support\Auth\RoleName;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -184,4 +187,68 @@ test('username must be unique when creating users', function () {
         ->set('centerId', $center->id)
         ->call('save')
         ->assertHasErrors(['username']);
+});
+
+test('owner can delete staff user from manage users list', function () {
+    $owner = actingAsOwnerWithoutActiveCenter();
+    $center = createTestCenter($owner->organization);
+
+    Role::findOrCreate(RoleName::Cashier, 'web');
+
+    $user = User::query()->create([
+        'organization_id' => $owner->organization_id,
+        'center_id' => $center->id,
+        'name' => 'Delete Target',
+        'username' => 'delete-target',
+        'password' => bcrypt('password'),
+        'is_active' => true,
+    ]);
+    $user->assignRole(RoleName::Cashier);
+
+    Livewire::test(ManageUsers::class)
+        ->call('deleteUser', $user->id);
+
+    expect(User::query()->whereKey($user->id)->exists())->toBeFalse();
+});
+
+test('owner cannot delete their own account from manage users', function () {
+    $owner = actingAsOwnerWithoutActiveCenter();
+
+    Livewire::test(ManageUsers::class)
+        ->call('deleteUser', $owner->id)
+        ->assertForbidden();
+});
+
+test('owner cannot delete user with import history', function () {
+    $owner = actingAsOwnerWithoutActiveCenter();
+    $center = createTestCenter($owner->organization);
+
+    Role::findOrCreate(RoleName::Cashier, 'web');
+
+    $user = User::query()->create([
+        'organization_id' => $owner->organization_id,
+        'center_id' => $center->id,
+        'name' => 'Import Uploader',
+        'username' => 'import-uploader',
+        'password' => bcrypt('password'),
+        'is_active' => true,
+    ]);
+    $user->assignRole(RoleName::Cashier);
+
+    Import::query()->create([
+        'center_id' => $center->id,
+        'uploaded_by' => $user->id,
+        'import_mode' => ImportMode::Operational,
+        'source_language' => 'fr',
+        'original_filename' => 'sample.csv',
+        'storage_path' => 'imports/sample.csv',
+        'file_hash' => str_repeat('a', 64),
+        'file_size' => 1024,
+        'status' => ImportStatus::Completed,
+    ]);
+
+    Livewire::test(ManageUsers::class)
+        ->call('deleteUser', $user->id);
+
+    expect(User::query()->whereKey($user->id)->exists())->toBeTrue();
 });

@@ -31,21 +31,42 @@ test('owner without active center sees prompt to select center in header', funct
         ->assertSee(route('center.select'), false);
 });
 
-test('owner can switch active center via header dropdown', function () {
+test('owner can switch active center via header dropdown form post', function () {
     $owner = actingAsOwner();
     $otherCenter = createTestCenter($owner->organization, [
         'name' => 'Douala Hub',
         'code' => 'DLA-01',
     ]);
 
-    Livewire::test(CenterSwitcher::class)
-        ->call('switchCenter', $otherCenter->id)
+    $this->actingAs($owner)
+        ->post(route('center.switch', $otherCenter))
         ->assertRedirect(route('dashboard'));
 
     $context = app(ActiveCenterContextService::class)->resolve($owner);
 
     expect($context?->centerId)->toBe($otherCenter->id);
     expect($context?->centerName)->toBe('Douala Hub');
+});
+
+test('header dropdown renders post forms for each selectable center', function () {
+    $owner = actingAsOwner();
+    $otherCenter = createTestCenter($owner->organization, ['name' => 'Second Center']);
+
+    $this->actingAs($owner)
+        ->get(route('settings.organization'))
+        ->assertOk()
+        ->assertSee(route('center.switch', $otherCenter), false);
+});
+
+test('switching to the already active center redirects to dashboard without error', function () {
+    $owner = actingAsOwner();
+    $activeCenterId = app(ActiveCenterContextService::class)->resolve($owner)?->centerId;
+
+    expect($activeCenterId)->not->toBeNull();
+
+    $this->actingAs($owner)
+        ->post(route('center.switch', $activeCenterId))
+        ->assertRedirect(route('dashboard'));
 });
 
 test('switching active center clears configured page filter session keys', function () {
@@ -71,7 +92,7 @@ test('switching active center clears configured page filter session keys', funct
     expect(session('unaffected.session.key'))->toBe('keep');
 });
 
-test('center switcher rejects centers outside owner organization', function () {
+test('center switch route rejects centers outside owner organization', function () {
     $owner = actingAsOwner();
     $foreignOrganization = Organization::query()->create([
         'name' => 'Foreign Organization',
@@ -79,8 +100,19 @@ test('center switcher rejects centers outside owner organization', function () {
     ]);
     $foreignCenter = createTestCenter($foreignOrganization);
 
-    Livewire::test(CenterSwitcher::class)
-        ->call('switchCenter', $foreignCenter->id)
+    $this->actingAs($owner)
+        ->post(route('center.switch', $foreignCenter))
+        ->assertForbidden();
+});
+
+test('staff cannot switch active center via header route', function () {
+    $manager = actingAsManager();
+    $center = $manager->center;
+
+    expect($center)->not->toBeNull();
+
+    $this->actingAs($manager)
+        ->post(route('center.switch', $center))
         ->assertForbidden();
 });
 

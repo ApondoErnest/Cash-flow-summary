@@ -24,22 +24,23 @@
 
             @foreach ($centers as $center)
                 @php($isActive = (int) $activeCenter->centerId === (int) $center->id)
-                <flux:menu.item
-                    type="button"
-                    wire:click="switchCenter({{ $center->id }})"
-                    wire:key="switch-center-{{ $center->id }}"
-                    icon="{{ $isActive ? 'check-circle' : 'building-office-2' }}"
-                    class="{{ $isActive ? 'mf-header-center-menu-item--active' : '' }}"
-                >
-                    <span class="block min-w-0 text-start">
-                        <span class="block truncate font-medium">{{ $center->name }}</span>
-                        @if ($center->code || $center->city)
-                            <span class="block truncate text-xs text-text-muted">
-                                {{ collect([$center->code, $center->city])->filter()->implode(' · ') }}
-                            </span>
-                        @endif
-                    </span>
-                </flux:menu.item>
+                <form method="POST" action="{{ route('center.switch', $center) }}" class="w-full">
+                    @csrf
+                    <flux:menu.item
+                        type="submit"
+                        icon="{{ $isActive ? 'check-circle' : 'building-office-2' }}"
+                        class="w-full cursor-pointer {{ $isActive ? 'mf-header-center-menu-item--active' : '' }}"
+                    >
+                        <span class="block min-w-0 text-start">
+                            <span class="block truncate font-medium">{{ $center->name }}</span>
+                            @if ($center->code || $center->city)
+                                <span class="block truncate text-xs text-text-muted">
+                                    {{ collect([$center->code, $center->city])->filter()->implode(' · ') }}
+                                </span>
+                            @endif
+                        </span>
+                    </flux:menu.item>
+                </form>
             @endforeach
 
             <flux:menu.separator />
@@ -47,7 +48,6 @@
             <flux:menu.item
                 :href="route('center.select')"
                 icon="arrow-path"
-                wire:navigate
             >
                 {{ __('center.switcher.open_selection') }}
             </flux:menu.item>
@@ -56,7 +56,6 @@
 @else
     <a
         href="{{ route('center.select') }}"
-        wire:navigate
         class="mf-header-center mf-header-center--prompt w-full"
     >
         <span class="mf-header-center-mark" aria-hidden="true">

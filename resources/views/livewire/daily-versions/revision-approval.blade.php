@@ -95,10 +95,10 @@
                             <flux:error>{{ $message }}</flux:error>
                         @enderror
 
-                        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                            <flux:button variant="ghost" wire:click="clearSelection">
+                        <div class="mf-form-actions border-t-0 pt-0 sm:justify-end">
+                            <x-ui.button variant="secondary" wire:click="clearSelection">
                                 {{ __('daily_versions.revisions.cancel') }}
-                            </flux:button>
+                            </x-ui.button>
 
                             <x-ui.button
                                 variant="secondary"
@@ -122,9 +122,9 @@
                     </div>
                 @else
                     <div class="border-t border-slate-200/80 pt-5">
-                        <flux:button variant="ghost" wire:click="clearSelection">
+                        <x-ui.button variant="secondary" wire:click="clearSelection">
                             {{ __('daily_versions.revisions.cancel') }}
-                        </flux:button>
+                        </x-ui.button>
                     </div>
                 @endif
             </div>

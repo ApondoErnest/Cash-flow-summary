@@ -124,3 +124,20 @@ test('center selection preselects the only active center', function () {
     Livewire::test(CenterSelection::class)
         ->assertSet('centerId', $center->id);
 });
+
+test('center selection shows back to dashboard when owner already has active center', function () {
+    actingAsOwner();
+
+    $this->get(route('center.select'))
+        ->assertOk()
+        ->assertSee(__('center.selection.back_to_dashboard'), false)
+        ->assertSee(route('dashboard'), false);
+});
+
+test('center selection hides back to dashboard when owner has no active center', function () {
+    actingAsOwnerWithoutActiveCenter();
+
+    $this->get(route('center.select'))
+        ->assertOk()
+        ->assertDontSee(__('center.selection.back_to_dashboard'), false);
+});

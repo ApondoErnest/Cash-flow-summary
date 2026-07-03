@@ -23,6 +23,7 @@ return [
         'search_placeholder' => 'Rechercher par nom, code ou ville…',
         'open_center' => 'Ouvrir le centre',
         'opening' => 'Ouverture du centre…',
+        'back_to_dashboard' => 'Retour au tableau de bord',
         'remember_default' => 'Utiliser comme centre par défaut après connexion',
         'remember_default_help' => 'Ignorer la sélection de centre lors des prochaines connexions et ouvrir ce centre automatiquement.',
         'field' => 'centre',
@@ -69,6 +70,7 @@ return [
         'actions' => [
             'edit' => 'Modifier',
             'open_center' => 'Ouvrir le centre',
+            'open_center_mobile' => 'Ouvrir le centre',
             'calendar' => 'Calendrier',
         ],
         'fields' => [

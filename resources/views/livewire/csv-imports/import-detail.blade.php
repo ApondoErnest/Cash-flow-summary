@@ -5,16 +5,9 @@
     <div class="space-y-6" data-mf-import-detail>
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="space-y-3">
-                <flux:button
-                    variant="ghost"
-                    size="sm"
-                    icon="arrow-left"
-                    :href="route('imports.index')"
-                    wire:navigate
-                    class="mf-import-detail-back"
-                >
+                <x-ui.back-link :href="route('imports.index')" :spa-navigate="true">
                     {{ __('csv_import.detail.back_to_list') }}
-                </flux:button>
+                </x-ui.back-link>
 
                 <div class="flex flex-wrap items-center gap-3">
                     <h1 class="text-xl font-semibold text-text-heading">{{ $result->filename }}</h1>

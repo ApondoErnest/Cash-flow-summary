@@ -237,11 +237,8 @@ class Dashboard extends Component
     public function render(): View
     {
         $user = auth()->user();
-        $previewRole = request()->query('role');
-        $showOwnerDashboard = $user?->isOwner() === true
-            && (! is_string($previewRole) || $previewRole === '' || $previewRole === 'owner');
 
-        if ($showOwnerDashboard) {
+        if ($user?->isOwner() === true) {
             $dashboard = $this->ownerDashboard;
 
             return view('livewire.dashboards.owner-dashboard', [

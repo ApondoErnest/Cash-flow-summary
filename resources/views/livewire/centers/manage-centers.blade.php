@@ -1,5 +1,5 @@
-<x-ui.page wide>
-    <header class="mf-manage-centers-header flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+<x-ui.page wide class="mf-admin-mobile-page">
+    <header class="mf-admin-mobile-header mf-manage-centers-header flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0 space-y-2">
             <flux:heading size="xl" class="font-display text-text-heading!">
                 {{ __('center.manage.title') }}
@@ -13,8 +13,7 @@
             variant="primary"
             icon="plus-circle"
             href="{{ route('centers.create') }}"
-            wire:navigate
-            class="shrink-0"
+            class="max-md:w-full shrink-0"
         >
             {{ __('center.manage.create') }}
         </x-ui.button>
@@ -27,6 +26,7 @@
     @endif
 
     <x-ui.table-panel
+        class="mf-admin-mobile-panel"
         :title="__('center.manage.table_title')"
         :description="__('center.manage.table_description')"
     >
@@ -61,13 +61,76 @@
                     variant="primary"
                     icon="plus-circle"
                     href="{{ route('centers.create') }}"
-                    wire:navigate
                     class="mt-6"
                 >
                     {{ __('center.manage.create') }}
                 </x-ui.button>
             </div>
         @else
+            <x-ui.mobile-record-list :label="trans_choice('center.selection.center_count', $this->centers->count(), ['count' => $this->centers->count()])">
+                @foreach ($this->centers as $center)
+                    <x-ui.mobile-record-card
+                        wire:key="center-mobile-{{ $center->id }}"
+                        :title="$center->name"
+                        :subtitle="$center->code"
+                        icon="building-office-2"
+                    >
+                        <x-slot:aside>
+                            @if ($center->is_active)
+                                <x-ui.status-badge status="success" icon="check-circle">
+                                    {{ __('center.manage.status.active') }}
+                                </x-ui.status-badge>
+                            @else
+                                <x-ui.status-badge status="neutral" icon="minus-circle">
+                                    {{ __('center.manage.status.inactive') }}
+                                </x-ui.status-badge>
+                            @endif
+                        </x-slot:aside>
+
+                        <x-slot:details>
+                            <x-ui.mobile-record-detail :label="__('center.manage.columns.location')">
+                                {{ $locationLabel($center) !== '' ? $locationLabel($center) : '—' }}
+                            </x-ui.mobile-record-detail>
+                            <x-ui.mobile-record-detail :label="__('center.manage.columns.users')">
+                                {{ $center->active_users_count }}
+                            </x-ui.mobile-record-detail>
+                        </x-slot:details>
+
+                        <x-slot:actions>
+                            @if ($center->is_active)
+                                <x-ui.mobile-record-action
+                                    variant="primary"
+                                    type="button"
+                                    icon="arrow-right-circle"
+                                    wire:click="openCenter({{ $center->id }})"
+                                    wire:loading.attr="disabled"
+                                    wire:target="openCenter"
+                                >
+                                    {{ __('center.manage.actions.open_center_mobile') }}
+                                </x-ui.mobile-record-action>
+                            @endif
+
+                            <x-ui.mobile-record-action
+                                variant="secondary"
+                                icon="pencil-square"
+                                :href="route('centers.edit', $center)"
+                            >
+                                {{ __('center.manage.actions.edit') }}
+                            </x-ui.mobile-record-action>
+
+                            <x-ui.mobile-record-action
+                                variant="secondary"
+                                icon="calendar-days"
+                                :href="route('centers.calendar', $center)"
+                            >
+                                {{ __('center.manage.actions.calendar') }}
+                            </x-ui.mobile-record-action>
+                        </x-slot:actions>
+                    </x-ui.mobile-record-card>
+                @endforeach
+            </x-ui.mobile-record-list>
+
+            <div class="mf-manage-list-table hidden min-w-0 md:block">
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('center.manage.columns.name') }}</flux:table.column>
@@ -111,7 +174,6 @@
                                         size="sm"
                                         icon="pencil-square"
                                         href="{{ route('centers.edit', $center) }}"
-                                        wire:navigate
                                     >
                                         {{ __('center.manage.actions.edit') }}
                                     </flux:button>
@@ -121,7 +183,6 @@
                                         size="sm"
                                         icon="calendar-days"
                                         href="{{ route('centers.calendar', $center) }}"
-                                        wire:navigate
                                     >
                                         {{ __('center.manage.actions.calendar') }}
                                     </flux:button>
@@ -145,6 +206,7 @@
                     @endforeach
                 </flux:table.rows>
             </flux:table>
+            </div>
         @endif
     </x-ui.table-panel>
 </x-ui.page>

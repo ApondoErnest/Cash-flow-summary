@@ -66,13 +66,18 @@ final class RoleNavigation
     private static function ownerAdministrativeItems(): array
     {
         return [
-            new NavigationItem(__('navigation.items.manage_centers'), 'building-office-2', 'centers.index'),
-            new NavigationItem(__('navigation.items.manage_users'), 'users', 'users.index'),
-            new NavigationItem(__('navigation.items.organization_settings'), 'cog-6-tooth', 'settings.organization'),
-            new NavigationItem(__('navigation.items.whatsapp_settings'), 'chat-bubble-left-right', 'settings.whatsapp'),
-            new NavigationItem(__('navigation.items.security'), 'shield-check', 'security.index'),
-            new NavigationItem(__('navigation.items.audit_logs'), 'clipboard-document-list', 'audit-logs.index'),
+            self::adminNavItem(__('navigation.items.manage_centers'), 'building-office-2', 'centers.index'),
+            self::adminNavItem(__('navigation.items.manage_users'), 'users', 'users.index'),
+            self::adminNavItem(__('navigation.items.organization_settings'), 'cog-6-tooth', 'settings.organization'),
+            self::adminNavItem(__('navigation.items.whatsapp_settings'), 'chat-bubble-left-right', 'settings.whatsapp'),
+            self::adminNavItem(__('navigation.items.security'), 'shield-check', 'security.index'),
+            self::adminNavItem(__('navigation.items.audit_logs'), 'clipboard-document-list', 'audit-logs.index'),
         ];
+    }
+
+    private static function adminNavItem(string $label, string $icon, string $routeName): NavigationItem
+    {
+        return new NavigationItem($label, $icon, $routeName, spaNavigate: false);
     }
 
     /**

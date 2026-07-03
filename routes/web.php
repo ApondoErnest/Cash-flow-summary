@@ -6,6 +6,7 @@ use App\Modules\Authentication\Livewire\ChangePassword;
 use App\Modules\Authentication\Livewire\Login;
 use App\Modules\Authentication\Livewire\TwoFactorChallenge;
 use App\Modules\Authentication\Livewire\TwoFactorSetup;
+use App\Modules\Centers\Http\Controllers\SwitchActiveCenterController;
 use App\Modules\Centers\Livewire\CenterSelection;
 use App\Modules\Centers\Livewire\ManageCenterForm;
 use App\Modules\Centers\Livewire\ManageCenters;
@@ -34,6 +35,7 @@ Route::middleware(['auth', 'password-changed'])->group(function (): void {
 
 Route::middleware(['auth', 'password-changed', 'two-factor', 'assigned-center', 'owner'])->group(function (): void {
     Route::get('center/select', CenterSelection::class)->name('center.select');
+    Route::post('center/switch/{center}', SwitchActiveCenterController::class)->name('center.switch');
 });
 
 Route::middleware(['auth', 'password-changed', 'two-factor', 'assigned-center'])->group(function (): void {

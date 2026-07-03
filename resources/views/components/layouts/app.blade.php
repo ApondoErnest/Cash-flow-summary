@@ -6,7 +6,7 @@
         <title>{{ config('app.name') }}</title>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @fluxAppearance
+        <x-flux.forced-light-appearance />
     </head>
     <body class="min-h-screen bg-app-bg font-sans text-text-body antialiased">
         <x-layouts.shell>

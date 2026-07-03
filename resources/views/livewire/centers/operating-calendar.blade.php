@@ -1,18 +1,11 @@
 <x-ui.page wide>
-    <header class="mf-operating-calendar-header space-y-3">
-        <flux:button
-            variant="ghost"
-            size="sm"
-            icon="arrow-left"
-            href="{{ route('centers.index') }}"
-            wire:navigate
-            class="!px-0"
-        >
+    <header class="mf-operating-calendar-header mf-page-header">
+        <x-ui.back-link :href="route('centers.index')">
             {{ __('center.calendar.back_to_centers') }}
-        </flux:button>
+        </x-ui.back-link>
 
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div class="min-w-0 space-y-2">
+            <div class="mf-page-header__intro min-w-0">
                 <flux:heading size="xl" class="font-display text-text-heading!">
                     {{ __('center.calendar.title', ['center' => $center->name]) }}
                 </flux:heading>
@@ -21,16 +14,14 @@
                 </flux:text>
             </div>
 
-            <flux:button
-                variant="ghost"
-                size="sm"
+            <x-ui.button
+                variant="secondary"
                 icon="pencil-square"
                 href="{{ route('centers.edit', $center) }}"
-                wire:navigate
                 class="shrink-0"
             >
                 {{ __('center.calendar.edit_center') }}
-            </flux:button>
+            </x-ui.button>
         </div>
     </header>
 
@@ -163,9 +154,9 @@
                 </x-ui.button>
 
                 @if ($editingExceptionId)
-                    <flux:button type="button" variant="ghost" wire:click="cancelExceptionEdit">
+                    <x-ui.button type="button" variant="secondary" wire:click="cancelExceptionEdit">
                         {{ __('center.calendar.cancel_edit') }}
-                    </flux:button>
+                    </x-ui.button>
                 @endif
             </div>
         </form>

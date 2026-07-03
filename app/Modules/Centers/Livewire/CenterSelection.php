@@ -115,10 +115,14 @@ class CenterSelection extends Component
             ? $centerSelectionService->activeCentersFor($user)
             : collect();
 
+        $canReturnToDashboard = $user !== null
+            && app(ActiveCenterContextService::class)->resolve($user) !== null;
+
         return view('livewire.centers.center-selection', [
             'hasCenters' => $allCenters->isNotEmpty(),
             'centerCount' => $allCenters->count(),
             'statusMessage' => session('status'),
+            'canReturnToDashboard' => $canReturnToDashboard,
         ])->title(__('center.selection.title'));
     }
 }

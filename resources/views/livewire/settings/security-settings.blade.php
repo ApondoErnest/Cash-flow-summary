@@ -62,7 +62,6 @@
                 variant="{{ $this->ownerHasTwoFactorEnabled ? 'secondary' : 'primary' }}"
                 icon="shield-check"
                 href="{{ route('two-factor.setup') }}"
-                wire:navigate
                 class="shrink-0"
             >
                 {{ $this->ownerHasTwoFactorEnabled

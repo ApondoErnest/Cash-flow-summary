@@ -44,6 +44,14 @@ test('owner manage centers list shows operational metadata without financial tot
         ->assertDontSee('Total', false);
 });
 
+test('manage centers css keeps primary open center button text visible', function () {
+    $css = file_get_contents(resource_path('css/app.css'));
+
+    expect($css)->toContain('.mf-table-panel [data-flux-cell] [data-flux-button].mf-btn-primary')
+        ->and($css)->toContain('color: var(--color-accent-foreground) !important')
+        ->and($css)->toContain('[data-flux-button].bg-transparent');
+});
+
 test('staff cannot access manage centers pages', function () {
     actingAsManager();
 

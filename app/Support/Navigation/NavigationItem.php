@@ -10,5 +10,6 @@ final readonly class NavigationItem
         public string $label,
         public string $icon,
         public string $routeName,
+        public bool $spaNavigate = true,
     ) {}
 }

@@ -34,6 +34,13 @@ class UserPolicy
             && (int) $user->id !== (int) $model->id;
     }
 
+    public function delete(User $user, User $model): bool
+    {
+        return $this->manageOrganizationUser($user, $model)
+            && (int) $user->id !== (int) $model->id
+            && ! $model->isOwner();
+    }
+
     private function manageOrganizationUser(User $user, User $model): bool
     {
         return $user->isOwner()

@@ -43,7 +43,7 @@ class ManageCenters extends Component
 
         $switchService->switch($user, $centerId);
 
-        $this->redirect(route('dashboard'), navigate: true);
+        $this->redirect(route('dashboard'), navigate: false);
     }
 
     /**

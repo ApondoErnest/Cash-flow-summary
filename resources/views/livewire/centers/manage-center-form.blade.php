@@ -1,22 +1,17 @@
 <x-ui.page>
-    <header class="space-y-2">
-        <flux:button
-            variant="ghost"
-            size="sm"
-            icon="arrow-left"
-            href="{{ route('centers.index') }}"
-            wire:navigate
-            class="!px-0"
-        >
+    <header class="mf-page-header">
+        <x-ui.back-link :href="route('centers.index')">
             {{ __('center.manage.back_to_list') }}
-        </flux:button>
+        </x-ui.back-link>
 
-        <flux:heading size="xl" class="font-display text-text-heading!">
-            {{ $isEditing ? __('center.manage.edit_title') : __('center.manage.create_title') }}
-        </flux:heading>
-        <flux:text class="text-text-muted!">
-            {{ $isEditing ? __('center.manage.edit_description') : __('center.manage.create_description') }}
-        </flux:text>
+        <div class="mf-page-header__intro">
+            <flux:heading size="xl" class="font-display text-text-heading!">
+                {{ $isEditing ? __('center.manage.edit_title') : __('center.manage.create_title') }}
+            </flux:heading>
+            <flux:text class="text-text-muted!">
+                {{ $isEditing ? __('center.manage.edit_description') : __('center.manage.create_description') }}
+            </flux:text>
+        </div>
     </header>
 
     <x-ui.card>
@@ -90,7 +85,7 @@
                 <flux:description>{{ __('center.manage.fields.set_as_default_help') }}</flux:description>
             </flux:field>
 
-            <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-6">
+            <div class="mf-form-actions">
                 <x-ui.button
                     variant="primary"
                     type="submit"
@@ -104,23 +99,18 @@
                     <span wire:loading wire:target="save">{{ __('center.manage.saving') }}</span>
                 </x-ui.button>
 
-                <flux:button
-                    variant="ghost"
-                    href="{{ route('centers.index') }}"
-                    wire:navigate
-                >
+                <x-ui.button variant="secondary" href="{{ route('centers.index') }}">
                     {{ __('center.manage.cancel') }}
-                </flux:button>
+                </x-ui.button>
 
                 @if ($isEditing)
-                    <flux:button
-                        variant="ghost"
+                    <x-ui.button
+                        variant="secondary"
                         icon="calendar-days"
                         href="{{ route('centers.calendar', $center) }}"
-                        wire:navigate
                     >
                         {{ __('center.manage.actions.calendar') }}
-                    </flux:button>
+                    </x-ui.button>
                 @endif
             </div>
         </form>

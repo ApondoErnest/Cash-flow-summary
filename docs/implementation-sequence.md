@@ -26,9 +26,9 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.0.90 |
-| Steps complete | **1–90** |
-| **Next step** | **Step 91** — Report UI — Owner (active center), Manager |
+| Doc set | v2.0.91 |
+| Steps complete | **1–91** |
+| **Next step** | **Step 92** — ExportService — CSV, Excel, PDF queue |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -128,7 +128,7 @@ flowchart LR
 | 88 | Recent imports list | Cashier interface | S7 | Complete |
 | 89 | Error report download | Cashier interface | S7 | Complete |
 | 90 | ReportQueryService — active snapshots only | Reports & exports | S5–S6 | Complete |
-| 91 | Report UI — Owner (active center), Manager | Reports & exports | S5–S6 | Not started |
+| 91 | Report UI — Owner (active center), Manager | Reports & exports | S5–S6 | Complete |
 | 92 | ExportService — CSV, Excel, PDF queue | Reports & exports | S5–S6 | Not started |
 | 93 | Export download + expiry | Reports & exports | S5–S6 | Not started |
 | 94 | WhatsApp settings UI (Owner admin) | WhatsApp integration | S8 | Not started |
@@ -1284,6 +1284,8 @@ flowchart LR
 | **Sprint** | S5–S6 |
 | **Reference** | [ux-overview.md](../design/ux-overview.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-03 — `CenterReport` Livewire (Step 85) verified against Step 90 active-snapshot backend; owner active-center redirect + center scoping; manager fixed-center view; period filter + custom range + daily breakdown + missing submissions callout; export placeholder for Step 92; EN/FR lang; extended `ManagerReportsPageTest` |
 
 ### Step 92 — ExportService — CSV, Excel, PDF queue
 

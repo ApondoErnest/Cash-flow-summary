@@ -23,6 +23,7 @@ return [
         'search_placeholder' => 'Search by name, code, or city…',
         'open_center' => 'Open Center',
         'opening' => 'Opening center…',
+        'back_to_dashboard' => 'Back to dashboard',
         'remember_default' => 'Use as my default center after login',
         'remember_default_help' => 'Skip center selection on future logins and open this center automatically.',
         'field' => 'center',
@@ -69,6 +70,7 @@ return [
         'actions' => [
             'edit' => 'Edit',
             'open_center' => 'Open Center',
+            'open_center_mobile' => 'Open Center',
             'calendar' => 'Calendar',
         ],
         'fields' => [

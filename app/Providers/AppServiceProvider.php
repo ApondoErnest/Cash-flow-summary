@@ -103,17 +103,14 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('components.layouts.shell', function ($view): void {
             $user = auth()->user();
-            $previewRole = request()->query('role');
 
             $role = match (true) {
                 $user?->hasRole(RoleName::CenterManager) === true => UserRole::Manager,
                 $user?->hasRole(RoleName::Cashier) === true => UserRole::Cashier,
-                $user?->isOwner() === true => UserRole::fromPreview(
-                    is_string($previewRole) && $previewRole !== '' ? $previewRole : 'owner'
-                ),
+                $user?->isOwner() === true => UserRole::Owner,
                 default => UserRole::fromPreview(
-                    is_string($previewRole) && $previewRole !== ''
-                        ? $previewRole
+                    is_string(request()->query('role')) && request()->query('role') !== ''
+                        ? (string) request()->query('role')
                         : config('navigation.preview_role', 'owner')
                 ),
             };

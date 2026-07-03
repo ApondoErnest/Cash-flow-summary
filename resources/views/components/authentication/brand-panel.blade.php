@@ -29,6 +29,12 @@
             @if ($description)
                 <p class="mf-login-brand-lead">{{ $description }}</p>
             @endif
+
+            @isset($actions)
+                <div class="mf-login-brand-actions">
+                    {{ $actions }}
+                </div>
+            @endisset
         @else
             <h1 class="mf-login-brand-title">{{ config('app.name') }}</h1>
 

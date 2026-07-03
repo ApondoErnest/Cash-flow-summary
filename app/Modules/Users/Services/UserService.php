@@ -8,9 +8,11 @@ use App\Models\User;
 use App\Modules\Authentication\Services\PasswordService;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\CenterService;
+use App\Modules\CsvImports\Models\Import;
 use App\Support\Auth\RoleName;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -149,6 +151,34 @@ final class UserService
         }
 
         return $passwordService->assignTemporaryPassword($user);
+    }
+
+    public function delete(User $owner, User $user): void
+    {
+        $this->assertBelongsToOrganization($owner, $user);
+
+        if ($user->isOwner()) {
+            throw ValidationException::withMessages([
+                'user' => __('user.manage.validation.cannot_delete_owner'),
+            ]);
+        }
+
+        if ((int) $owner->id === (int) $user->id) {
+            throw ValidationException::withMessages([
+                'user' => __('user.manage.validation.cannot_delete_self'),
+            ]);
+        }
+
+        if (Import::query()->where('uploaded_by', $user->id)->exists()) {
+            throw ValidationException::withMessages([
+                'user' => __('user.manage.validation.has_import_history'),
+            ]);
+        }
+
+        DB::transaction(function () use ($user): void {
+            $user->syncRoles([]);
+            $user->delete();
+        });
     }
 
     public function roleLabel(User $user): string

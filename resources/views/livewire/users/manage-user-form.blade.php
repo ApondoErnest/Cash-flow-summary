@@ -1,22 +1,17 @@
 <x-ui.page>
-    <header class="space-y-2">
-        <flux:button
-            variant="ghost"
-            size="sm"
-            icon="arrow-left"
-            href="{{ route('users.index') }}"
-            wire:navigate
-            class="!px-0"
-        >
+    <header class="mf-page-header">
+        <x-ui.back-link :href="route('users.index')">
             {{ __('user.manage.back_to_list') }}
-        </flux:button>
+        </x-ui.back-link>
 
-        <flux:heading size="xl" class="font-display text-text-heading!">
-            {{ $isEditing ? __('user.manage.edit_title') : __('user.manage.create_title') }}
-        </flux:heading>
-        <flux:text class="text-text-muted!">
-            {{ $isEditing ? __('user.manage.edit_description') : __('user.manage.create_description') }}
-        </flux:text>
+        <div class="mf-page-header__intro">
+            <flux:heading size="xl" class="font-display text-text-heading!">
+                {{ $isEditing ? __('user.manage.edit_title') : __('user.manage.create_title') }}
+            </flux:heading>
+            <flux:text class="text-text-muted!">
+                {{ $isEditing ? __('user.manage.edit_description') : __('user.manage.create_description') }}
+            </flux:text>
+        </div>
     </header>
 
     <x-ui.card>
@@ -86,7 +81,7 @@
                 </flux:field>
             @endif
 
-            <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-6">
+            <div class="mf-form-actions">
                 <x-ui.button
                     variant="primary"
                     type="submit"
@@ -100,9 +95,9 @@
                     <span wire:loading wire:target="save">{{ __('user.manage.saving') }}</span>
                 </x-ui.button>
 
-                <flux:button variant="ghost" href="{{ route('users.index') }}" wire:navigate>
+                <x-ui.button variant="secondary" href="{{ route('users.index') }}">
                     {{ __('user.manage.cancel') }}
-                </flux:button>
+                </x-ui.button>
             </div>
         </form>
     </x-ui.card>
