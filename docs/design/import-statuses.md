@@ -97,10 +97,12 @@
 | Status | Description |
 |--------|-------------|
 | queued | Awaiting send |
-| sent | Accepted by API |
-| delivered | Delivered to device |
-| read | Read receipt |
-| failed | Send failed after retries |
+| sent | Accepted by Meta Cloud API |
+| delivered | Delivered to device — **requires webhook** (production; verify token configured) |
+| read | Read receipt — **requires webhook** |
+| failed | Send failed after retries, or delivery failure reported via webhook |
+
+**Testing without webhook verify token (Meta test number):** expect `queued` → `sent` or outbound `failed` only. Do not assert `delivered` or `read` until production webhook is configured (REQ-096, [api/README.md](../api/README.md)).
 
 ---
 

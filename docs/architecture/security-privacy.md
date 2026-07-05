@@ -90,7 +90,7 @@ PII in import_rows protected by center isolation and private storage.
 - Secure cookie flags
 - CSP headers
 - `.env` secrets not in Git
-- WhatsApp tokens in encrypted settings
+- WhatsApp tokens in encrypted settings (access token always; webhook verify token when production webhooks enabled)
 - SSH key VPS access; firewall; non-root deploy user
 - Regular dependency updates
 
@@ -98,6 +98,6 @@ PII in import_rows protected by center isolation and private storage.
 
 ## Related
 
-- REQ-005, REQ-100–REQ-103
+- REQ-005, REQ-100–REQ-103, REQ-096
 - [ADR 0005](decisions/0005-exact-duplicate-ledger.md)
 - [ADR 0009](decisions/0009-verification-token-flow.md)

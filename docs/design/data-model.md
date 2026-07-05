@@ -180,7 +180,7 @@ Organization-scoped configuration (WhatsApp, security defaults). Secrets encrypt
 | updated_by | FK nullable | User who last changed setting |
 | timestamps | | |
 
-**Example keys:** `whatsapp.owner_phone`, `whatsapp.phone_number_id`, `whatsapp.access_token`, `whatsapp.webhook_verify_token`
+**Example keys:** `whatsapp.owner_phone`, `whatsapp.phone_number_id`, `whatsapp.access_token` (required for send), `whatsapp.webhook_verify_token` (optional — required in production for inbound delivery status webhooks; omit for Meta test number / outbound-only testing per REQ-096)
 
 ---
 

@@ -10,7 +10,7 @@ Laravel **13.18** scaffolded (Step 13). From project root:
 
 ```bash
 composer install   # if needed
-cp .env.example .env && php artisan key:generate   # first-time only; use .env.local for DB creds
+cp .env.example .env && php artisan key:generate   # first-time only; use local-db.env for DB creds reference
 php artisan serve
 ```
 

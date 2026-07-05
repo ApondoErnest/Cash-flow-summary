@@ -403,6 +403,10 @@ Meta WhatsApp Cloud API. Events: successful import, with duplicates, duplicate-o
 
 Aggregate totals only — no customer/plate lists. Idempotency keys required. Owner number in admin settings.
 
+**Outbound (required to send):** owner phone, phone number ID, access token. Sufficient for Meta test number / local testing.
+
+**Inbound webhooks (production):** webhook verify token optional during testing (Meta test number does not provide one); required in production for delivered / read / failed status updates (REQ-096, ADR 0007).
+
 Historical imports: WhatsApp suppressed by default; optional "Notify Owner" checkbox.
 
 ---

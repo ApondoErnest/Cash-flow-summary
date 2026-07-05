@@ -147,6 +147,7 @@ Requirements use `REQ-xxx` (functional) and `NFR-xxx` (non-functional).
 | REQ-093 | Idempotency prevents duplicate sends | Must | 15 | S8 |
 | REQ-094 | Failure does not roll back import | Must | 15 | S8 |
 | REQ-095 | Owner number in admin settings | Must | 8, 15 | S3 |
+| REQ-096 | Webhook verify token optional for outbound-only testing; required in production for delivery status webhooks | Must | 15 | S8 |
 
 ---
 
@@ -192,7 +193,7 @@ Requirements use `REQ-xxx` (functional) and `NFR-xxx` (non-functional).
 | 80–85 | 12 | REQ-073, REQ-039, REQ-040–046, REQ-049, REQ-068, REQ-081 |
 | 86–89 | 13 | REQ-039–046, REQ-049, REQ-068, REQ-082 |
 | 90–93 | 14 | REQ-072, REQ-083, REQ-085, REQ-086 |
-| 94–98 | 15 | REQ-048, REQ-090–095 |
+| 94–98 | 15 | REQ-048, REQ-090–096 |
 | 99–102 | 16 | REQ-100 (complete) |
 | 103–105 | 17 | NFR-005, NFR-007 |
 | 109–111 | 19 | NFR-006 |

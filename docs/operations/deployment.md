@@ -50,8 +50,15 @@ Secrets via `.env` on server — never in Git:
 - `APP_KEY`
 - `DB_PASSWORD`
 - `REDIS_PASSWORD` (if set)
-- WhatsApp Cloud API token (or DB settings)
-- Meta webhook verify token
+
+WhatsApp credentials are stored in **Owner admin settings** (encrypted), not in Git:
+
+| Setting | Local / staging (Meta test number) | Production |
+|---------|-----------------------------------|------------|
+| Owner phone, phone number ID, access token | Required | Required |
+| Webhook verify token | **Optional** — leave blank for outbound-only testing | **Required** — must match Meta webhook configuration |
+
+Configure Meta webhook URL and verify token on the production VPS only. See [api/README.md](../api/README.md) and REQ-096.
 
 ---
 
@@ -97,7 +104,8 @@ Document exact commands in `deploy/` when implemented.
 - [ ] Owner login
 - [ ] Horizon dashboard accessible (protected)
 - [ ] Verify sample CSV end-to-end on staging
-- [ ] WhatsApp test message (staging number)
+- [ ] WhatsApp test message (Meta test number or staging — phone number ID + access token; webhook optional)
+- [ ] *(Production only)* Meta webhook verified; delivery status updates observed
 
 ---
 

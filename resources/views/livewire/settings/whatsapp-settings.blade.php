@@ -8,9 +8,13 @@
         </flux:text>
     </header>
 
-    @if ($isConfigured)
+    @if ($isOutboundConfigured && $isWebhookConfigured)
         <flux:callout variant="success" icon="check-circle">
-            {{ __('settings.whatsapp.configured_notice') }}
+            {{ __('settings.whatsapp.configured_with_webhooks_notice') }}
+        </flux:callout>
+    @elseif ($isOutboundConfigured)
+        <flux:callout variant="success" icon="check-circle">
+            {{ __('settings.whatsapp.outbound_configured_notice') }}
         </flux:callout>
     @else
         <flux:callout variant="warning" icon="exclamation-triangle">
@@ -79,6 +83,12 @@
                     <flux:error name="webhookVerifyToken" />
                 </flux:field>
             </div>
+
+            @if ($isOutboundConfigured && ! $isWebhookConfigured)
+                <flux:callout variant="info" icon="information-circle">
+                    {{ __('settings.whatsapp.webhook_optional_notice') }}
+                </flux:callout>
+            @endif
 
             <div class="flex justify-end border-t border-slate-200 pt-4">
                 <x-ui.button

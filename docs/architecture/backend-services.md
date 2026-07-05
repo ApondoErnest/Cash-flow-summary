@@ -127,7 +127,7 @@ All query **active daily snapshots** only.
 |---------|----------------|
 | `WhatsAppNotificationService` | Build message, idempotency key |
 | `WhatsAppCloudApiClient` | Meta API HTTP |
-| `WebhookProcessorService` | Delivery status updates |
+| `WebhookProcessorService` | Delivery status updates — **only when** webhook verify token is configured (REQ-096) |
 
 ---
 

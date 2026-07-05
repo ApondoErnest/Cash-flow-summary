@@ -81,6 +81,39 @@ test('idle session timeout logs user out and shows login message', function () {
         ->assertSee(__('auth.session_expired'), false);
 });
 
+test('idle session timeout redirects wire navigate requests to login', function () {
+    actingAsOwner();
+
+    session([
+        config('auth_security.session.last_activity_key') => now()->subMinutes(
+            app(SessionService::class)->timeoutMinutes() + 1
+        )->timestamp,
+    ]);
+
+    $this->withHeader('X-Livewire-Navigate', '1')
+        ->followingRedirects()
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee(__('auth.sign_in'), false);
+
+    $this->assertGuest();
+});
+
+test('idle session timeout redirect uses a relative login path', function () {
+    Config::set('app.url', 'http://localhost');
+
+    actingAsOwner();
+
+    session([
+        config('auth_security.session.last_activity_key') => now()->subMinutes(
+            app(SessionService::class)->timeoutMinutes() + 1
+        )->timestamp,
+    ]);
+
+    $this->get(route('dashboard'))
+        ->assertRedirect('/login');
+});
+
 test('active session is refreshed on authenticated requests', function () {
     actingAsOwner();
 

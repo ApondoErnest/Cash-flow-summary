@@ -38,8 +38,10 @@ return [
     'whatsapp' => [
         'title' => 'WhatsApp Settings',
         'description' => 'Configure the owner notification number and Meta WhatsApp Cloud API credentials.',
-        'configured_notice' => 'WhatsApp is configured. Outbound notifications will use these credentials once messaging is enabled.',
-        'incomplete_notice' => 'Complete all fields below to enable WhatsApp notifications for this organization.',
+        'outbound_configured_notice' => 'WhatsApp outbound messaging is configured. You can send notifications with the phone number ID and access token below.',
+        'configured_with_webhooks_notice' => 'WhatsApp is fully configured, including webhooks for delivered, read, and failed status updates.',
+        'incomplete_notice' => 'Enter the owner phone number, phone number ID, and access token to enable outbound WhatsApp notifications.',
+        'webhook_optional_notice' => 'Webhook verify token is optional for local testing with Meta’s test number. Add it in production when Meta webhooks are configured to track delivery status.',
         'saved' => 'WhatsApp settings saved.',
         'saving' => 'Saving…',
         'notifications_title' => 'Configuration',
@@ -50,8 +52,8 @@ return [
             'access_token' => 'Access token',
             'access_token_help' => 'Permanent token from Meta Business Manager. Stored encrypted.',
             'access_token_configured_help' => 'A token is saved. Leave blank to keep the current token, or enter a new one to replace it.',
-            'webhook_verify_token' => 'Webhook verify token',
-            'webhook_verify_token_help' => 'Shared secret for Meta webhook verification. Stored encrypted.',
+            'webhook_verify_token' => 'Webhook verify token (optional)',
+            'webhook_verify_token_help' => 'Optional for Meta test number / outbound-only testing. Required in production for delivered, read, and failed status webhooks. Stored encrypted.',
             'webhook_verify_token_configured_help' => 'A verify token is saved. Leave blank to keep the current token, or enter a new one to replace it.',
         ],
         'placeholders' => [

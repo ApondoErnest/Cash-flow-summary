@@ -66,6 +66,16 @@ final class SettingsService
         );
     }
 
+    public function whatsAppOutboundConfigured(int $organizationId): bool
+    {
+        return $this->whatsAppSettings($organizationId)->isOutboundConfigured();
+    }
+
+    public function whatsAppWebhooksEnabled(int $organizationId): bool
+    {
+        return $this->whatsAppSettings($organizationId)->isWebhookConfigured();
+    }
+
     /**
      * @param  array{
      *     owner_phone: string,

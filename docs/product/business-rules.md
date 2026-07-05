@@ -28,6 +28,7 @@
 | BR-016 | Exact duplicate normalization | **`field_specific_v1`** — see normalization-policy.md |
 | BR-017 | Probable duplicates | All roles see details; informational only |
 | BR-018 | Owner WhatsApp number | Admin settings at deployment; not in Git |
+| BR-023 | WhatsApp webhook verify token | Optional for outbound-only testing (Meta test number); required in production for delivered/read/failed status webhooks |
 | BR-019 | Owner active center | One selected center at a time; no All Centers operational view |
 | BR-020 | Owner login flow | Login → Center Selection → Open Center → dashboard |
 | BR-021 | Owner CSV scope | Active session center; no center picker on CSV page |

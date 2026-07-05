@@ -15,7 +15,7 @@
 | 65–71 | Import commit, duplicates, versions | duplicate_historical, concurrency; AC #18–19, #22–23 |
 | 72–89 | CSV UI, role flows | Verify/Import/Reject; AC #15–16 |
 | 90–93 | Reports reconcile | AC #26, #45 |
-| 94–98 | WhatsApp idempotency | AC #30–32 |
+| 94–98 | WhatsApp idempotency; outbound send without webhook token (Meta test number) | AC #30–32; REQ-096 |
 | 103–105 | Full suite + CI | All fixtures; NFR-005 |
 | 106–108 | UAT | Real-format samples (private storage) |
 

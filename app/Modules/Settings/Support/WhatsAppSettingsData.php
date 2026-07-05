@@ -13,11 +13,20 @@ final readonly class WhatsAppSettingsData
         public bool $webhookVerifyTokenConfigured,
     ) {}
 
-    public function isConfigured(): bool
+    public function isOutboundConfigured(): bool
     {
         return filled($this->ownerPhone)
             && filled($this->phoneNumberId)
-            && $this->accessTokenConfigured
-            && $this->webhookVerifyTokenConfigured;
+            && $this->accessTokenConfigured;
+    }
+
+    public function isWebhookConfigured(): bool
+    {
+        return $this->webhookVerifyTokenConfigured;
+    }
+
+    public function isConfigured(): bool
+    {
+        return $this->isOutboundConfigured();
     }
 }

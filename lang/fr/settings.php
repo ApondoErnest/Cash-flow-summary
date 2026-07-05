@@ -38,8 +38,10 @@ return [
     'whatsapp' => [
         'title' => 'Paramètres WhatsApp',
         'description' => 'Configurez le numéro de notification du propriétaire et les identifiants Meta WhatsApp Cloud API.',
-        'configured_notice' => 'WhatsApp est configuré. Les notifications sortantes utiliseront ces identifiants lorsque la messagerie sera activée.',
-        'incomplete_notice' => 'Complétez tous les champs ci-dessous pour activer les notifications WhatsApp pour cette organisation.',
+        'outbound_configured_notice' => 'La messagerie WhatsApp sortante est configurée. Vous pouvez envoyer des notifications avec l’ID du numéro et le jeton d’accès ci-dessous.',
+        'configured_with_webhooks_notice' => 'WhatsApp est entièrement configuré, y compris les webhooks pour les statuts livré, lu et échoué.',
+        'incomplete_notice' => 'Saisissez le numéro du propriétaire, l’ID du numéro et le jeton d’accès pour activer les notifications WhatsApp sortantes.',
+        'webhook_optional_notice' => 'Le jeton de vérification webhook est facultatif pour les tests locaux avec le numéro test Meta. Ajoutez-le en production lorsque les webhooks Meta sont configurés pour suivre les statuts de livraison.',
         'saved' => 'Paramètres WhatsApp enregistrés.',
         'saving' => 'Enregistrement…',
         'notifications_title' => 'Configuration',
@@ -50,8 +52,8 @@ return [
             'access_token' => 'Jeton d\'accès',
             'access_token_help' => 'Jeton permanent depuis Meta Business Manager. Stocké chiffré.',
             'access_token_configured_help' => 'Un jeton est enregistré. Laissez vide pour le conserver ou saisissez-en un nouveau pour le remplacer.',
-            'webhook_verify_token' => 'Jeton de vérification webhook',
-            'webhook_verify_token_help' => 'Secret partagé pour la vérification webhook Meta. Stocké chiffré.',
+            'webhook_verify_token' => 'Jeton de vérification webhook (facultatif)',
+            'webhook_verify_token_help' => 'Facultatif pour le numéro test Meta / envoi sortant seul. Requis en production pour les webhooks livré, lu et échoué. Stocké chiffré.',
             'webhook_verify_token_configured_help' => 'Un jeton est enregistré. Laissez vide pour le conserver ou saisissez-en un nouveau pour le remplacer.',
         ],
         'placeholders' => [

@@ -107,6 +107,7 @@ Out of scope: migration PHP, Eloquent models, and application-layer enforcement 
 |-------------|---------------------|
 | REQ-090–094 | `whatsapp_messages`, `whatsapp_webhook_events`, `idempotency_key` unique |
 | REQ-095, BR-018 | **`organization_settings`** — Owner phone, API credentials (encrypted) |
+| REQ-096, BR-023 | `whatsapp.webhook_verify_token` optional for outbound-only testing; webhook events and delivery status when token configured |
 | REQ-048 | `import_verifications.notify_owner` |
 
 ### 4.6 Audit and security

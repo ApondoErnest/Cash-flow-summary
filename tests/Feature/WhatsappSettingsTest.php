@@ -13,7 +13,27 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('owner can save whatsapp settings', function () {
+test('owner can save whatsapp settings without webhook verify token', function () {
+    $owner = actingAsOwnerWithoutActiveCenter();
+
+    Livewire::test(WhatsappSettings::class)
+        ->set('ownerPhone', '+237612345678')
+        ->set('phoneNumberId', '123456789012345')
+        ->set('accessToken', 'EAAtest-access-token-value-123456')
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertSee(__('settings.whatsapp.outbound_configured_notice'), false)
+        ->assertSee(__('settings.whatsapp.webhook_optional_notice'), false);
+
+    $organizationId = (int) $owner->organization_id;
+
+    expect(app(SettingsService::class)->whatsAppOutboundConfigured($organizationId))->toBeTrue()
+        ->and(app(SettingsService::class)->whatsAppWebhooksEnabled($organizationId))->toBeFalse()
+        ->and(app(SettingsService::class)->get($organizationId, OrganizationSettingKey::WhatsappWebhookVerifyToken))
+        ->toBeNull();
+});
+
+test('owner can save whatsapp settings with optional webhook verify token', function () {
     $owner = actingAsOwnerWithoutActiveCenter();
 
     Livewire::test(WhatsappSettings::class)
@@ -67,7 +87,19 @@ test('owner can update whatsapp settings without re-entering secrets', function 
             ->value('value')))->toBe('EAAtest-access-token-value-123456');
 });
 
-test('whatsapp settings page shows configured notice after save', function () {
+test('whatsapp settings page shows outbound configured notice without webhook token', function () {
+    actingAsOwnerWithoutActiveCenter();
+
+    Livewire::test(WhatsappSettings::class)
+        ->set('ownerPhone', '+237612345678')
+        ->set('phoneNumberId', '123456789012345')
+        ->set('accessToken', 'EAAtest-access-token-value-123456')
+        ->call('save')
+        ->assertSee(__('settings.whatsapp.outbound_configured_notice'), false)
+        ->assertDontSee(__('settings.whatsapp.configured_with_webhooks_notice'), false);
+});
+
+test('whatsapp settings page shows full configured notice when webhook token is saved', function () {
     actingAsOwnerWithoutActiveCenter();
 
     Livewire::test(WhatsappSettings::class)
@@ -76,7 +108,19 @@ test('whatsapp settings page shows configured notice after save', function () {
         ->set('accessToken', 'EAAtest-access-token-value-123456')
         ->set('webhookVerifyToken', 'verify-token-secret')
         ->call('save')
-        ->assertSee(__('settings.whatsapp.configured_notice'), false);
+        ->assertSee(__('settings.whatsapp.configured_with_webhooks_notice'), false);
+});
+
+test('whatsapp settings validates webhook verify token length when provided', function () {
+    actingAsOwnerWithoutActiveCenter();
+
+    Livewire::test(WhatsappSettings::class)
+        ->set('ownerPhone', '+237612345678')
+        ->set('phoneNumberId', '123456789012345')
+        ->set('accessToken', 'EAAtest-access-token-value-123456')
+        ->set('webhookVerifyToken', 'short')
+        ->call('save')
+        ->assertHasErrors(['webhookVerifyToken']);
 });
 
 test('whatsapp settings validates owner phone format', function () {

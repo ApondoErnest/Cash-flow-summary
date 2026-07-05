@@ -26,7 +26,7 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.0.94 |
+| Doc set | v2.0.95 |
 | Steps complete | **1–94** |
 | **Next step** | **Step 95** — WhatsAppCloudApiClient + notification service |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
@@ -1326,7 +1326,7 @@ flowchart LR
 | **Reference** | [api/README.md](../api/README.md) |
 | **Done when** | Deliverable complete and locally verified |
 | **Status** | Complete |
-| **Completed** | 2026-07-03 — `organization_settings` migration + `SettingsService`; owner `WhatsappSettings` save UI (owner phone, phone number ID, encrypted access/webhook tokens); audit `settings.updated`; EN/FR lang; `WhatsappSettingsTest` |
+| **Completed** | 2026-07-03 — `organization_settings` migration + `SettingsService`; owner `WhatsappSettings` save UI (owner phone, phone number ID, encrypted access token; **optional** encrypted webhook verify token per REQ-096 / Meta test number); audit `settings.updated`; EN/FR lang; `WhatsappSettingsTest` |
 
 ### Step 95 — WhatsAppCloudApiClient + notification service
 
@@ -1352,8 +1352,9 @@ flowchart LR
 |---|---|
 | **Group** | WhatsApp integration (Phase 15) |
 | **Sprint** | S8 |
-| **Reference** | [api/README.md](../api/README.md) |
+| **Reference** | [api/README.md](../api/README.md), REQ-096, BR-023 |
 | **Done when** | Deliverable complete and locally verified |
+| **Notes** | Webhook routes and delivery status processing **only when** `whatsapp.webhook_verify_token` is configured. Without verify token (Meta test number / local testing), skip webhook registration; outbound send still works; ignore `delivered` / `read` / `failed` inbound events. |
 
 ### Step 98 — Historical import opt-in suppress
 
@@ -1366,8 +1367,8 @@ flowchart LR
 
 **Checkpoint after Step 98** (end of WhatsApp integration):
 
-- **Gate:** Test message sends once; failure does not roll back import
-- **Requirements:** REQ-048, REQ-090–095
+- **Gate:** Test message sends once with phone number ID + access token only (webhook verify token optional); failure does not roll back import; delivery status webhooks verified separately in production configuration
+- **Requirements:** REQ-048, REQ-090–096
 - **Gate tests (AC):** AC #30–32
 
 ---
@@ -1673,7 +1674,7 @@ Full matrix: [requirements.md](../product/requirements.md#appendix--reqnfr-by-ph
 | 80–85 | REQ-073, REQ-081 |
 | 86–89 | REQ-082 |
 | 90–93 | REQ-072, REQ-083, REQ-085–086 |
-| 94–98 | REQ-048, REQ-090–095 |
+| 94–98 | REQ-048, REQ-090–096 |
 | 99–102 | REQ-100 |
 | 103–105 | NFR-005, NFR-007 |
 | 109–111 | NFR-006 |

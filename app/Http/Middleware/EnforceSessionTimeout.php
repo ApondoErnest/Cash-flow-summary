@@ -26,10 +26,9 @@ class EnforceSessionTimeout
 
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+            $request->session()->flash('auth_status', 'session_expired');
 
-            return redirect()
-                ->route('login')
-                ->with('auth_status', 'session_expired');
+            return redirect()->to(route('login', absolute: false));
         }
 
         if ($request->user()) {

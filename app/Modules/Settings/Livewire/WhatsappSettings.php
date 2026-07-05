@@ -73,11 +73,16 @@ class WhatsappSettings extends Component
 
     public function render(): View
     {
+        $settings = new WhatsAppSettingsData(
+            ownerPhone: $this->ownerPhone !== '' ? $this->ownerPhone : null,
+            phoneNumberId: $this->phoneNumberId !== '' ? $this->phoneNumberId : null,
+            accessTokenConfigured: $this->accessTokenConfigured,
+            webhookVerifyTokenConfigured: $this->webhookVerifyTokenConfigured,
+        );
+
         return view('livewire.settings.whatsapp-settings', [
-            'isConfigured' => $this->accessTokenConfigured
-                && $this->webhookVerifyTokenConfigured
-                && $this->ownerPhone !== ''
-                && $this->phoneNumberId !== '',
+            'isOutboundConfigured' => $settings->isOutboundConfigured(),
+            'isWebhookConfigured' => $settings->isWebhookConfigured(),
         ]);
     }
 
@@ -94,11 +99,7 @@ class WhatsappSettings extends Component
                 'string',
                 'min:20',
             ],
-            'webhookVerifyToken' => [
-                $this->webhookVerifyTokenConfigured ? 'nullable' : 'required',
-                'string',
-                'min:8',
-            ],
+            'webhookVerifyToken' => ['nullable', 'string', 'min:8'],
         ];
     }
 

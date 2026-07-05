@@ -60,7 +60,7 @@ php -m | grep -E 'bcmath|ctype|curl|dom|fileinfo|json|mbstring|openssl|pdo_mysql
 | User `cashflow_app`@`localhost` | Created with local dev grants |
 | App user connection test | `SELECT 1` OK |
 | Redis | `PONG` |
-| Local credentials file | `.env.local` (gitignored — optional local override) |
+| Local credentials file | `local-db.env` (gitignored — DB creds reference; **not** `.env.local`, which Laravel loads when `APP_ENV=local`) |
 
 ### Verified environment (Step 13 — 2026-07-01)
 
@@ -430,6 +430,20 @@ php artisan test
 # or
 ./vendor/bin/pest
 ```
+
+---
+
+## WhatsApp local testing (Meta test number)
+
+For Steps 94–98 integration testing with Meta’s **WhatsApp test number**:
+
+1. In Meta Developer Console, copy **Phone number ID** and **temporary/permanent access token**.
+2. In the app: **Settings → WhatsApp** — enter owner phone (E.164), phone number ID, and access token.
+3. Leave **Webhook verify token** blank — the test number flow does not provide a custom verify token (REQ-096, BR-023).
+4. Save and trigger a test send (Step 95+). Messages should reach the owner phone.
+5. Do **not** expect `delivered` / `read` status in WhatsApp History until production webhook is configured.
+
+Production deployment: configure Meta webhook URL + verify token and enter the same verify token in WhatsApp Settings. See [api/README.md](../api/README.md) and [deployment.md](deployment.md).
 
 ---
 
