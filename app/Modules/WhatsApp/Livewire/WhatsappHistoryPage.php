@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\WhatsApp\Livewire;
 
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Centers\Services\ActiveCenterContextService;
+use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
 use App\Modules\WhatsApp\Models\WhatsappMessage;
+use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
 use App\Modules\WhatsApp\Services\WhatsappHistoryService;
 use App\Modules\WhatsApp\Support\WhatsappHistoryDetailData;
 use App\Modules\WhatsApp\Support\WhatsappHistoryRow;
@@ -86,6 +89,47 @@ class WhatsappHistoryPage extends Component
     public function clearSelection(): void
     {
         $this->selectedMessageId = null;
+    }
+
+    public function resendMessage(
+        WhatsAppNotificationService $notificationService,
+        AuditLogger $auditLogger,
+    ): void {
+        abort_unless(auth()->user()?->isOwner() === true, 403);
+
+        if ($this->selectedMessageId === null) {
+            return;
+        }
+
+        $message = WhatsappMessage::query()->find($this->selectedMessageId);
+        $user = auth()->user();
+
+        if ($message === null
+            || $user === null
+            || $message->status !== WhatsappMessageStatus::Failed
+            || ! app(CenterContextResolver::class)->resourceBelongsToResolvedCenter($user, $message)) {
+            return;
+        }
+
+        $resent = $notificationService->resendFailedMessage($message);
+
+        if ($resent === null) {
+            return;
+        }
+
+        $auditLogger->record(
+            event: 'whatsapp.resent',
+            user: $user,
+            centerId: (int) $message->center_id,
+            resourceType: WhatsappMessage::class,
+            resourceId: (int) $message->id,
+            newValues: [
+                'event_type' => $message->event_type,
+                'import_id' => $message->import_id,
+            ],
+        );
+
+        $this->selectedMessageId = $resent->id;
     }
 
     #[Computed]

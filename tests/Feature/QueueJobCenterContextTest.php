@@ -106,7 +106,9 @@ test('process verification job releases job center context after handle', functi
         app(\App\Modules\CsvVerification\Services\FooterReaderService::class),
         app(\App\Modules\CsvVerification\Services\ReconciliationService::class),
         app(\App\Modules\CsvVerification\Services\DuplicatePreviewService::class),
+        app(\App\Modules\CsvImports\Services\ImportErrorRecorderService::class),
         app(JobCenterContextService::class),
+        app(\App\Modules\AuditLogging\Services\AuditLogger::class),
     );
 
     expect(app(JobCenterContextService::class)->isBound())->toBeFalse();

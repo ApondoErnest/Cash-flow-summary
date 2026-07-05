@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\CsvVerification\Services;
 
 use App\Models\User;
-use App\Modules\AuditLogging\Models\AuditLog;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Modules\CsvVerification\Enums\ImportMode;
@@ -33,6 +33,7 @@ final class VerificationService
     public function __construct(
         private readonly ActiveCenterContextService $activeCenterContext,
         private readonly VerificationCleanupService $cleanupService,
+        private readonly AuditLogger $auditLogger,
     ) {}
 
     public function start(
@@ -138,17 +139,17 @@ final class VerificationService
             'rejected_at' => now(),
         ]);
 
-        AuditLog::query()->create([
-            'user_id' => $user->id,
-            'center_id' => $verification->center_id,
-            'event' => 'verification.rejected',
-            'resource_type' => ImportVerification::class,
-            'resource_id' => $verification->id,
-            'new_values' => [
+        $this->auditLogger->record(
+            event: 'verification.rejected',
+            user: $user,
+            centerId: (int) $verification->center_id,
+            resourceType: ImportVerification::class,
+            resourceId: (int) $verification->id,
+            newValues: [
                 'token' => $verification->token,
                 'filename' => $verification->original_filename,
             ],
-        ]);
+        );
 
         return $verification->fresh();
     }

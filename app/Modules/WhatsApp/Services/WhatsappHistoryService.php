@@ -81,6 +81,7 @@ final class WhatsappHistoryService
             importId: $message->import_id,
             importFilename: $message->import?->original_filename,
             payloadRows: $this->payloadRows($message->payload_summary ?? []),
+            canResend: $message->status === WhatsappMessageStatus::Failed,
         );
     }
 

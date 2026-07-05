@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace App\Modules\Settings\Services;
 
 use App\Models\User;
-use App\Modules\AuditLogging\Models\AuditLog;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Centers\Models\Organization;
 use App\Modules\Settings\Enums\OrganizationSettingKey;
 use App\Modules\Settings\Models\OrganizationSetting;
 use App\Modules\Settings\Support\WhatsAppSettingsData;
+use App\Modules\WhatsApp\Support\WhatsAppCredentials;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 final class SettingsService
 {
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+    ) {}
+
     public function get(int $organizationId, OrganizationSettingKey|string $key): ?string
     {
         $keyValue = $key instanceof OrganizationSettingKey ? $key->value : $key;
@@ -76,6 +81,69 @@ final class SettingsService
         return $this->whatsAppSettings($organizationId)->isWebhookConfigured();
     }
 
+    public function anyWhatsAppWebhooksEnabled(): bool
+    {
+        return OrganizationSetting::query()
+            ->where('key', OrganizationSettingKey::WhatsappWebhookVerifyToken->value)
+            ->whereNotNull('value')
+            ->where('value', '!=', '')
+            ->exists();
+    }
+
+    public function findOrganizationIdByWebhookVerifyToken(string $verifyToken): ?int
+    {
+        $settings = OrganizationSetting::query()
+            ->where('key', OrganizationSettingKey::WhatsappWebhookVerifyToken->value)
+            ->whereNotNull('value')
+            ->where('value', '!=', '')
+            ->get(['organization_id', 'value']);
+
+        foreach ($settings as $setting) {
+            if (hash_equals($this->decryptValue(OrganizationSettingKey::WhatsappWebhookVerifyToken->value, $setting->value), $verifyToken)) {
+                return (int) $setting->organization_id;
+            }
+        }
+
+        return null;
+    }
+
+    public function findOrganizationIdByWhatsAppPhoneNumberId(string $phoneNumberId): ?int
+    {
+        $normalized = trim($phoneNumberId);
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        $setting = OrganizationSetting::query()
+            ->where('key', OrganizationSettingKey::WhatsappPhoneNumberId->value)
+            ->where('value', $normalized)
+            ->first(['organization_id']);
+
+        return $setting !== null ? (int) $setting->organization_id : null;
+    }
+
+    public function whatsAppCredentials(int $organizationId): ?WhatsAppCredentials
+    {
+        $settings = $this->whatsAppSettings($organizationId);
+
+        if (! $settings->isOutboundConfigured()) {
+            return null;
+        }
+
+        $accessToken = $this->get($organizationId, OrganizationSettingKey::WhatsappAccessToken);
+
+        if ($accessToken === null || $settings->ownerPhone === null || $settings->phoneNumberId === null) {
+            return null;
+        }
+
+        return new WhatsAppCredentials(
+            ownerPhone: $settings->ownerPhone,
+            phoneNumberId: $settings->phoneNumberId,
+            accessToken: $accessToken,
+        );
+    }
+
     /**
      * @param  array{
      *     owner_phone: string,
@@ -119,20 +187,19 @@ final class SettingsService
                 );
             }
 
-            AuditLog::query()->create([
-                'user_id' => $user->id,
-                'center_id' => null,
-                'event' => 'settings.updated',
-                'resource_type' => OrganizationSetting::class,
-                'resource_id' => (int) $organization->id,
-                'new_values' => [
+            $this->auditLogger->record(
+                event: 'settings.updated',
+                user: $user,
+                resourceType: OrganizationSetting::class,
+                resourceId: (int) $organization->id,
+                newValues: [
                     'scope' => 'whatsapp',
                     'owner_phone' => $this->normalizePhone($payload['owner_phone']),
                     'phone_number_id' => trim($payload['phone_number_id']),
                     'access_token' => filled($payload['access_token'] ?? null) ? '[updated]' : '[unchanged]',
                     'webhook_verify_token' => filled($payload['webhook_verify_token'] ?? null) ? '[updated]' : '[unchanged]',
                 ],
-            ]);
+            );
 
             return $this->whatsAppSettings((int) $organization->id);
         });

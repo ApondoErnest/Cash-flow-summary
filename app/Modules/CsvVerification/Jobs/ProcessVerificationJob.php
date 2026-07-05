@@ -6,6 +6,7 @@ namespace App\Modules\CsvVerification\Jobs;
 
 use App\Modules\CsvVerification\Enums\VerificationStatus;
 use App\Modules\CsvVerification\Models\ImportVerification;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Support\Center\JobCenterContextService;
 use App\Modules\CsvVerification\Services\CsvInspectionService;
 use App\Modules\CsvVerification\Services\CsvParsingService;
@@ -37,6 +38,7 @@ class ProcessVerificationJob implements ShouldQueue
         DuplicatePreviewService $duplicatePreviewService,
         ImportErrorRecorderService $importErrorRecorderService,
         JobCenterContextService $jobCenterContextService,
+        AuditLogger $auditLogger,
     ): void {
         $jobCenterContextService->runForCenter($this->centerId, function () use (
             $inspectionService,
@@ -46,6 +48,7 @@ class ProcessVerificationJob implements ShouldQueue
             $reconciliationService,
             $duplicatePreviewService,
             $importErrorRecorderService,
+            $auditLogger,
         ): void {
             $this->process(
                 $inspectionService,
@@ -55,6 +58,7 @@ class ProcessVerificationJob implements ShouldQueue
                 $reconciliationService,
                 $duplicatePreviewService,
                 $importErrorRecorderService,
+                $auditLogger,
             );
         });
     }
@@ -67,6 +71,7 @@ class ProcessVerificationJob implements ShouldQueue
         ReconciliationService $reconciliationService,
         DuplicatePreviewService $duplicatePreviewService,
         ImportErrorRecorderService $importErrorRecorderService,
+        AuditLogger $auditLogger,
     ): void {
         $verification = ImportVerification::query()
             ->where('token', $this->token)
@@ -94,6 +99,8 @@ class ProcessVerificationJob implements ShouldQueue
                 'validation_result' => $inspection->toValidationPayload(),
             ]);
 
+            $this->recordVerificationFailure($auditLogger, $verification, implode(' ', $inspection->errors));
+
             return;
         }
 
@@ -112,6 +119,8 @@ class ProcessVerificationJob implements ShouldQueue
                 'delimiter' => $inspection->delimiter,
                 'validation_result' => $validationResult,
             ]);
+
+            $this->recordVerificationFailure($auditLogger, $verification, implode(' ', $mapping->errors));
 
             return;
         }
@@ -154,6 +163,8 @@ class ProcessVerificationJob implements ShouldQueue
                 'error_message' => implode(' ', $footerResult->errors),
             ]);
 
+            $this->recordVerificationFailure($auditLogger, $verification, implode(' ', $footerResult->errors));
+
             return;
         }
 
@@ -177,6 +188,8 @@ class ProcessVerificationJob implements ShouldQueue
                 'status' => VerificationStatus::Failed,
                 'error_message' => implode(' ', $reconciliationResult->errors),
             ]);
+
+            $this->recordVerificationFailure($auditLogger, $verification, implode(' ', $reconciliationResult->errors));
 
             return;
         }
@@ -209,5 +222,24 @@ class ProcessVerificationJob implements ShouldQueue
             'status' => VerificationStatus::Ready,
             'verified_at' => now(),
         ]);
+    }
+
+    private function recordVerificationFailure(
+        AuditLogger $auditLogger,
+        ImportVerification $verification,
+        string $errorMessage,
+    ): void {
+        $auditLogger->record(
+            event: 'verification.failed',
+            user: $verification->user,
+            centerId: (int) $verification->center_id,
+            resourceType: ImportVerification::class,
+            resourceId: (int) $verification->id,
+            newValues: [
+                'token' => $verification->token,
+                'filename' => $verification->original_filename,
+            ],
+            reason: $errorMessage,
+        );
     }
 }

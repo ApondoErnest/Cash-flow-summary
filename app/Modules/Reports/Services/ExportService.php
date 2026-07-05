@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Reports\Services;
 
 use App\Models\User;
-use App\Modules\AuditLogging\Models\AuditLog;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Dashboards\Enums\DashboardPeriod;
 use App\Modules\Reports\Enums\ExportFormat;
@@ -30,6 +30,7 @@ final class ExportService
     public function __construct(
         private readonly ReportQueryService $reportQueryService,
         private readonly CenterReportExportBuilder $exportBuilder,
+        private readonly AuditLogger $auditLogger,
     ) {}
 
     public function requestCenterReportExport(
@@ -52,18 +53,18 @@ final class ExportService
                 'status' => ExportRequestStatus::Pending,
             ]);
 
-            AuditLog::query()->create([
-                'user_id' => $user->id,
-                'center_id' => $center->id,
-                'event' => 'export.requested',
-                'resource_type' => ExportRequest::class,
-                'resource_id' => $export->id,
-                'new_values' => [
+            $this->auditLogger->record(
+                event: 'export.requested',
+                user: $user,
+                centerId: (int) $center->id,
+                resourceType: ExportRequest::class,
+                resourceId: (int) $export->id,
+                newValues: [
                     'report_type' => ReportType::CenterReport->value,
                     'format' => $format->value,
                     'filters' => $filters,
                 ],
-            ]);
+            );
 
             return $export;
         });
@@ -96,17 +97,19 @@ final class ExportService
             abort(404);
         }
 
-        AuditLog::query()->create([
-            'user_id' => auth()->id(),
-            'center_id' => $export->center_id,
-            'event' => 'export.downloaded',
-            'resource_type' => ExportRequest::class,
-            'resource_id' => $export->id,
-            'new_values' => [
+        $user = auth()->user();
+
+        $this->auditLogger->record(
+            event: 'export.downloaded',
+            user: $user instanceof User ? $user : null,
+            centerId: (int) $export->center_id,
+            resourceType: ExportRequest::class,
+            resourceId: (int) $export->id,
+            newValues: [
                 'format' => $export->format->value,
                 'report_type' => $export->report_type,
             ],
-        ]);
+        );
 
         $disk = (string) config('exports.disk', 'local');
         $filename = $this->downloadFilename($export);

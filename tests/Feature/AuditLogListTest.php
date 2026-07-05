@@ -15,8 +15,7 @@ test('owner can view audit logs without an active center', function () {
 
     $this->get(route('audit-logs.index'))
         ->assertOk()
-        ->assertSee(__('audit.list.title'), false)
-        ->assertSee(__('audit.list.shell_notice'), false);
+        ->assertSee(__('audit.list.title'), false);
 });
 
 test('owner audit log list shows organization-wide events across centers', function () {

@@ -146,7 +146,13 @@ function sampleCsvContents(): string
     return csvFixture(frenchCsvHeaderLine());
 }
 
-function startVerificationFor(User $user, Center $center, ?string $contents = null, ImportMode $importMode = ImportMode::Operational): ImportVerification
+function startVerificationFor(
+    User $user,
+    Center $center,
+    ?string $contents = null,
+    ImportMode $importMode = ImportMode::Operational,
+    bool $notifyOwner = false,
+): ImportVerification
 {
     $file = UploadedFile::fake()->createWithContent(
         'cashflow-june.csv',
@@ -158,6 +164,7 @@ function startVerificationFor(User $user, Center $center, ?string $contents = nu
         center: $center,
         file: $file,
         importMode: $importMode,
+        notifyOwner: $notifyOwner,
     );
 }
 
@@ -186,6 +193,7 @@ function runProcessVerificationJob(string $token, ?int $centerId = null): void
         app(DuplicatePreviewService::class),
         app(\App\Modules\CsvImports\Services\ImportErrorRecorderService::class),
         app(\App\Support\Center\JobCenterContextService::class),
+        app(\App\Modules\AuditLogging\Services\AuditLogger::class),
     );
 }
 

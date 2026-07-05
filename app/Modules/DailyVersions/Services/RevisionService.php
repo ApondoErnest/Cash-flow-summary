@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\DailyVersions\Services;
 
 use App\Models\User;
-use App\Modules\AuditLogging\Models\AuditLog;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Modules\CsvImports\Enums\DayComparisonResult;
@@ -29,6 +29,7 @@ final class RevisionService
         private readonly ActiveSnapshotService $activeSnapshotService,
         private readonly ActiveCenterContextService $activeCenterContext,
         private readonly SummaryGenerationService $summaryGenerationService,
+        private readonly AuditLogger $auditLogger,
     ) {}
 
     public function applyImportComparisons(Import $import, User $submittedBy): ImportVersionApplyResult
@@ -69,6 +70,20 @@ final class RevisionService
             }
         }
 
+        if ($proposedRevisions > 0) {
+            $this->auditLogger->record(
+                event: 'revision.submitted',
+                user: $submittedBy,
+                centerId: (int) $import->center_id,
+                resourceType: Import::class,
+                resourceId: (int) $import->id,
+                newValues: [
+                    'import_id' => $import->id,
+                    'proposed_revisions' => $proposedRevisions,
+                ],
+            );
+        }
+
         return new ImportVersionApplyResult(
             activatedDays: $activatedDays,
             proposedRevisions: $proposedRevisions,
@@ -90,18 +105,18 @@ final class RevisionService
             $version->business_date->toDateString(),
         );
 
-        AuditLog::query()->create([
-            'user_id' => $owner->id,
-            'center_id' => $version->center_id,
-            'event' => 'revision.approved',
-            'resource_type' => DailyVersion::class,
-            'resource_id' => $version->id,
-            'new_values' => [
+        $this->auditLogger->record(
+            event: 'revision.approved',
+            user: $owner,
+            centerId: (int) $version->center_id,
+            resourceType: DailyVersion::class,
+            resourceId: (int) $version->id,
+            newValues: [
                 'business_date' => $version->business_date?->toDateString(),
                 'version_number' => $version->version_number,
                 'import_id' => $version->import_id,
             ],
-        ]);
+        );
 
         if ($version->import_id !== null) {
             $this->finalizeImportStatusIfApprovalsComplete(
@@ -131,18 +146,19 @@ final class RevisionService
             'rejected_reason' => $reason,
         ]);
 
-        AuditLog::query()->create([
-            'user_id' => $owner->id,
-            'center_id' => $version->center_id,
-            'event' => 'revision.rejected',
-            'resource_type' => DailyVersion::class,
-            'resource_id' => $version->id,
-            'new_values' => [
+        $this->auditLogger->record(
+            event: 'revision.rejected',
+            user: $owner,
+            centerId: (int) $version->center_id,
+            resourceType: DailyVersion::class,
+            resourceId: (int) $version->id,
+            newValues: [
                 'business_date' => $version->business_date?->toDateString(),
                 'version_number' => $version->version_number,
                 'reason' => $reason,
             ],
-        ]);
+            reason: $reason,
+        );
 
         if ($version->import_id !== null) {
             $this->finalizeImportStatusIfApprovalsComplete(

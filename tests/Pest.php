@@ -9,6 +9,7 @@ require __DIR__.'/Support/CsvVerificationHelpers.php';
 require __DIR__.'/Support/ImportCommitHelpers.php';
 require __DIR__.'/Support/AnomalyHelpers.php';
 require __DIR__.'/Support/TwoFactorHelpers.php';
+require __DIR__.'/Support/WhatsAppNotificationHelpers.php';
 
 /*
 |--------------------------------------------------------------------------

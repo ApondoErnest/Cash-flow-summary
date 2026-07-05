@@ -8,10 +8,6 @@
         </flux:text>
     </header>
 
-    <flux:callout variant="info" icon="information-circle" class="mf-audit-log-shell-notice">
-        {{ __('audit.list.shell_notice') }}
-    </flux:callout>
-
     @if ($this->selectedLog)
         <x-ui.card :title="__('audit.list.detail_title')" compact>
             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

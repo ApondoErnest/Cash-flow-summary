@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Centers\Services;
 
 use App\Models\User;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Centers\Models\Center;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -12,6 +13,10 @@ use Illuminate\Validation\ValidationException;
 
 final class CenterService
 {
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+    ) {}
+
     /**
      * @return Collection<int, Center>
      */
@@ -39,7 +44,7 @@ final class CenterService
     {
         $this->assertUniqueCode($owner, (string) $data['code']);
 
-        return Center::query()->create([
+        $center = Center::query()->create([
             'organization_id' => $owner->organization_id,
             'name' => $data['name'],
             'code' => $data['code'],
@@ -51,6 +56,21 @@ final class CenterService
             'submission_deadline' => $data['submission_deadline'] ?? null,
             'is_active' => $data['is_active'] ?? true,
         ]);
+
+        $this->auditLogger->record(
+            event: 'center.created',
+            user: $owner,
+            centerId: (int) $center->id,
+            resourceType: Center::class,
+            resourceId: (int) $center->id,
+            newValues: [
+                'name' => $data['name'],
+                'code' => $data['code'],
+                'is_active' => $data['is_active'] ?? true,
+            ],
+        );
+
+        return $center;
     }
 
     /**
@@ -60,6 +80,12 @@ final class CenterService
     {
         $this->assertBelongsToOrganization($center, $owner);
         $this->assertUniqueCode($owner, (string) $data['code'], $center->id);
+
+        $previousValues = [
+            'name' => $center->name,
+            'code' => $center->code,
+            'is_active' => $center->is_active,
+        ];
 
         $center->fill([
             'name' => $data['name'],
@@ -72,6 +98,20 @@ final class CenterService
             'submission_deadline' => $data['submission_deadline'] ?? null,
             'is_active' => $data['is_active'] ?? true,
         ])->save();
+
+        $this->auditLogger->record(
+            event: 'center.updated',
+            user: $owner,
+            centerId: (int) $center->id,
+            resourceType: Center::class,
+            resourceId: (int) $center->id,
+            oldValues: $previousValues,
+            newValues: [
+                'name' => $data['name'],
+                'code' => $data['code'],
+                'is_active' => $data['is_active'] ?? true,
+            ],
+        );
 
         return $center->fresh();
     }

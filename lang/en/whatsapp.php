@@ -8,6 +8,11 @@ return [
         'read' => 'Read',
         'failed' => 'Failed',
     ],
+    'unknown_uploader' => 'Unknown uploader',
+    'errors' => [
+        'send_failed' => 'WhatsApp notification could not be sent after multiple attempts.',
+        'webhook_delivery_failed' => 'WhatsApp reported a delivery failure.',
+    ],
     'event_type' => [
         'import_success' => 'Successful import',
         'import_with_duplicates' => 'Import with duplicates',
@@ -29,6 +34,7 @@ return [
         'table_description' => 'Filter by delivery status, event type, or date.',
         'detail_title' => 'Message detail',
         'close_detail' => 'Close detail',
+        'resend' => 'Resend notification',
         'empty' => 'No WhatsApp notifications recorded for this center.',
         'view_detail' => 'View',
         'payload_title' => 'Message summary',

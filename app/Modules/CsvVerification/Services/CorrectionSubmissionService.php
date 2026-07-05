@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace App\Modules\CsvVerification\Services;
 
 use App\Models\User;
-use App\Modules\AuditLogging\Models\AuditLog;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvVerification\Enums\ImportMode;
 use Illuminate\Auth\Access\AuthorizationException;
 
 final class CorrectionSubmissionService
 {
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+    ) {}
+
     public function assertModeAllowed(User $user, ImportMode $mode): void
     {
         if ($mode->canSubmit($user)) {
@@ -27,17 +31,17 @@ final class CorrectionSubmissionService
             return;
         }
 
-        AuditLog::query()->create([
-            'user_id' => $user->id,
-            'center_id' => $import->center_id,
-            'event' => 'correction.submitted',
-            'resource_type' => Import::class,
-            'resource_id' => $import->id,
-            'new_values' => [
+        $this->auditLogger->record(
+            event: 'correction.submitted',
+            user: $user,
+            centerId: (int) $import->center_id,
+            resourceType: Import::class,
+            resourceId: (int) $import->id,
+            newValues: [
                 'import_id' => $import->id,
                 'filename' => $import->original_filename,
                 'status' => $import->status->value,
             ],
-        ]);
+        );
     }
 }

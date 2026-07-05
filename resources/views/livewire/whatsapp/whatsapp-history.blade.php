@@ -84,6 +84,14 @@
                 </flux:button>
             </div>
 
+            @if ($this->selectedMessage->canResend)
+                <div class="mt-4 flex justify-end border-t border-slate-200/80 pt-4">
+                    <flux:button variant="primary" size="sm" wire:click="resendMessage">
+                        {{ __('whatsapp.history.resend') }}
+                    </flux:button>
+                </div>
+            @endif
+
             @if ($this->selectedMessage->payloadRows !== [])
                 <div class="mt-4 border-t border-slate-200/80 pt-4">
                     <p class="text-xs font-semibold uppercase tracking-wide text-text-muted">{{ __('whatsapp.history.payload_title') }}</p>

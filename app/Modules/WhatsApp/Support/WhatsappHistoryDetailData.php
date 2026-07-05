@@ -26,5 +26,6 @@ final readonly class WhatsappHistoryDetailData
         public ?int $importId,
         public ?string $importFilename,
         public array $payloadRows,
+        public bool $canResend = false,
     ) {}
 }

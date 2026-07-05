@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Users\Services;
 
 use App\Models\User;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Authentication\Services\PasswordService;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\CenterService;
@@ -19,6 +20,10 @@ use Spatie\Permission\Models\Role;
 
 final class UserService
 {
+    public function __construct(
+        private readonly AuditLogger $auditLogger,
+    ) {}
+
     /**
      * @param  array{
      *     search?: string,
@@ -92,6 +97,20 @@ final class UserService
 
         $this->syncRole($user, (string) $data['role']);
 
+        $this->auditLogger->record(
+            event: 'user.created',
+            user: $owner,
+            centerId: $centerId,
+            resourceType: User::class,
+            resourceId: (int) $user->id,
+            newValues: [
+                'username' => $user->username,
+                'name' => $user->name,
+                'role' => $data['role'],
+                'center_id' => $centerId,
+            ],
+        );
+
         return [
             'user' => $user->fresh(['center', 'roles']),
             'temporary_password' => $temporaryPassword,
@@ -126,6 +145,9 @@ final class UserService
         $this->assertUniqueUsername((string) $data['username'], $user->id);
         $centerId = $this->resolveCenterId($owner, $role, $data['center_id'] ?? null);
 
+        $previousCenterId = $user->center_id !== null ? (int) $user->center_id : null;
+        $wasActive = $user->is_active;
+
         $user->fill([
             'name' => $data['name'],
             'username' => $data['username'],
@@ -136,6 +158,43 @@ final class UserService
         ])->save();
 
         $this->syncRole($user, $role);
+
+        $this->auditLogger->record(
+            event: 'user.updated',
+            user: $owner,
+            centerId: $centerId,
+            resourceType: User::class,
+            resourceId: (int) $user->id,
+            newValues: [
+                'username' => $user->username,
+                'name' => $user->name,
+                'role' => $role,
+                'center_id' => $centerId,
+                'is_active' => (bool) ($data['is_active'] ?? true),
+            ],
+        );
+
+        if ($previousCenterId !== null && $previousCenterId !== $centerId) {
+            $this->auditLogger->record(
+                event: 'user.reassigned',
+                user: $owner,
+                centerId: $centerId,
+                resourceType: User::class,
+                resourceId: (int) $user->id,
+                oldValues: ['center_id' => $previousCenterId],
+                newValues: ['center_id' => $centerId],
+            );
+        }
+
+        if ($wasActive && ! (bool) ($data['is_active'] ?? true)) {
+            $this->auditLogger->record(
+                event: 'user.deactivated',
+                user: $owner,
+                centerId: $centerId,
+                resourceType: User::class,
+                resourceId: (int) $user->id,
+            );
+        }
 
         return $user->fresh(['center', 'roles']);
     }
@@ -150,7 +209,18 @@ final class UserService
             ]);
         }
 
-        return $passwordService->assignTemporaryPassword($user);
+        $temporaryPassword = $passwordService->assignTemporaryPassword($user);
+
+        $this->auditLogger->record(
+            event: 'user.password_reset',
+            user: $owner,
+            centerId: $user->center_id !== null ? (int) $user->center_id : null,
+            resourceType: User::class,
+            resourceId: (int) $user->id,
+            newValues: ['username' => $user->username],
+        );
+
+        return $temporaryPassword;
     }
 
     public function delete(User $owner, User $user): void
@@ -175,7 +245,16 @@ final class UserService
             ]);
         }
 
-        DB::transaction(function () use ($user): void {
+        DB::transaction(function () use ($owner, $user): void {
+            $this->auditLogger->record(
+                event: 'user.deactivated',
+                user: $owner,
+                centerId: $user->center_id !== null ? (int) $user->center_id : null,
+                resourceType: User::class,
+                resourceId: (int) $user->id,
+                newValues: ['deleted' => true],
+            );
+
             $user->syncRoles([]);
             $user->delete();
         });

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\CsvImports\Services;
 
 use App\Models\User;
-use App\Modules\AuditLogging\Models\AuditLog;
+use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Modules\CsvImports\Enums\ImportStatus;
@@ -21,6 +21,7 @@ use App\Modules\DailyVersions\Support\VersionComparisonProcessResult;
 use App\Modules\DuplicateDetection\Services\MasterLedgerService;
 use App\Modules\DuplicateDetection\Support\MasterLedgerProcessResult;
 use App\Modules\Reports\Services\SummaryGenerationService;
+use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -37,6 +38,8 @@ final class ImportService
         private readonly SummaryGenerationService $summaryGenerationService,
         private readonly VerificationCleanupService $verificationCleanupService,
         private readonly CorrectionSubmissionService $correctionSubmissionService,
+        private readonly WhatsAppNotificationService $whatsAppNotificationService,
+        private readonly AuditLogger $auditLogger,
     ) {}
 
     public function commitFromVerification(User $user, string $token): Import
@@ -154,20 +157,20 @@ final class ImportService
                 'committed_at' => now(),
             ]);
 
-            AuditLog::query()->create([
-                'user_id' => $user->id,
-                'center_id' => $locked->center_id,
-                'event' => 'import.created',
-                'resource_type' => Import::class,
-                'resource_id' => $import->id,
-                'new_values' => [
+            $this->auditLogger->record(
+                event: 'import.created',
+                user: $user,
+                centerId: (int) $locked->center_id,
+                resourceType: Import::class,
+                resourceId: (int) $import->id,
+                newValues: [
                     'token' => $locked->token,
                     'filename' => $locked->original_filename,
                     'import_id' => $import->id,
                     'row_count' => $rowCount,
                     'import_mode' => $import->import_mode->value,
                 ],
-            ]);
+            );
 
             $this->correctionSubmissionService->recordSubmission($import->fresh(), $user);
 
@@ -179,6 +182,8 @@ final class ImportService
         if ($import->import_verification_id !== $verification->id) {
             throw new ExactFileDuplicateException($import);
         }
+
+        $this->whatsAppNotificationService->queueImportNotification($import);
 
         return $import;
     }
@@ -194,18 +199,18 @@ final class ImportService
             'committed_at' => now(),
         ]);
 
-        AuditLog::query()->create([
-            'user_id' => $user->id,
-            'center_id' => $verification->center_id,
-            'event' => 'import.exact_file_duplicate',
-            'resource_type' => Import::class,
-            'resource_id' => $existingImport->id,
-            'new_values' => [
+        $this->auditLogger->record(
+            event: 'import.exact_file_duplicate',
+            user: $user,
+            centerId: (int) $verification->center_id,
+            resourceType: Import::class,
+            resourceId: (int) $existingImport->id,
+            newValues: [
                 'token' => $verification->token,
                 'filename' => $verification->original_filename,
                 'existing_import_id' => $existingImport->id,
             ],
-        ]);
+        );
 
         return $existingImport;
     }

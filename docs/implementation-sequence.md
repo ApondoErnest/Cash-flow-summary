@@ -26,9 +26,9 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.0.95 |
-| Steps complete | **1–94** |
-| **Next step** | **Step 95** — WhatsAppCloudApiClient + notification service |
+| Doc set | v2.1.00 |
+| Steps complete | **1–99** |
+| **Next step** | **Step 100** — File download authorization review |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -132,11 +132,11 @@ flowchart LR
 | 92 | ExportService — CSV, Excel, PDF queue | Reports & exports | S5–S6 | Complete |
 | 93 | Export download + expiry | Reports & exports | S5–S6 | Complete |
 | 94 | WhatsApp settings UI (Owner admin) | WhatsApp integration | S8 | Complete |
-| 95 | WhatsAppCloudApiClient + notification service | WhatsApp integration | S8 | Not started |
-| 96 | Idempotency keys + queue jobs | WhatsApp integration | S8 | Not started |
-| 97 | Webhook endpoint + delivery status | WhatsApp integration | S8 | Not started |
-| 98 | Historical import opt-in suppress | WhatsApp integration | S8 | Not started |
-| 99 | Complete audit event coverage | Security hardening & audit | S8 | Not started |
+| 95 | WhatsAppCloudApiClient + notification service | WhatsApp integration | S8 | Complete |
+| 96 | Idempotency keys + queue jobs | WhatsApp integration | S8 | Complete |
+| 97 | Webhook endpoint + delivery status | WhatsApp integration | S8 | Complete |
+| 98 | Historical import opt-in suppress | WhatsApp integration | S8 | Complete |
+| 99 | Complete audit event coverage | Security hardening & audit | S8 | Complete |
 | 100 | File download authorization review | Security hardening & audit | S8 | Not started |
 | 101 | Verification token security tests | Security hardening & audit | S8 | Not started |
 | 102 | Production CSP, cookie, HTTPS settings | Security hardening & audit | S8 | Not started |
@@ -1336,6 +1336,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | ADR [0007](../architecture/decisions/0007-whatsapp.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — `WhatsAppCloudApiClient` (Meta Graph template send); `WhatsAppNotificationService` (idempotency key, import payload summary, queued → sent/failed); `WhatsappEventType` enum; `SettingsService::whatsAppCredentials()`; `config/whatsapp.php`; tests `WhatsAppCloudApiClientTest`, `WhatsAppNotificationServiceTest` |
 
 ### Step 96 — Idempotency keys + queue jobs
 
@@ -1345,6 +1347,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [api/README.md](../api/README.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — `SendWhatsAppNotificationJob` (center context, retries/backoff from config, `failed()` marks message failed); `WhatsAppNotificationService::queueImportNotification()` + `prepareImportNotification()` with `firstOrCreate` idempotency; `ImportService` queues after commit; `config/whatsapp.php` `max_attempts` / `retry_backoff_seconds`; tests `SendWhatsAppNotificationJobTest`, updated `WhatsAppNotificationServiceTest` |
 
 ### Step 97 — Webhook endpoint + delivery status
 
@@ -1354,6 +1358,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [api/README.md](../api/README.md), REQ-096, BR-023 |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — `GET/POST /api/webhooks/whatsapp` (404 when no org webhook verify token); Meta GET challenge + `X-Hub-Signature-256` validation; `whatsapp_webhook_events` storage; `WhatsAppWebhookService` updates `delivered` / `read` / `failed`; `SettingsService::anyWhatsAppWebhooksEnabled()`; `WHATSAPP_APP_SECRET`; tests `WhatsAppWebhookTest` |
 | **Notes** | Webhook routes and delivery status processing **only when** `whatsapp.webhook_verify_token` is configured. Without verify token (Meta test number / local testing), skip webhook registration; outbound send still works; ignore `delivered` / `read` / `failed` inbound events. |
 
 ### Step 98 — Historical import opt-in suppress
@@ -1364,6 +1370,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | BR-014 |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — `shouldQueueImportNotification()` skips `historical` imports unless `import_verifications.notify_owner`; opted-in historical uses `historical_import` event type; tests in `SendWhatsAppNotificationJobTest`, `WhatsAppNotificationServiceTest` |
 
 **Checkpoint after Step 98** (end of WhatsApp integration):
 
@@ -1381,6 +1389,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | plan.md §33 |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — `AuditLogger` central service (IP/user-agent); events for login, failed login, center/user CRUD, password reset, reassignment, deactivation, verification failed/rejected, import, exact duplicate, correction/revision submit/approve/reject, export, WhatsApp resend, settings; rejected CSV body excluded; tests `AuditEventCoverageTest` |
 
 ### Step 100 — File download authorization review
 
