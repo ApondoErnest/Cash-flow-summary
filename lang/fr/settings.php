@@ -12,8 +12,10 @@ return [
 
     'organization' => [
         'title' => 'Paramètres organisation',
-        'description' => 'Consultez le profil de votre organisation, les valeurs régionales par défaut et les coordonnées.',
+        'description' => 'Mettez à jour le profil et les coordonnées de votre organisation. Les valeurs régionales par défaut sont en lecture seule.',
         'profile_title' => 'Profil organisation',
+        'saved' => 'Profil organisation enregistré.',
+        'saving' => 'Enregistrement…',
         'stats' => [
             'currency' => 'Devise',
             'timezone' => 'Fuseau horaire',
@@ -32,6 +34,8 @@ return [
             'timezone' => 'Fuseau horaire',
             'contact_email' => 'E-mail de contact',
             'contact_phone' => 'Téléphone de contact',
+            'code_help' => 'Identifiant unique court (lettres, chiffres, tirets). Enregistré en majuscules.',
+            'readonly_help' => 'Défini lors de l\'installation — contactez le support pour modifier.',
         ],
     ],
 
@@ -43,6 +47,12 @@ return [
         'incomplete_notice' => 'Saisissez le numéro du propriétaire, l’ID du numéro et le jeton d’accès pour activer les notifications WhatsApp sortantes.',
         'webhook_optional_notice' => 'Le jeton de vérification webhook est facultatif pour les tests locaux avec le numéro test Meta. Ajoutez-le en production lorsque les webhooks Meta sont configurés pour suivre les statuts de livraison.',
         'saved' => 'Paramètres WhatsApp enregistrés.',
+        'test_send' => 'Envoyer un message test',
+        'test_sending' => 'Envoi…',
+        'test_help' => 'Envoie le modèle hello_world au numéro du propriétaire avec les identifiants enregistrés.',
+        'test_sent' => 'Message test envoyé à :phone. ID Meta : :message_id',
+        'test_not_configured' => 'Enregistrez le numéro du propriétaire, l’ID du numéro et le jeton d’accès avant d’envoyer un message test.',
+        'test_failed' => 'Échec du message test WhatsApp : :error',
         'saving' => 'Enregistrement…',
         'notifications_title' => 'Configuration',
         'fields' => [

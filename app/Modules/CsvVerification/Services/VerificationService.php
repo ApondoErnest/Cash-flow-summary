@@ -95,6 +95,19 @@ final class VerificationService
             throw $exception;
         }
 
+        if (config('csv_verification.process_synchronously')) {
+            try {
+                app()->call([
+                    new ProcessVerificationJob($verification->token, $verification->center_id),
+                    'handle',
+                ]);
+            } catch (Throwable) {
+                // Job marks the verification failed before rethrowing.
+            }
+
+            return $verification->fresh() ?? $verification;
+        }
+
         ProcessVerificationJob::dispatch($verification->token, $verification->center_id);
 
         return $verification;

@@ -557,8 +557,76 @@
     );
 }
 
+.mf-login-brand-organization {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-top: 1.125rem;
+    max-width: min(100%, 28rem);
+    padding: 1rem 1.125rem 1.125rem 1.375rem;
+    border-radius: 0.875rem;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: linear-gradient(
+        135deg,
+        rgb(255 255 255 / 0.1) 0%,
+        rgb(15 118 110 / 0.12) 48%,
+        rgb(214 167 86 / 0.08) 100%
+    );
+    box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.14),
+        0 10px 28px rgb(0 0 0 / 0.16);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+}
+
+.mf-login-brand-organization::before {
+    content: '';
+    position: absolute;
+    inset-block: 0.75rem;
+    inset-inline-start: 0;
+    width: 3px;
+    border-radius: 0 999px 999px 0;
+    background: linear-gradient(
+        180deg,
+        var(--color-emerald-brand) 0%,
+        var(--color-gold-brand) 100%
+    );
+    box-shadow: 0 0 14px rgb(15 118 110 / 0.45);
+}
+
+.mf-login-brand-organization-label {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.62);
+}
+
+.mf-login-brand-organization-name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.3125rem, 2.8vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    text-shadow: 0 1px 18px rgb(15 118 110 / 0.35);
+    text-wrap: balance;
+    background: linear-gradient(
+        118deg,
+        #fff 0%,
+        rgb(236 253 245 / 0.98) 42%,
+        rgb(214 167 86 / 0.95) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
 .mf-login-brand-title {
-    margin-top: 1rem;
+    margin-top: 1.25rem;
     font-family: var(--font-display);
     font-size: clamp(1.875rem, 4.5vw, 2.625rem);
     font-weight: 700;
@@ -831,6 +899,15 @@
         width: 2.75rem;
         height: 2.75rem;
         margin-bottom: 1.25rem;
+    }
+
+    .mf-login-brand-organization {
+        margin-top: 0.875rem;
+        padding: 0.875rem 1rem 1rem 1.25rem;
+    }
+
+    .mf-login-brand-organization-name {
+        font-size: 1.25rem;
     }
 
     .mf-login-brand-title {

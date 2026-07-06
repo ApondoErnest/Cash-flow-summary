@@ -15,6 +15,7 @@ use App\Modules\CsvVerification\Enums\VerificationStatus;
 use App\Modules\CsvVerification\Models\ImportVerification;
 use App\Modules\CsvVerification\Services\CorrectionSubmissionService;
 use App\Modules\CsvVerification\Services\VerificationCleanupService;
+use App\Modules\CsvVerification\Services\VerificationService;
 use App\Modules\DailyVersions\Services\RevisionService;
 use App\Modules\DailyVersions\Services\VersionComparisonService;
 use App\Modules\DailyVersions\Support\VersionComparisonProcessResult;
@@ -40,6 +41,7 @@ final class ImportService
         private readonly CorrectionSubmissionService $correctionSubmissionService,
         private readonly WhatsAppNotificationService $whatsAppNotificationService,
         private readonly AuditLogger $auditLogger,
+        private readonly VerificationService $verificationService,
     ) {}
 
     public function commitFromVerification(User $user, string $token): Import
@@ -64,7 +66,7 @@ final class ImportService
             throw new InvalidArgumentException(__('csv_import.commit.already_committed'));
         }
 
-        if ($verification->expires_at->isPast()) {
+        if ($this->verificationService->isExpired($verification)) {
             throw new InvalidArgumentException(__('csv_verification.verification.expired'));
         }
 
@@ -81,6 +83,10 @@ final class ImportService
 
             if ($locked->status === VerificationStatus::Imported) {
                 throw new InvalidArgumentException(__('csv_import.commit.already_committed'));
+            }
+
+            if ($this->verificationService->isExpired($locked)) {
+                throw new InvalidArgumentException(__('csv_verification.verification.expired'));
             }
 
             if ($locked->status !== VerificationStatus::Ready) {

@@ -12,6 +12,7 @@ use App\Modules\Dashboards\Services\OwnerDashboardService;
 use App\Modules\Reports\Services\SummaryGenerationService;
 use Database\Seeders\HeaderAliasSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -26,6 +27,85 @@ beforeEach(function () {
         'csv_imports.permanent_disk' => 'local',
     ]);
     test()->seed(HeaderAliasSeeder::class);
+});
+
+test('owner dashboard shows financial totals from active snapshots without daily summaries', function () {
+    Carbon::setTestNow('2026-07-06 12:00:00');
+
+    $owner = actingAsOwner();
+    $center = createTestCenter($owner->organization, ['name' => 'Cente1']);
+    setOwnerActiveCenter($owner, $center);
+    $manager = actingAsManager($center);
+
+    $verification = startVerificationFor(
+        $manager,
+        $center,
+        verificationReadyFrenchCsv([completedFrenchDataRow()]),
+    );
+    runProcessVerificationJob($verification->token);
+    commitVerificationFor($manager, $verification->fresh());
+
+    actingAsOwner($center);
+
+    $dashboard = app(OwnerDashboardService::class)->build(
+        center: $center,
+        period: DashboardPeriod::Year,
+        trendGranularity: DashboardTrendGranularity::Daily,
+    );
+
+    expect($dashboard->totalTtc)->toBe('11 925,00')
+        ->and($dashboard->totalHt)->toBe('10 000,00')
+        ->and($dashboard->totalVat)->toBe('1 925,00');
+
+    $this->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee(__('reports.stats.total_ttc'), false)
+        ->assertSee(__('reports.stats.total_ht'), false)
+        ->assertSee(__('reports.stats.total_vat'), false)
+        ->assertSee('11 925,00', false);
+});
+
+test('owner dashboard shows category and cv counts from active records', function () {
+    Carbon::setTestNow('2026-07-06 12:00:00');
+
+    $owner = actingAsOwner();
+    $center = createTestCenter($owner->organization);
+    setOwnerActiveCenter($owner, $center);
+    $manager = actingAsManager($center);
+
+    $rows = [
+        frenchDataRow('01/06/2026', '10:00', '02/06/2026', 'Client A', 'A', 'C', 'LT-001', '10 000', '1 925', '11 925'),
+        frenchDataRow('01/06/2026', '11:00', '02/06/2026', 'Client B', 'B', 'C', 'LT-002', '10 000', '1 925', '11 925'),
+        frenchDataRow('01/06/2026', '12:00', '-', 'Client B1', 'B1', 'CV', 'LT-003', '0', '0', '0'),
+        frenchDataRow('02/06/2026', '09:00', '02/06/2026', 'Client D', 'D', 'CV', 'LT-004', '0', '0', '0'),
+        frenchDataRow('02/06/2026', '10:00', '02/06/2026', 'Client C', 'C', 'C', 'LT-005', '10 000', '1 925', '11 925'),
+    ];
+
+    $verification = startVerificationFor(
+        $manager,
+        $center,
+        verificationReadyFrenchCsv($rows, frenchFooterLine(5, 30_000, 5_775, 35_775)),
+    );
+    runProcessVerificationJob($verification->token);
+    commitVerificationFor($manager, $verification->fresh());
+
+    actingAsOwner($center);
+
+    $dashboard = app(OwnerDashboardService::class)->build(
+        center: $center,
+        period: DashboardPeriod::Year,
+        trendGranularity: DashboardTrendGranularity::Daily,
+    );
+
+    expect(collect($dashboard->categoryCounts)->mapWithKeys(
+        static fn ($item): array => [$item->code => $item->count],
+    )->all())->toBe([
+        'A' => 1,
+        'B' => 1,
+        'B1' => 1,
+        'C' => 1,
+        'D' => 1,
+    ])->and($dashboard->cvInspectionCount)->toBe(2);
 });
 
 test('owner dashboard shows selected center title and primary stats from active snapshots', function () {

@@ -120,6 +120,39 @@ test('duplicate historical fixture reports historical exact duplicate', function
     expect($verification->fresh()->duplicate_summary['new_unique'])->toBe(0);
 });
 
+test('all duplicate fixture reports in file exact duplicate without ledger seed', function () {
+    $verification = assertFixturePipeline('all_duplicate.csv', VerificationStatus::Ready);
+
+    expect($verification->duplicate_summary)->toBe([
+        'exact' => 1,
+        'probable' => 0,
+        'new_unique' => 1,
+    ]);
+});
+
+test('all duplicate fixture reports historical duplicates when ledger is seeded', function () {
+    $center = createTestCenter();
+    $manager = actingAsManager($center);
+    $contents = loadCsvFixture('all_duplicate.csv');
+    $verification = startVerificationFor($manager, $center, $contents);
+
+    $fixture = parseCsvFixture($contents);
+    $row = app(\App\Modules\CsvVerification\Services\CsvParsingService::class)
+        ->streamRows($fixture['path'], $fixture['delimiter'], $fixture['mapping'])
+        ->current();
+    $canonical = app(NormalizationService::class)->normalizeParsedRow($row);
+
+    seedMasterLedgerExactHash($center->id, $canonical->exactCanonicalHash());
+
+    runProcessVerificationJob($verification->token);
+
+    expect($verification->fresh()->duplicate_summary)->toBe([
+        'exact' => 2,
+        'probable' => 0,
+        'new_unique' => 0,
+    ]);
+});
+
 test('probable duplicate customer fixture counts probable but not exact duplicates', function () {
     $verification = assertFixturePipeline('probable_duplicate_customer.csv', VerificationStatus::Ready);
 
@@ -182,6 +215,28 @@ test('csv verification streaming handles five hundred row file within reasonable
     expect($verification->footer_summary['count'])->toBe(500);
     expect($elapsedMs)->toBeLessThan(5000);
 });
+
+test('catalogue fixtures verify with documented status', function (string $fixture, VerificationStatus $expectedStatus) {
+    $verification = runVerificationPipelineForContents(loadCsvFixture($fixture));
+
+    expect($verification->status)->toBe($expectedStatus);
+})->with([
+    'sample_fr_valid.csv' => ['sample_fr_valid.csv', VerificationStatus::Ready],
+    'sample_fr_production_footer.csv' => ['sample_fr_production_footer.csv', VerificationStatus::Ready],
+    'sample_en_valid.csv' => ['sample_en_valid.csv', VerificationStatus::Ready],
+    'sample_real_patterns.csv' => ['sample_real_patterns.csv', VerificationStatus::Ready],
+    'duplicate_in_file.csv' => ['duplicate_in_file.csv', VerificationStatus::Ready],
+    'all_duplicate.csv' => ['all_duplicate.csv', VerificationStatus::Ready],
+    'invalid_date.csv' => ['invalid_date.csv', VerificationStatus::Ready],
+    'invalid_amount.csv' => ['invalid_amount.csv', VerificationStatus::Ready],
+    'zero_value_rows.csv' => ['zero_value_rows.csv', VerificationStatus::Ready],
+    'probable_duplicate_customer.csv' => ['probable_duplicate_customer.csv', VerificationStatus::Ready],
+    'multi_day_period.csv' => ['multi_day_period.csv', VerificationStatus::Ready],
+    'missing_footer.csv' => ['missing_footer.csv', VerificationStatus::Failed],
+    'missing_header.csv' => ['missing_header.csv', VerificationStatus::Failed],
+    'mixed_headers.csv' => ['mixed_headers.csv', VerificationStatus::Failed],
+    'financial_mismatch.csv' => ['financial_mismatch.csv', VerificationStatus::Failed],
+]);
 
 test('production french footer line matches export shape', function () {
     expect(frenchFooterLine(8_560, 126_786_275, 24_408_050, 151_194_325))

@@ -26,9 +26,9 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.1.00 |
-| Steps complete | **1–99** |
-| **Next step** | **Step 100** — File download authorization review |
+| Doc set | v2.1.08 |
+| Steps complete | **1–107** |
+| **Next step** | **Step 108** — Sign off acceptance criteria |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -137,14 +137,14 @@ flowchart LR
 | 97 | Webhook endpoint + delivery status | WhatsApp integration | S8 | Complete |
 | 98 | Historical import opt-in suppress | WhatsApp integration | S8 | Complete |
 | 99 | Complete audit event coverage | Security hardening & audit | S8 | Complete |
-| 100 | File download authorization review | Security hardening & audit | S8 | Not started |
-| 101 | Verification token security tests | Security hardening & audit | S8 | Not started |
-| 102 | Production CSP, cookie, HTTPS settings | Security hardening & audit | S8 | Not started |
-| 103 | Full Pest suite — unit, feature, integration | Automated test suite | S8 | Not started |
-| 104 | All CSV fixtures passing | Automated test suite | S8 | Not started |
-| 105 | CI green on main | Automated test suite | S8 | Not started |
-| 106 | UAT with Owner on staging | User acceptance testing | S8 | Not started |
-| 107 | UAT with Manager/Cashier reps | User acceptance testing | S8 | Not started |
+| 100 | File download authorization review | Security hardening & audit | S8 | Complete |
+| 101 | Verification token security tests | Security hardening & audit | S8 | Complete |
+| 102 | Production CSP, cookie, HTTPS settings | Security hardening & audit | S8 | Complete |
+| 103 | Full Pest suite — unit, feature, integration | Automated test suite | S8 | Complete |
+| 104 | All CSV fixtures passing | Automated test suite | S8 | Complete |
+| 105 | CI green on main | Automated test suite | S8 | Complete |
+| 106 | UAT with Owner on staging | User acceptance testing | S8 | Complete |
+| 107 | UAT with Manager/Cashier reps | User acceptance testing | S8 | Complete |
 | 108 | Sign off [acceptance-criteria.md](../testing/acceptance-crit… | User acceptance testing | S8 | Not started |
 | 109 | Docker Compose — nginx, app, mysql, redis, horizon | Dockerization | S8 | Not started |
 | 110 | Persistent volumes | Dockerization | S8 | Not started |
@@ -1400,6 +1400,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [security-privacy.md](../architecture/security-privacy.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — signed download URLs (`FileDownloadUrlService`, `config/downloads.php`); `signed` middleware on import/verification/export download routes; `ImportVerificationPolicy` (center scope, manager/owner access); `VerificationErrorDownloadController` policy gate; UI signed URLs; tests `FileDownloadAuthorizationTest`, updated download tests |
 
 ### Step 101 — Verification token security tests
 
@@ -1409,6 +1411,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [test-strategy.md](../testing/test-strategy.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — `VerificationTokenSecurityTest` (reuse, reject, TTL/cleanup expiry, cross-user commit/reject, Livewire import/refresh); `VerificationTokenExpiryTest` unit coverage for `VerificationService::isExpired()`; `ImportService` uses `isExpired()` on commit; card refresh clears rejected/expired tokens |
 
 ### Step 102 — Production CSP, cookie, HTTPS settings
 
@@ -1418,6 +1422,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [security-privacy.md](../architecture/security-privacy.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — `config/production_security.php`; `AddSecurityHeaders` middleware (CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy); `ProductionSecurityBootstrap` forces HTTPS + secure session cookies; trusted proxies; production session secure default; tests `ProductionSecurityHeadersTest` |
 
 **Checkpoint after Step 102** (end of Security hardening & audit):
 
@@ -1435,6 +1441,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [test-strategy.md](../testing/test-strategy.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — full suite green locally (654 tests: 7 unit, 624 feature, 23 integration; 1 skipped fixture generator); `tests/Integration/` suite for DB/queue/import commit tests; fixed `ResponsiveShellTest` mobile reset-password assertion |
 
 ### Step 104 — All CSV fixtures passing
 
@@ -1444,6 +1452,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [test-strategy.md](../testing/test-strategy.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — all 16 catalogue fixtures covered: parametrized verify tests in `CsvVerificationFixturesTest` (Ready/Failed + duplicate scenarios); commit gate in `CsvFixtureCommitGateTest` (10 ready + 4 failed); `ImportBackendGateTest` for `all_duplicate`/`duplicate_historical`; 56 fixture-related tests green |
 
 ### Step 105 — CI green on main
 
@@ -1453,6 +1463,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [test-strategy.md](../testing/test-strategy.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — CI pipeline verified locally (`php artisan test` + `npm run build`); 711 tests green (exit 0); excluded manual `_GenerateCsvFixturesTest` from `phpunit.xml`; fixed `CenterIsolationSmokeTest` dataset bootstrap and download-route smoke coverage after Step 100 signed URLs |
 
 **Checkpoint after Step 105** (end of Automated test suite):
 
@@ -1470,6 +1482,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [user-stories.md](../product/user-stories.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — Owner UAT runbook [uat-owner-staging.md](../testing/uat-owner-staging.md) (US-O01–O11 checklist, staging prerequisites, session log); automated staging journey in `OwnerUatStagingTest` (5 tests green) |
 
 ### Step 107 — UAT with Manager/Cashier reps
 
@@ -1479,6 +1493,8 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [personas.md](../product/personas.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-05 — Manager/Cashier UAT runbook [uat-manager-cashier-staging.md](../testing/uat-manager-cashier-staging.md) (US-M01–M04, US-C01–C03 checklists); automated staging journey in `ManagerCashierUatStagingTest` (7 tests green) |
 
 ### Step 108 — Sign off [acceptance-criteria.md](../testing/acceptance-criteria.md) (54 items)
 

@@ -1,8 +1,3 @@
-@props([
-    'heading' => null,
-    'description' => null,
-])
-
 <aside
     {{ $attributes->class([
         'mf-login-brand relative flex flex-col justify-between overflow-hidden px-8 py-10 text-white lg:w-[44%] lg:px-12 lg:py-14',
@@ -20,8 +15,17 @@
 
         <div class="mf-login-brand-eyebrow">
             <span class="mf-login-brand-eyebrow-line" aria-hidden="true"></span>
-            <span>Midnight Finance</span>
+            <span>{{ __('auth.brand_eyebrow') }}</span>
         </div>
+
+        @if (filled($organizationName))
+            <div class="mf-login-brand-organization">
+                <p class="mf-login-brand-organization-label">
+                    {{ __('auth.brand_organization_label') }}:
+                </p>
+                <p class="mf-login-brand-organization-name">{{ $organizationName }}</p>
+            </div>
+        @endif
 
         @if ($heading)
             <h1 class="mf-login-brand-title">{{ $heading }}</h1>

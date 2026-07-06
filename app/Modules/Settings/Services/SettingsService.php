@@ -9,6 +9,7 @@ use App\Modules\AuditLogging\Services\AuditLogger;
 use App\Modules\Centers\Models\Organization;
 use App\Modules\Settings\Enums\OrganizationSettingKey;
 use App\Modules\Settings\Models\OrganizationSetting;
+use App\Modules\Settings\Support\OrganizationProfileData;
 use App\Modules\Settings\Support\WhatsAppSettingsData;
 use App\Modules\WhatsApp\Support\WhatsAppCredentials;
 use Illuminate\Support\Facades\Crypt;
@@ -203,6 +204,87 @@ final class SettingsService
 
             return $this->whatsAppSettings((int) $organization->id);
         });
+    }
+
+    /**
+     * @param  array{name: string, code: string, contact_email?: string|null, contact_phone?: string|null}  $payload
+     */
+    public function updateOrganizationProfile(Organization $organization, User $user, array $payload): Organization
+    {
+        return DB::transaction(function () use ($organization, $user, $payload): Organization {
+            $oldContact = is_array($organization->contact_details) ? $organization->contact_details : [];
+
+            $oldValues = [
+                'name' => $organization->name,
+                'code' => $organization->code,
+                'contact_email' => $oldContact['email'] ?? null,
+                'contact_phone' => $oldContact['phone'] ?? null,
+            ];
+
+            $contactDetails = $oldContact;
+            $contactEmail = filled($payload['contact_email'] ?? null)
+                ? trim((string) $payload['contact_email'])
+                : null;
+            $contactPhone = filled($payload['contact_phone'] ?? null)
+                ? trim((string) $payload['contact_phone'])
+                : null;
+
+            if ($contactEmail !== null) {
+                $contactDetails['email'] = $contactEmail;
+            } else {
+                unset($contactDetails['email']);
+            }
+
+            if ($contactPhone !== null) {
+                $contactDetails['phone'] = $contactPhone;
+            } else {
+                unset($contactDetails['phone']);
+            }
+
+            $organization->update([
+                'name' => trim($payload['name']),
+                'code' => $this->normalizeOrganizationCode($payload['code']),
+                'contact_details' => $contactDetails === [] ? null : $contactDetails,
+            ]);
+
+            $organization = $organization->fresh();
+
+            $newContact = is_array($organization->contact_details) ? $organization->contact_details : [];
+
+            $this->auditLogger->record(
+                event: 'settings.updated',
+                user: $user,
+                resourceType: Organization::class,
+                resourceId: (int) $organization->id,
+                oldValues: $oldValues,
+                newValues: [
+                    'scope' => 'organization_profile',
+                    'name' => $organization->name,
+                    'code' => $organization->code,
+                    'contact_email' => $newContact['email'] ?? null,
+                    'contact_phone' => $newContact['phone'] ?? null,
+                ],
+            );
+
+            return $organization;
+        });
+    }
+
+    public function organizationProfile(Organization $organization): OrganizationProfileData
+    {
+        $contact = is_array($organization->contact_details) ? $organization->contact_details : [];
+
+        return new OrganizationProfileData(
+            name: $organization->name,
+            code: $organization->code,
+            contactEmail: $contact['email'] ?? null,
+            contactPhone: $contact['phone'] ?? null,
+        );
+    }
+
+    private function normalizeOrganizationCode(string $code): string
+    {
+        return strtoupper(trim($code));
     }
 
     private function normalizePhone(string $phone): string

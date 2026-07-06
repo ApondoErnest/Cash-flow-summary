@@ -64,6 +64,19 @@ test('verification service dispatches process verification job', function () {
     });
 });
 
+test('verification service processes synchronously when configured', function () {
+    config(['csv_verification.process_synchronously' => true]);
+
+    $center = createTestCenter();
+    $manager = actingAsManager($center);
+
+    $verification = startVerificationFor($manager, $center, verificationReadyFrenchCsv([]));
+
+    Queue::assertNothingPushed();
+
+    expect($verification->fresh()->status)->toBe(VerificationStatus::Ready);
+});
+
 test('verification service allows owner to verify for active center only', function () {
     $owner = actingAsOwner();
     $center = createTestCenter($owner->organization);

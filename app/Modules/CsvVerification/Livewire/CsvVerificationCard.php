@@ -16,6 +16,7 @@ use App\Modules\CsvVerification\Enums\VerificationStatus;
 use App\Modules\CsvVerification\Models\ImportVerification;
 use App\Modules\CsvVerification\Services\VerificationService;
 use App\Modules\CsvVerification\Services\VerificationSummaryService;
+use App\Support\Downloads\FileDownloadUrlService;
 use App\Modules\CsvVerification\Support\VerificationSummaryData;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
@@ -96,6 +97,13 @@ class CsvVerificationCard extends Component
 
     public function refreshVerification(): void
     {
+        unset(
+            $this->verification,
+            $this->summary,
+            $this->canDownloadErrorReport,
+            $this->errorReportDownloadUrl,
+        );
+
         if ($this->verificationToken === null) {
             return;
         }
@@ -108,7 +116,7 @@ class CsvVerificationCard extends Component
             return;
         }
 
-        if ($verification->status === VerificationStatus::Expired) {
+        if (app(VerificationService::class)->isExpired($verification)) {
             $this->resetCard();
             $this->addError('csvFile', __('csv_verification.verification.expired'));
         }
@@ -252,7 +260,12 @@ class CsvVerificationCard extends Component
             return null;
         }
 
-        return route('verifications.errors.download', $this->verificationToken);
+        return app(FileDownloadUrlService::class)->verificationErrors(
+            ImportVerification::query()
+                ->withoutCenterScope()
+                ->where('token', $this->verificationToken)
+                ->firstOrFail(),
+        );
     }
 
     #[Computed]

@@ -55,9 +55,9 @@
     </header>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <x-ui.stat-card :label="__('dashboard.stats.total_ttc')" :value="$dashboard->totalTtc" :context="$dashboard->periodLabel" />
-        <x-ui.stat-card :label="__('dashboard.stats.total_ht')" :value="$dashboard->totalHt" :context="$dashboard->periodLabel" />
-        <x-ui.stat-card :label="__('dashboard.stats.total_vat')" :value="$dashboard->totalVat" :context="$dashboard->periodLabel" />
+        <x-ui.stat-card :label="__('reports.stats.total_ttc')" :value="$dashboard->totalTtc" :context="$dashboard->periodLabel" />
+        <x-ui.stat-card :label="__('reports.stats.total_ht')" :value="$dashboard->totalHt" :context="$dashboard->periodLabel" />
+        <x-ui.stat-card :label="__('reports.stats.total_vat')" :value="$dashboard->totalVat" :context="$dashboard->periodLabel" />
         <x-ui.stat-card
             :label="__('dashboard.stats.unique_records')"
             :value="(string) $dashboard->uniqueRecords"
@@ -66,11 +66,39 @@
         />
     </div>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <x-ui.stat-card :label="__('dashboard.stats.completed')" :value="(string) $dashboard->completedCount" />
         <x-ui.stat-card :label="__('dashboard.stats.unfinished')" :value="(string) $dashboard->unfinishedCount" />
         <x-ui.stat-card :label="__('dashboard.stats.zero_value')" :value="(string) $dashboard->zeroValueCount" />
         <x-ui.stat-card :label="__('dashboard.stats.duplicates_ignored')" :value="(string) $dashboard->duplicatesIgnored" />
+    </div>
+
+    <div class="space-y-4">
+        <div>
+            <flux:heading size="lg" class="font-display text-text-heading!">
+                {{ __('dashboard.sections.category_breakdown') }}
+            </flux:heading>
+            <flux:text class="mt-1 text-text-muted!">
+                {{ __('dashboard.sections.category_breakdown_description') }}
+            </flux:text>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+            @foreach ($dashboard->categoryCounts as $categoryCount)
+                <x-ui.stat-card
+                    :label="$categoryCount->code"
+                    :value="(string) $categoryCount->count"
+                    :context="$dashboard->periodLabel"
+                />
+            @endforeach
+
+            <x-ui.stat-card
+                label="CV"
+                :value="(string) $dashboard->cvInspectionCount"
+                :context="$dashboard->periodLabel"
+                :accent="true"
+            />
+        </div>
     </div>
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-12">
@@ -150,7 +178,7 @@
                 <flux:table.columns>
                     <flux:table.column>{{ __('dashboard.table.date') }}</flux:table.column>
                     <flux:table.column>{{ __('dashboard.table.file') }}</flux:table.column>
-                    <flux:table.column align="end">{{ __('dashboard.stats.total_ttc') }}</flux:table.column>
+                    <flux:table.column align="end">{{ __('reports.stats.total_ttc') }}</flux:table.column>
                     <flux:table.column>{{ __('dashboard.table.status') }}</flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>

@@ -7,22 +7,19 @@ namespace App\Modules\CsvVerification\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\CsvImports\Services\ImportErrorReportService;
 use App\Modules\CsvVerification\Models\ImportVerification;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 
 class VerificationErrorDownloadController extends Controller
 {
     public function __invoke(string $token, ImportErrorReportService $reportService): Response
     {
         $verification = ImportVerification::query()
+            ->withoutCenterScope()
             ->where('token', $token)
             ->firstOrFail();
 
-        $user = auth()->user();
-
-        if ($user === null || (int) $verification->user_id !== (int) $user->id) {
-            throw new AuthorizationException(__('center.cross_center_forbidden'));
-        }
+        Gate::authorize('download', $verification);
 
         abort_unless($reportService->verificationHasErrors($verification), 404);
 

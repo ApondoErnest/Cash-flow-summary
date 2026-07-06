@@ -17,7 +17,8 @@ test('owner can access organization settings without an active center', function
         ->assertOk()
         ->assertSee(__('settings.organization.title'), false)
         ->assertSee($owner->organization->name, false)
-        ->assertSee(__('settings.shell.notice'), false);
+        ->assertSee(__('settings.common.save_changes'), false)
+        ->assertDontSee(__('settings.shell.notice'), false);
 });
 
 test('owner can access whatsapp settings without an active center', function () {
@@ -44,8 +45,8 @@ test('organization settings livewire shows organization profile fields', functio
     $owner = actingAsOwnerWithoutActiveCenter();
 
     Livewire::test(OrganizationSettings::class)
-        ->assertSee($owner->organization->name, false)
-        ->assertSee($owner->organization->code, false)
+        ->assertSet('name', $owner->organization->name)
+        ->assertSet('code', $owner->organization->code)
         ->assertSee($owner->organization->currency, false);
 });
 

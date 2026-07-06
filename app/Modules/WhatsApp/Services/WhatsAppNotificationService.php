@@ -182,7 +182,7 @@ final class WhatsAppNotificationService
         WhatsAppCredentials $credentials,
         WhatsappEventType $eventType,
         string $idempotencyKey,
-        int $centerId,
+        ?int $centerId,
         ?int $importId,
         array $payloadSummary,
     ): WhatsappMessage {
@@ -331,5 +331,51 @@ final class WhatsAppNotificationService
         $end = Carbon::parse($import->actual_period_end)->format('d/m/Y');
 
         return $start === $end ? $start : "{$start} – {$end}";
+    }
+
+    public function sendTestMessage(int $organizationId, ?int $centerId = null): WhatsappMessage
+    {
+        $credentials = $this->credentialsForOrganization($organizationId);
+        $idempotencyKey = 'test_message:'.$organizationId.':'.now()->format('YmdHisu');
+
+        $message = $this->createQueuedMessage(
+            credentials: $credentials,
+            eventType: WhatsappEventType::TestMessage,
+            idempotencyKey: $idempotencyKey,
+            centerId: $centerId,
+            importId: null,
+            payloadSummary: [
+                'event_type' => WhatsappEventType::TestMessage->value,
+                'template' => WhatsappEventType::TestMessage->templateName(),
+                'initiated_at' => now()->timezone(config('app.timezone'))->toIso8601String(),
+            ],
+        );
+
+        try {
+            $result = $this->cloudApiClient->sendTemplateMessage(
+                credentials: $credentials,
+                recipientPhone: $credentials->ownerPhone,
+                templateName: WhatsappEventType::TestMessage->templateName(),
+                languageCode: (string) config('whatsapp.test_template_language', 'en_US'),
+                bodyParameters: [],
+            );
+
+            $message->forceFill([
+                'status' => WhatsappMessageStatus::Sent,
+                'provider_message_id' => $result->providerMessageId,
+                'error_reason' => null,
+                'sent_at' => now(),
+            ])->save();
+
+            return $message->fresh();
+        } catch (WhatsAppApiException $exception) {
+            $message->forceFill([
+                'status' => WhatsappMessageStatus::Failed,
+                'error_reason' => $exception->getMessage(),
+                'retry_count' => 1,
+            ])->save();
+
+            throw $exception;
+        }
     }
 }

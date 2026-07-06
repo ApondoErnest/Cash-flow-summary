@@ -11,17 +11,18 @@ use App\Modules\CsvImports\Enums\ImportStatus;
 use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvImports\Models\MasterCashFlowRecord;
 use App\Modules\DailyVersions\Enums\DailyVersionStatus;
-use App\Modules\DailyVersions\Models\ActiveDailySnapshot;
 use App\Modules\DailyVersions\Models\DailyVersionMembership;
 use App\Modules\Dashboards\Enums\DashboardPeriod;
 use App\Modules\Dashboards\Enums\DashboardTrendGranularity;
 use App\Modules\Dashboards\Support\DashboardMoney;
+use App\Modules\Dashboards\Support\DashboardCategoryCodes;
 use App\Modules\Dashboards\Support\OwnerDashboardAlert;
+use App\Modules\Dashboards\Support\OwnerDashboardCategoryCount;
 use App\Modules\Dashboards\Support\OwnerDashboardData;
 use App\Modules\Dashboards\Support\OwnerDashboardImportRow;
 use App\Modules\Dashboards\Support\OwnerDashboardTrendPoint;
 use App\Modules\Reports\Models\Anomaly;
-use App\Modules\Reports\Models\DailySummary;
+use App\Modules\Reports\Services\ReportQueryService;
 use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
 use App\Modules\WhatsApp\Models\WhatsappMessage;
 use Illuminate\Support\Carbon;
@@ -31,6 +32,7 @@ final class OwnerDashboardService
 {
     public function __construct(
         private readonly SubmissionStatusService $submissionStatusService,
+        private readonly ReportQueryService $reportQueryService,
     ) {}
 
     public function build(
@@ -44,14 +46,16 @@ final class OwnerDashboardService
         $reference = ($referenceDate ?? now())->copy();
         [$rangeStart, $rangeEnd] = $period->range($reference, $customFrom, $customTo);
 
-        $summaries = DailySummary::query()
-            ->withoutCenterScope()
-            ->where('center_id', $center->id)
-            ->whereDate('business_date', '>=', $rangeStart->toDateString())
-            ->whereDate('business_date', '<=', $rangeEnd->toDateString())
-            ->get();
+        $periodTotals = $this->reportQueryService->periodTotals(
+            $center->id,
+            $period,
+            $referenceDate,
+            $customFrom,
+            $customTo,
+        );
 
         $masterStats = $this->masterStatsForRange($center->id, $rangeStart, $rangeEnd);
+        $dimensionStats = $this->dimensionStatsForRange($center->id, $rangeStart, $rangeEnd);
         $duplicatesIgnored = $this->duplicatesIgnoredForRange($center->id, $rangeStart, $rangeEnd);
         $trend = $this->buildTrend($center->id, $trendGranularity, $reference);
         $trendMax = $trend->max(static fn (OwnerDashboardTrendPoint $point): float => $point->totalTtcNumeric) ?? 0.0;
@@ -66,20 +70,24 @@ final class OwnerDashboardService
         return new OwnerDashboardData(
             centerName: $center->name,
             periodLabel: $period->label($customFrom, $customTo),
-            totalTtc: DashboardMoney::format(DashboardMoney::sum($summaries->pluck('total_ttc')->all())),
-            totalHt: DashboardMoney::format(DashboardMoney::sum($summaries->pluck('total_ht')->all())),
-            totalVat: DashboardMoney::format(DashboardMoney::sum($summaries->pluck('total_vat')->all())),
+            totalTtc: DashboardMoney::format($periodTotals['ttc']),
+            totalHt: DashboardMoney::format($periodTotals['ht']),
+            totalVat: DashboardMoney::format($periodTotals['vat']),
             uniqueRecords: $masterStats['unique'],
             completedCount: $masterStats['completed'],
             unfinishedCount: $masterStats['unfinished'],
             zeroValueCount: $masterStats['zero_value'],
             duplicatesIgnored: $duplicatesIgnored,
+            categoryCounts: $dimensionStats['categories'],
+            cvInspectionCount: $dimensionStats['cv'],
             trend: $trend->all(),
             trendMaxTtc: $trendMax,
             alerts: $this->buildAlerts($center, $reference),
             recentImports: $recentImports->all(),
             lastImportAt: $lastImport?->completed_at?->timezone(config('app.timezone'))->format('Y-m-d H:i'),
-            hasData: $summaries->isNotEmpty() || $recentImports->isNotEmpty(),
+            hasData: $periodTotals['ttc'] > 0
+                || $periodTotals['recordCount'] > 0
+                || $recentImports->isNotEmpty(),
         );
     }
 
@@ -87,6 +95,65 @@ final class OwnerDashboardService
      * @return array{unique: int, completed: int, unfinished: int, zero_value: int}
      */
     private function masterStatsForRange(int $centerId, Carbon $rangeStart, Carbon $rangeEnd): array
+    {
+        $masters = $this->activeMastersForRange($centerId, $rangeStart, $rangeEnd);
+
+        if ($masters->isEmpty()) {
+            return [
+                'unique' => 0,
+                'completed' => 0,
+                'unfinished' => 0,
+                'zero_value' => 0,
+            ];
+        }
+
+        return [
+            'unique' => $masters->count(),
+            'completed' => $masters->where('completion_status', CompletionStatus::Completed)->count(),
+            'unfinished' => $masters->where('completion_status', CompletionStatus::Unfinished)->count(),
+            'zero_value' => $masters->where('financial_status', FinancialStatus::ZeroValue)->count(),
+        ];
+    }
+
+    /**
+     * @return array{categories: list<OwnerDashboardCategoryCount>, cv: int}
+     */
+    private function dimensionStatsForRange(int $centerId, Carbon $rangeStart, Carbon $rangeEnd): array
+    {
+        $masters = $this->activeMastersForRange($centerId, $rangeStart, $rangeEnd);
+
+        /** @var array<string, int> $categoryTotals */
+        $categoryTotals = array_fill_keys(DashboardCategoryCodes::CATEGORY_CODES, 0);
+        $cvCount = 0;
+
+        foreach ($masters as $master) {
+            $category = DashboardCategoryCodes::normalizeCategory((string) $master->category_code);
+
+            if (array_key_exists($category, $categoryTotals)) {
+                $categoryTotals[$category]++;
+            }
+
+            if (DashboardCategoryCodes::normalizeInspectionType((string) $master->inspection_type_code) === DashboardCategoryCodes::CV_INSPECTION_TYPE) {
+                $cvCount++;
+            }
+        }
+
+        $categories = [];
+
+        foreach (DashboardCategoryCodes::CATEGORY_CODES as $code) {
+            $categories[] = new OwnerDashboardCategoryCount($code, $categoryTotals[$code]);
+        }
+
+        return [
+            'categories' => $categories,
+            'cv' => $cvCount,
+        ];
+    }
+
+    /**
+     * @return Collection<int, MasterCashFlowRecord>
+     */
+    private function activeMastersForRange(int $centerId, Carbon $rangeStart, Carbon $rangeEnd): Collection
     {
         $masterIds = DailyVersionMembership::query()
             ->whereIn('daily_version_id', function ($query) use ($centerId, $rangeStart, $rangeEnd): void {
@@ -102,25 +169,18 @@ final class OwnerDashboardService
             ->pluck('master_cash_flow_record_id');
 
         if ($masterIds->isEmpty()) {
-            return [
-                'unique' => 0,
-                'completed' => 0,
-                'unfinished' => 0,
-                'zero_value' => 0,
-            ];
+            return collect();
         }
 
-        $masters = MasterCashFlowRecord::query()
+        return MasterCashFlowRecord::query()
             ->withoutCenterScope()
             ->whereIn('id', $masterIds)
-            ->get(['completion_status', 'financial_status']);
-
-        return [
-            'unique' => $masters->count(),
-            'completed' => $masters->where('completion_status', CompletionStatus::Completed)->count(),
-            'unfinished' => $masters->where('completion_status', CompletionStatus::Unfinished)->count(),
-            'zero_value' => $masters->where('financial_status', FinancialStatus::ZeroValue)->count(),
-        ];
+            ->get([
+                'completion_status',
+                'financial_status',
+                'category_code',
+                'inspection_type_code',
+            ]);
     }
 
     private function duplicatesIgnoredForRange(int $centerId, Carbon $rangeStart, Carbon $rangeEnd): int
@@ -138,38 +198,9 @@ final class OwnerDashboardService
      */
     private function buildTrend(int $centerId, DashboardTrendGranularity $granularity, Carbon $reference): Collection
     {
-        $lookbackStart = match ($granularity) {
-            DashboardTrendGranularity::Daily => $reference->copy()->subDays(29)->startOfDay(),
-            DashboardTrendGranularity::Weekly => $reference->copy()->subWeeks(11)->startOfWeek(),
-            DashboardTrendGranularity::Monthly => $reference->copy()->subMonths(11)->startOfMonth(),
-            DashboardTrendGranularity::Yearly => $reference->copy()->subYears(4)->startOfYear(),
-        };
-
-        $summaries = DailySummary::query()
-            ->withoutCenterScope()
-            ->where('center_id', $centerId)
-            ->whereDate('business_date', '>=', $lookbackStart->toDateString())
-            ->whereDate('business_date', '<=', $reference->toDateString())
-            ->orderBy('business_date')
-            ->get(['business_date', 'total_ttc']);
-
-        /** @var array<string, float> $grouped */
-        $grouped = [];
-
-        foreach ($summaries as $summary) {
-            $date = Carbon::parse($summary->business_date);
-            $key = match ($granularity) {
-                DashboardTrendGranularity::Daily => $date->toDateString(),
-                DashboardTrendGranularity::Weekly => $date->copy()->startOfWeek()->toDateString(),
-                DashboardTrendGranularity::Monthly => $date->format('Y-m'),
-                DashboardTrendGranularity::Yearly => $date->format('Y'),
-            };
-
-            $grouped[$key] = ($grouped[$key] ?? 0.0) + (float) $summary->total_ttc;
-        }
+        $grouped = $this->reportQueryService->trendTtcTotals($centerId, $granularity, $reference);
 
         return collect($grouped)
-            ->sortKeys()
             ->map(function (float $total, string $key) use ($granularity): OwnerDashboardTrendPoint {
                 $label = match ($granularity) {
                     DashboardTrendGranularity::Daily => Carbon::parse($key)->format('d/m'),

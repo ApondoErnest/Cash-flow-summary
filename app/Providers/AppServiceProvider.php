@@ -17,6 +17,7 @@ use App\Modules\CsvImports\Livewire\ImportList;
 use App\Modules\CsvImports\Livewire\ImportResultPage;
 use App\Modules\CsvImports\Livewire\RecordsExplorer;
 use App\Modules\CsvImports\Models\Import;
+use App\Modules\CsvVerification\Models\ImportVerification;
 use App\Modules\CsvImports\Models\MasterCashFlowRecord;
 use App\Modules\CsvVerification\Livewire\CsvVerificationCard;
 use App\Modules\CsvVerification\Livewire\ImportCsv;
@@ -40,6 +41,7 @@ use App\Policies\AuditLogPolicy;
 use App\Policies\CenterPolicy;
 use App\Policies\DailyVersionPolicy;
 use App\Policies\ImportPolicy;
+use App\Policies\ImportVerificationPolicy;
 use App\Policies\MasterCashFlowRecordPolicy;
 use App\Policies\ReportExportPolicy;
 use App\Policies\UserPolicy;
@@ -48,6 +50,7 @@ use App\Support\Auth\PasswordRules;
 use App\Support\Auth\RoleName;
 use App\Support\Center\JobCenterContextService;
 use App\Support\Navigation\RoleNavigation;
+use App\Support\Security\ProductionSecurityBootstrap;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -69,10 +72,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        ProductionSecurityBootstrap::apply();
+
         Password::defaults(fn () => PasswordRules::rule());
 
         Gate::policy(Center::class, CenterPolicy::class);
         Gate::policy(Import::class, ImportPolicy::class);
+        Gate::policy(ImportVerification::class, ImportVerificationPolicy::class);
         Gate::policy(MasterCashFlowRecord::class, MasterCashFlowRecordPolicy::class);
         Gate::policy(DailyVersion::class, DailyVersionPolicy::class);
         Gate::policy(Anomaly::class, AnomalyPolicy::class);

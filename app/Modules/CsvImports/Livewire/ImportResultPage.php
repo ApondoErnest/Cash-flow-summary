@@ -9,6 +9,7 @@ use App\Modules\CsvImports\Services\ImportResultService;
 use App\Modules\CsvImports\Support\ImportResultData;
 use App\Modules\CsvVerification\Enums\ImportMode;
 use App\Support\Auth\RoleName;
+use App\Support\Downloads\FileDownloadUrlService;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -46,6 +47,16 @@ class ImportResultPage extends Component
     public function isCorrectionSubmission(): bool
     {
         return $this->import->import_mode === ImportMode::Correction;
+    }
+
+    #[Computed]
+    public function importErrorDownloadUrl(): ?string
+    {
+        if ($this->import->invalid_count <= 0) {
+            return null;
+        }
+
+        return app(FileDownloadUrlService::class)->importErrors($this->import);
     }
 
     public function render(): View

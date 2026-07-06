@@ -16,9 +16,14 @@ enum WhatsappEventType: string
     case DeliveryFailure = 'delivery_failure';
     case DailySummary = 'daily_summary';
     case HistoricalImport = 'historical_import';
+    case TestMessage = 'test_message';
 
     public function templateName(): string
     {
+        if ($this === self::TestMessage) {
+            return (string) config('whatsapp.test_template', 'hello_world');
+        }
+
         return $this->value;
     }
 }

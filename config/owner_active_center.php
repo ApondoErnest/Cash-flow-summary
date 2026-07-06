@@ -24,6 +24,7 @@ return [
     'operational_route_names' => [
         'dashboard',
         'imports.create',
+        'imports.errors.download',
         'imports.result',
         'imports.show',
         'imports.index',
@@ -31,6 +32,8 @@ return [
         'daily-versions.index',
         'revisions.index',
         'reports.index',
+        'exports.download',
+        'verifications.errors.download',
         'anomalies.index',
         'whatsapp-history.index',
     ],

@@ -9,6 +9,7 @@ use App\Modules\Settings\Models\OrganizationSetting;
 use App\Modules\Settings\Services\SettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -133,6 +134,45 @@ test('whatsapp settings validates owner phone format', function () {
         ->set('webhookVerifyToken', 'verify-token-secret')
         ->call('save')
         ->assertHasErrors(['ownerPhone']);
+});
+
+test('owner can send whatsapp test message when outbound settings are configured', function () {
+    Http::fake([
+        'https://graph.facebook.com/*' => Http::response([
+            'messaging_product' => 'whatsapp',
+            'messages' => [
+                ['id' => 'wamid.test-settings-message'],
+            ],
+        ], 200),
+    ]);
+
+    $owner = actingAsOwnerWithoutActiveCenter();
+    $organizationId = (int) $owner->organization_id;
+
+    Livewire::test(WhatsappSettings::class)
+        ->set('ownerPhone', '+237612345678')
+        ->set('phoneNumberId', '123456789012345')
+        ->set('accessToken', 'EAAtest-access-token-value-123456')
+        ->call('save')
+        ->call('sendTestMessage')
+        ->assertHasNoErrors()
+        ->assertSet('testMessageFeedback', fn (?string $value): bool => is_string($value) && str_contains($value, 'wamid.test-settings-message'));
+
+    Http::assertSent(function ($request): bool {
+        $body = $request->data();
+
+        return ($body['template']['name'] ?? null) === 'hello_world'
+            && ($body['template']['language']['code'] ?? null) === 'en_US'
+            && ($body['to'] ?? null) === '237612345678';
+    });
+});
+
+test('whatsapp test message requires saved outbound configuration', function () {
+    actingAsOwnerWithoutActiveCenter();
+
+    Livewire::test(WhatsappSettings::class)
+        ->call('sendTestMessage')
+        ->assertHasErrors(['testMessage']);
 });
 
 test('staff cannot access whatsapp settings page', function () {

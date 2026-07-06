@@ -19,6 +19,7 @@ use App\Modules\Normalization\NormalizationPolicy;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ProcessVerificationJob implements ShouldQueue
 {
@@ -40,17 +41,8 @@ class ProcessVerificationJob implements ShouldQueue
         JobCenterContextService $jobCenterContextService,
         AuditLogger $auditLogger,
     ): void {
-        $jobCenterContextService->runForCenter($this->centerId, function () use (
-            $inspectionService,
-            $headerMappingService,
-            $csvParsingService,
-            $footerReaderService,
-            $reconciliationService,
-            $duplicatePreviewService,
-            $importErrorRecorderService,
-            $auditLogger,
-        ): void {
-            $this->process(
+        try {
+            $jobCenterContextService->runForCenter($this->centerId, function () use (
                 $inspectionService,
                 $headerMappingService,
                 $csvParsingService,
@@ -59,8 +51,55 @@ class ProcessVerificationJob implements ShouldQueue
                 $duplicatePreviewService,
                 $importErrorRecorderService,
                 $auditLogger,
-            );
-        });
+            ): void {
+                $this->process(
+                    $inspectionService,
+                    $headerMappingService,
+                    $csvParsingService,
+                    $footerReaderService,
+                    $reconciliationService,
+                    $duplicatePreviewService,
+                    $importErrorRecorderService,
+                    $auditLogger,
+                );
+            });
+        } catch (Throwable $exception) {
+            $this->markVerificationFailed($auditLogger, $exception);
+
+            throw $exception;
+        }
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $this->markVerificationFailed(app(AuditLogger::class), $exception);
+    }
+
+    private function markVerificationFailed(AuditLogger $auditLogger, ?Throwable $exception): void
+    {
+        $verification = ImportVerification::query()
+            ->where('token', $this->token)
+            ->where('center_id', $this->centerId)
+            ->first();
+
+        if ($verification === null) {
+            return;
+        }
+
+        if (! in_array($verification->status, [VerificationStatus::Pending, VerificationStatus::Processing], true)) {
+            return;
+        }
+
+        $errorMessage = filled($exception?->getMessage())
+            ? $exception->getMessage()
+            : (string) __('csv_verification.verification.processing_failed');
+
+        $verification->update([
+            'status' => VerificationStatus::Failed,
+            'error_message' => $errorMessage,
+        ]);
+
+        $this->recordVerificationFailure($auditLogger, $verification, $errorMessage);
     }
 
     private function process(

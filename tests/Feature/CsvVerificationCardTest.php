@@ -149,7 +149,19 @@ test('verification card tracks verifying phase after verify is clicked', functio
 });
 
 test('verification card shows summary panel after processing completes', function () {
-    readyVerificationCardComponent()
+    config(['csv_verification.process_synchronously' => true]);
+
+    $owner = actingAsOwner();
+    $center = createTestCenter($owner->organization);
+    setOwnerActiveCenter($owner, $center);
+
+    Livewire::test(CsvVerificationCard::class)
+        ->set('csvFile', UploadedFile::fake()->createWithContent(
+            'cashflow-june.csv',
+            verificationReadyFrenchCsv([completedFrenchDataRow()]),
+        ))
+        ->call('verify')
+        ->assertHasNoErrors()
         ->assertSee(__('csv_verification.summary.footer_totals'), false)
         ->assertSee(__('csv_verification.summary.verification_status'), false)
         ->assertSee(__('csv_verification.summary.compact_stats'), false)

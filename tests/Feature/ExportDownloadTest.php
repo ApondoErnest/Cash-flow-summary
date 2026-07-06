@@ -32,40 +32,10 @@ beforeEach(function () {
     test()->seed(HeaderAliasSeeder::class);
 });
 
-function completedExportFixture(): array
-{
-    Carbon::setTestNow('2026-06-01 14:30:00');
-
-    $center = createTestCenter(attributes: ['name' => 'Download Center', 'code' => 'DL-CTR']);
-    $manager = actingAsManager($center);
-
-    $verification = startVerificationFor(
-        $manager,
-        $center,
-        verificationReadyFrenchCsv([completedFrenchDataRow()]),
-    );
-    runProcessVerificationJob($verification->token);
-    commitVerificationFor($manager, $verification->fresh());
-    app(SummaryGenerationService::class)->regenerate($center->id, '2026-06-01');
-
-    $export = ExportRequest::query()->create([
-        'user_id' => $manager->id,
-        'center_id' => $center->id,
-        'report_type' => ReportType::CenterReport->value,
-        'filters' => ['period' => 'month'],
-        'format' => ExportFormat::Csv,
-        'status' => ExportRequestStatus::Pending,
-    ]);
-
-    app(ExportService::class)->generate($export->fresh());
-
-    return [$center, $manager, $export->fresh()];
-}
-
 test('manager receives completed center report export file', function () {
     [, $manager, $export] = completedExportFixture();
 
-    $response = $this->actingAs($manager)->get(route('exports.download', $export));
+    $response = $this->actingAs($manager)->get(signedDownloadUrl('exports.download', ['exportRequest' => $export->id]));
 
     $response->assertOk()
         ->assertHeader('content-type', 'text/csv; charset=UTF-8');
@@ -105,7 +75,7 @@ test('owner can download completed export for active center', function () {
     app(ExportService::class)->generate($export->fresh());
 
     $this->actingAs($owner)
-        ->get(route('exports.download', $export->fresh()))
+        ->get(signedDownloadUrl('exports.download', ['exportRequest' => $export->fresh()->id]))
         ->assertOk()
         ->assertHeader('content-type', 'application/pdf');
 });
@@ -115,7 +85,7 @@ test('manager cannot download another users export for the same center', functio
     $otherManager = actingAsManager($center);
 
     $this->actingAs($otherManager)
-        ->get(route('exports.download', $export))
+        ->get(signedDownloadUrl('exports.download', ['exportRequest' => $export->id]))
         ->assertForbidden();
 });
 
@@ -125,7 +95,7 @@ test('user cannot download export from another center', function () {
     $otherManager = actingAsManager($otherCenter);
 
     $this->actingAs($otherManager)
-        ->get(route('exports.download', $export))
+        ->get(signedDownloadUrl('exports.download', ['exportRequest' => $export->id]))
         ->assertForbidden();
 });
 
@@ -137,7 +107,7 @@ test('expired export download returns not found', function () {
     ]);
 
     $this->actingAs($manager)
-        ->get(route('exports.download', $export))
+        ->get(signedDownloadUrl('exports.download', ['exportRequest' => $export->id]))
         ->assertNotFound();
 });
 
@@ -154,7 +124,7 @@ test('pending export download returns not found', function () {
     ]);
 
     $this->actingAs($manager)
-        ->get(route('exports.download', $export))
+        ->get(signedDownloadUrl('exports.download', ['exportRequest' => $export->id]))
         ->assertNotFound();
 });
 
@@ -163,7 +133,7 @@ test('cashier cannot download report exports', function () {
     $cashier = actingAsCashier($center);
 
     $this->actingAs($cashier)
-        ->get(route('exports.download', $export))
+        ->get(signedDownloadUrl('exports.download', ['exportRequest' => $export->id]))
         ->assertForbidden();
 });
 

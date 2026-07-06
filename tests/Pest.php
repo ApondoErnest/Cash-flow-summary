@@ -10,6 +10,7 @@ require __DIR__.'/Support/ImportCommitHelpers.php';
 require __DIR__.'/Support/AnomalyHelpers.php';
 require __DIR__.'/Support/TwoFactorHelpers.php';
 require __DIR__.'/Support/WhatsAppNotificationHelpers.php';
+require __DIR__.'/Support/DownloadHelpers.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,12 @@ require __DIR__.'/Support/WhatsAppNotificationHelpers.php';
 pest()->extend(TestCase::class)
  // ->use(RefreshDatabase::class)
     ->in('Feature');
+
+pest()->extend(TestCase::class)
+    ->in('Unit');
+
+pest()->extend(TestCase::class)
+    ->in('Integration');
 
 /*
 |--------------------------------------------------------------------------

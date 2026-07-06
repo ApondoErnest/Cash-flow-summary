@@ -90,6 +90,37 @@
                 </flux:callout>
             @endif
 
+            @if ($testMessageFeedback)
+                <flux:callout variant="success" icon="check-circle">
+                    {{ $testMessageFeedback }}
+                </flux:callout>
+            @endif
+
+            @error('testMessage')
+                <flux:callout variant="danger" icon="x-circle">
+                    {{ $message }}
+                </flux:callout>
+            @enderror
+
+            <div class="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <flux:text class="text-sm text-text-muted!">
+                    {{ __('settings.whatsapp.test_help') }}
+                </flux:text>
+
+                <x-ui.button
+                    variant="secondary"
+                    icon="paper-airplane"
+                    type="button"
+                    wire:click="sendTestMessage"
+                    wire:loading.attr="disabled"
+                    wire:target="sendTestMessage"
+                    :disabled="! $isOutboundConfigured"
+                >
+                    <span wire:loading.remove wire:target="sendTestMessage">{{ __('settings.whatsapp.test_send') }}</span>
+                    <span wire:loading wire:target="sendTestMessage">{{ __('settings.whatsapp.test_sending') }}</span>
+                </x-ui.button>
+            </div>
+
             <div class="flex justify-end border-t border-slate-200 pt-4">
                 <x-ui.button
                     variant="primary"

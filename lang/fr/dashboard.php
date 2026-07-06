@@ -92,6 +92,8 @@ return [
     ],
     'sections' => [
         'revenue_trend' => 'Tendance des recettes',
+        'category_breakdown' => 'Catégories et inspections',
+        'category_breakdown_description' => 'Nombre d\'enregistrements actifs pour la période sélectionnée.',
         'submission_alerts' => 'Soumissions et alertes',
         'recent_imports' => 'Imports récents',
         'recent_imports_description' => 'Derniers imports CSV pour le centre actif.',

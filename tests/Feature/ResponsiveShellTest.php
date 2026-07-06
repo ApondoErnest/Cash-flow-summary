@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Support\Auth\RoleName;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
@@ -104,17 +106,31 @@ test('administration form css targets flux field markup', function () {
 });
 
 test('manage centers and users render mobile card lists', function () {
-    actingAsOwnerWithoutActiveCenter();
-    createTestCenter(auth()->user()->organization, ['name' => 'Mobile Center']);
+    $owner = actingAsOwnerWithoutActiveCenter();
+    $center = createTestCenter($owner->organization, ['name' => 'Mobile Center']);
 
-    $this->get(route('centers.index'))
+    Role::findOrCreate(RoleName::CenterManager, 'web');
+
+    \App\Models\User::query()->create([
+        'organization_id' => $owner->organization_id,
+        'center_id' => $center->id,
+        'name' => 'Mobile Manager',
+        'username' => 'mobile-manager',
+        'password' => bcrypt('password'),
+        'is_active' => true,
+        'must_change_password' => false,
+    ])->assignRole(RoleName::CenterManager);
+
+    $this->actingAs($owner)
+        ->get(route('centers.index'))
         ->assertOk()
         ->assertSee('data-mf-mobile-record-list', false)
         ->assertSee('mf-mobile-record-card__mark', false)
         ->assertSee('mf-admin-mobile-panel', false)
         ->assertSee('mf-manage-list-table hidden min-w-0 md:block', false);
 
-    $this->get(route('users.index'))
+    $this->actingAs($owner)
+        ->get(route('users.index'))
         ->assertOk()
         ->assertSee('data-mf-mobile-record-card', false)
         ->assertSee('mf-mobile-record-card__action', false)

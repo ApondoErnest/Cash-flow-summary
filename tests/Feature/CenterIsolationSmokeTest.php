@@ -9,35 +9,32 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-dataset('operational_route_names', fn () => array_map(
-    fn (string $routeName) => [$routeName],
-    operationalRouteNames(),
-));
+dataset('operational_route_smoke_cases', fn () => operationalRouteSmokeCases());
 
 describe('checkpoint AC #5 / #53 — cross-center tampering blocked', function () {
-    test('manager receives 403 when tampering center_id on operational routes', function (string $routeName) {
+    test('manager receives 403 when tampering center_id on operational routes', function (string $routeName, array $pathParameters) {
         actingAsManager();
         $otherCenter = createTestCenter();
 
-        $this->get(route($routeName, ['center_id' => $otherCenter->id]))
+        $this->get(route($routeName, array_merge($pathParameters, ['center_id' => $otherCenter->id])))
             ->assertForbidden();
-    })->with('operational_route_names');
+    })->with('operational_route_smoke_cases');
 
-    test('cashier receives 403 when tampering center_id on operational routes', function (string $routeName) {
+    test('cashier receives 403 when tampering center_id on operational routes', function (string $routeName, array $pathParameters) {
         actingAsCashier();
         $otherCenter = createTestCenter();
 
-        $this->get(route($routeName, ['center_id' => $otherCenter->id]))
+        $this->get(route($routeName, array_merge($pathParameters, ['center_id' => $otherCenter->id])))
             ->assertForbidden();
-    })->with('operational_route_names');
+    })->with('operational_route_smoke_cases');
 
-    test('owner receives 403 when tampering center_id on operational routes', function (string $routeName) {
+    test('owner receives 403 when tampering center_id on operational routes', function (string $routeName, array $pathParameters) {
         actingAsOwner();
         $otherCenter = createTestCenter();
 
-        $this->get(route($routeName, ['center_id' => $otherCenter->id]))
+        $this->get(route($routeName, array_merge($pathParameters, ['center_id' => $otherCenter->id])))
             ->assertForbidden();
-    })->with('operational_route_names');
+    })->with('operational_route_smoke_cases');
 });
 
 describe('checkpoint AC #3 — single assigned center for staff', function () {

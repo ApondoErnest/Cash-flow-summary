@@ -38,6 +38,7 @@ return [
     'verification' => [
         'expired' => 'Cette vérification a expiré. Téléversez à nouveau le fichier.',
         'reject_not_allowed' => 'Cette vérification ne peut pas être rejetée dans son état actuel.',
+        'processing_failed' => 'La vérification n\'a pas pu aboutir. Réessayez ou contactez le support.',
     ],
     'import_mode' => [
         'operational' => 'Opérationnel',

@@ -32,4 +32,17 @@ return [
 
     'cleanup_batch_size' => (int) env('CSV_VERIFICATION_CLEANUP_BATCH', 100),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Synchronous processing
+    |--------------------------------------------------------------------------
+    |
+    | When true, verification runs inline instead of on the queue. Defaults to
+    | true in local so CSV verify works without Horizon / queue:work. Set false
+    | in production and run a queue worker (see docs/operations/setup.md).
+    |
+    */
+
+    'process_synchronously' => env('CSV_VERIFICATION_SYNC', env('APP_ENV') === 'local'),
+
 ];

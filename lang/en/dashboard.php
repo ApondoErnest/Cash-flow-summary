@@ -92,6 +92,8 @@ return [
     ],
     'sections' => [
         'revenue_trend' => 'Revenue trend',
+        'category_breakdown' => 'Categories & inspections',
+        'category_breakdown_description' => 'Active record counts for the selected period.',
         'submission_alerts' => 'Submission & alerts',
         'recent_imports' => 'Recent imports',
         'recent_imports_description' => 'Latest CSV imports for the active center.',

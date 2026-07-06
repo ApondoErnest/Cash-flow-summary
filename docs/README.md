@@ -96,6 +96,8 @@
 | Document | Description |
 |----------|-------------|
 | [test-strategy.md](testing/test-strategy.md) | Pest, fixtures, coverage |
+| [uat-owner-staging.md](testing/uat-owner-staging.md) | Owner UAT runbook (Step 106) |
+| [uat-manager-cashier-staging.md](testing/uat-manager-cashier-staging.md) | Manager/Cashier UAT runbook (Step 107) |
 | [acceptance-criteria.md](testing/acceptance-criteria.md) | Production acceptance (54 criteria) |
 
 ### API

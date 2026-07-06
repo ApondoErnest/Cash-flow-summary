@@ -8,7 +8,7 @@ use App\Modules\Centers\Models\Center;
 use App\Modules\Dashboards\Enums\DashboardPeriod;
 use App\Modules\Dashboards\Support\CashierDashboardData;
 use App\Modules\Dashboards\Support\DashboardMoney;
-use App\Modules\Reports\Models\DailySummary;
+use App\Modules\Reports\Services\ReportQueryService;
 use Illuminate\Support\Carbon;
 
 final class CashierDashboardService
@@ -18,6 +18,7 @@ final class CashierDashboardService
     public function __construct(
         private readonly OwnerDashboardService $ownerDashboardService,
         private readonly SubmissionStatusService $submissionStatusService,
+        private readonly ReportQueryService $reportQueryService,
     ) {}
 
     public function build(Center $center, ?Carbon $referenceDate = null): CashierDashboardData
@@ -47,26 +48,17 @@ final class CashierDashboardService
 
     private function totalTtcForPeriod(int $centerId, DashboardPeriod $period, Carbon $reference): string
     {
-        [$rangeStart, $rangeEnd] = $period->range($reference);
+        $totals = $this->reportQueryService->periodTotals($centerId, $period, $reference);
 
-        $summaries = DailySummary::query()
-            ->withoutCenterScope()
-            ->where('center_id', $centerId)
-            ->whereDate('business_date', '>=', $rangeStart->toDateString())
-            ->whereDate('business_date', '<=', $rangeEnd->toDateString())
-            ->pluck('total_ttc');
-
-        return DashboardMoney::format(DashboardMoney::sum($summaries->all()));
+        return DashboardMoney::format($totals['ttc']);
     }
 
     private function activeRecordsToday(int $centerId, Carbon $reference): int
     {
-        $summary = DailySummary::query()
-            ->withoutCenterScope()
-            ->where('center_id', $centerId)
-            ->whereDate('business_date', $reference->toDateString())
-            ->first();
-
-        return $summary?->record_count ?? 0;
+        return $this->reportQueryService->periodTotals(
+            $centerId,
+            DashboardPeriod::Today,
+            $reference,
+        )['recordCount'];
     }
 }

@@ -38,6 +38,7 @@ return [
     'verification' => [
         'expired' => 'This verification has expired. Upload the file again.',
         'reject_not_allowed' => 'This verification cannot be rejected in its current state.',
+        'processing_failed' => 'Verification could not be completed. Try again or contact support.',
     ],
     'import_mode' => [
         'operational' => 'Operational',

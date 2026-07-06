@@ -162,7 +162,7 @@
                 <flux:table.columns>
                     <flux:table.column>{{ __('dashboard.table.date') }}</flux:table.column>
                     <flux:table.column>{{ __('dashboard.table.file') }}</flux:table.column>
-                    <flux:table.column align="end">{{ __('dashboard.stats.total_ttc') }}</flux:table.column>
+                    <flux:table.column align="end">{{ __('reports.stats.total_ttc') }}</flux:table.column>
                     <flux:table.column>{{ __('dashboard.table.status') }}</flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>

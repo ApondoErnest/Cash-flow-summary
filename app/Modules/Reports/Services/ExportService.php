@@ -17,6 +17,7 @@ use App\Modules\Reports\Support\CenterReportData;
 use App\Modules\Reports\Support\CenterReportExportBuilder;
 use App\Modules\Reports\Support\ExportListRow;
 use App\Modules\Reports\Support\ExportRequestStatusPresenter;
+use App\Support\Downloads\FileDownloadUrlService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -175,7 +176,7 @@ final class ExportService
             statusLabel: $badge['label'],
             statusVariant: $badge['variant'],
             downloadUrl: $this->isDownloadable($export)
-                ? route('exports.download', $export)
+                ? app(FileDownloadUrlService::class)->export($export)
                 : null,
             isInProgress: in_array($export->status, [ExportRequestStatus::Pending, ExportRequestStatus::Processing], true),
             requestedAt: $export->created_at?->timezone(config('app.timezone'))->format('d/m/Y H:i') ?? '—',

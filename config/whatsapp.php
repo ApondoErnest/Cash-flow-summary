@@ -22,6 +22,19 @@ return [
 
     'max_attempts' => (int) env('WHATSAPP_QUEUE_MAX_ATTEMPTS', 3),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Settings test message
+    |--------------------------------------------------------------------------
+    |
+    | Meta’s default hello_world template is available on test numbers without
+    | custom template approval. Override if your Business Manager uses another.
+    |
+    */
+    'test_template' => env('WHATSAPP_TEST_TEMPLATE', 'hello_world'),
+
+    'test_template_language' => env('WHATSAPP_TEST_TEMPLATE_LANGUAGE', 'en_US'),
+
     /** @var list<int> Seconds between queue retries (exponential backoff base). */
     'retry_backoff_seconds' => [60, 300, 900],
 

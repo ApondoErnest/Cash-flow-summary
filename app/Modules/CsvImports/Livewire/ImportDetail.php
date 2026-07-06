@@ -8,6 +8,7 @@ use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvImports\Services\ImportDetailService;
 use App\Modules\CsvImports\Support\ImportDetailData;
 use App\Support\Auth\RoleName;
+use App\Support\Downloads\FileDownloadUrlService;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -53,6 +54,16 @@ class ImportDetail extends Component
     public function detail(): ImportDetailData
     {
         return app(ImportDetailService::class)->build($this->import);
+    }
+
+    #[Computed]
+    public function importErrorDownloadUrl(): ?string
+    {
+        if ($this->import->invalid_count <= 0) {
+            return null;
+        }
+
+        return app(FileDownloadUrlService::class)->importErrors($this->import);
     }
 
     public function render(): View

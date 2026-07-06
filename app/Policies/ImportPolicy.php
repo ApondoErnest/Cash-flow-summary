@@ -6,6 +6,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Modules\CsvImports\Models\Import;
+use Illuminate\Database\Eloquent\Model;
 
 class ImportPolicy extends CenterResourcePolicy
 {
@@ -14,8 +15,12 @@ class ImportPolicy extends CenterResourcePolicy
         return app(\App\Support\Center\CenterContextResolver::class)->canImport($user);
     }
 
-    public function view(User $user, Import $import): bool
+    public function view(User $user, Model $resource): bool
     {
-        return $this->resourceBelongsToResolvedCenter($user, $import);
+        if (! $resource instanceof Import) {
+            return false;
+        }
+
+        return $this->resourceBelongsToResolvedCenter($user, $resource);
     }
 }

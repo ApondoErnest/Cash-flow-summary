@@ -12,8 +12,10 @@ return [
 
     'organization' => [
         'title' => 'Organization Settings',
-        'description' => 'Review your organization profile, regional defaults, and contact information.',
+        'description' => 'Update your organization profile and contact information. Regional defaults are read-only.',
         'profile_title' => 'Organization profile',
+        'saved' => 'Organization profile saved.',
+        'saving' => 'Saving…',
         'stats' => [
             'currency' => 'Currency',
             'timezone' => 'Timezone',
@@ -32,6 +34,8 @@ return [
             'timezone' => 'Timezone',
             'contact_email' => 'Contact email',
             'contact_phone' => 'Contact phone',
+            'code_help' => 'Short unique identifier (letters, numbers, dashes). Stored in uppercase.',
+            'readonly_help' => 'Managed during setup — contact support to change.',
         ],
     ],
 
@@ -43,6 +47,12 @@ return [
         'incomplete_notice' => 'Enter the owner phone number, phone number ID, and access token to enable outbound WhatsApp notifications.',
         'webhook_optional_notice' => 'Webhook verify token is optional for local testing with Meta’s test number. Add it in production when Meta webhooks are configured to track delivery status.',
         'saved' => 'WhatsApp settings saved.',
+        'test_send' => 'Send test message',
+        'test_sending' => 'Sending…',
+        'test_help' => 'Send a hello_world template message to the owner number using the saved credentials.',
+        'test_sent' => 'Test message sent to :phone. Meta message ID: :message_id',
+        'test_not_configured' => 'Save the owner phone number, phone number ID, and access token before sending a test message.',
+        'test_failed' => 'WhatsApp test message failed: :error',
         'saving' => 'Saving…',
         'notifications_title' => 'Configuration',
         'fields' => [

@@ -6,6 +6,7 @@ namespace App\Modules\Reports\Services;
 
 use App\Modules\Centers\Models\Center;
 use App\Modules\Dashboards\Enums\DashboardPeriod;
+use App\Modules\Dashboards\Enums\DashboardTrendGranularity;
 use App\Modules\Dashboards\Services\SubmissionStatusService;
 use App\Modules\Dashboards\Support\DashboardMoney;
 use App\Modules\DailyVersions\Enums\DailyVersionStatus;
@@ -34,7 +35,98 @@ final class ReportQueryService
 
         $snapshots = $this->activeSnapshotsForRange($center->id, $rangeStart, $rangeEnd);
         $summaries = $this->summariesForSnapshots($center->id, $snapshots);
+        $totals = $this->aggregateSnapshotMetrics($snapshots, $summaries);
 
+        $dailyRows = $totals['rows'];
+
+        return new CenterReportData(
+            centerName: $center->name,
+            periodLabel: $period->label($customFrom, $customTo),
+            totalHt: DashboardMoney::format($totals['ht']),
+            totalVat: DashboardMoney::format($totals['vat']),
+            totalTtc: DashboardMoney::format($totals['ttc']),
+            recordCount: $totals['recordCount'],
+            daysWithData: count($dailyRows),
+            missingSubmissionDates: $this->submissionStatusService->missingSubmissionDatesBetween(
+                $center,
+                $rangeStart,
+                $rangeEnd,
+            ),
+            dailyRows: $dailyRows,
+            hasData: $dailyRows !== [],
+        );
+    }
+
+    /**
+     * @return array{ht: float, vat: float, ttc: float, recordCount: int}
+     */
+    public function periodTotals(
+        int $centerId,
+        DashboardPeriod $period,
+        ?Carbon $referenceDate = null,
+        ?Carbon $customFrom = null,
+        ?Carbon $customTo = null,
+    ): array {
+        $reference = ($referenceDate ?? now())->copy();
+        [$rangeStart, $rangeEnd] = $period->range($reference, $customFrom, $customTo);
+        $snapshots = $this->activeSnapshotsForRange($centerId, $rangeStart, $rangeEnd);
+        $summaries = $this->summariesForSnapshots($centerId, $snapshots);
+        $totals = $this->aggregateSnapshotMetrics($snapshots, $summaries);
+
+        return [
+            'ht' => $totals['ht'],
+            'vat' => $totals['vat'],
+            'ttc' => $totals['ttc'],
+            'recordCount' => $totals['recordCount'],
+        ];
+    }
+
+    /**
+     * @return array<string, float>
+     */
+    public function trendTtcTotals(
+        int $centerId,
+        DashboardTrendGranularity $granularity,
+        Carbon $reference,
+    ): array {
+        $lookbackStart = match ($granularity) {
+            DashboardTrendGranularity::Daily => $reference->copy()->subDays(29)->startOfDay(),
+            DashboardTrendGranularity::Weekly => $reference->copy()->subWeeks(11)->startOfWeek(),
+            DashboardTrendGranularity::Monthly => $reference->copy()->subMonths(11)->startOfMonth(),
+            DashboardTrendGranularity::Yearly => $reference->copy()->subYears(4)->startOfYear(),
+        };
+
+        $snapshots = $this->activeSnapshotsForRange($centerId, $lookbackStart, $reference);
+        $summaries = $this->summariesForSnapshots($centerId, $snapshots);
+
+        /** @var array<string, float> $grouped */
+        $grouped = [];
+
+        foreach ($snapshots as $snapshot) {
+            $metrics = $this->resolveSnapshotMetrics($snapshot, $summaries);
+            $date = Carbon::parse($snapshot->business_date);
+            $key = match ($granularity) {
+                DashboardTrendGranularity::Daily => $date->toDateString(),
+                DashboardTrendGranularity::Weekly => $date->copy()->startOfWeek()->toDateString(),
+                DashboardTrendGranularity::Monthly => $date->format('Y-m'),
+                DashboardTrendGranularity::Yearly => $date->format('Y'),
+            };
+
+            $grouped[$key] = ($grouped[$key] ?? 0.0) + $metrics['ttc'];
+        }
+
+        ksort($grouped);
+
+        return $grouped;
+    }
+
+    /**
+     * @param  Collection<int, ActiveDailySnapshot>  $snapshots
+     * @param  Collection<string, DailySummary>  $summaries
+     * @return array{rows: list<ReportDailyRow>, ht: float, vat: float, ttc: float, recordCount: int}
+     */
+    private function aggregateSnapshotMetrics(Collection $snapshots, Collection $summaries): array
+    {
         $dailyRows = [];
         $totalHt = 0.0;
         $totalVat = 0.0;
@@ -50,22 +142,13 @@ final class ReportQueryService
             $recordCount += $metrics['recordCount'];
         }
 
-        return new CenterReportData(
-            centerName: $center->name,
-            periodLabel: $period->label($customFrom, $customTo),
-            totalHt: DashboardMoney::format($totalHt),
-            totalVat: DashboardMoney::format($totalVat),
-            totalTtc: DashboardMoney::format($totalTtc),
-            recordCount: $recordCount,
-            daysWithData: count($dailyRows),
-            missingSubmissionDates: $this->submissionStatusService->missingSubmissionDatesBetween(
-                $center,
-                $rangeStart,
-                $rangeEnd,
-            ),
-            dailyRows: $dailyRows,
-            hasData: $dailyRows !== [],
-        );
+        return [
+            'rows' => $dailyRows,
+            'ht' => $totalHt,
+            'vat' => $totalVat,
+            'ttc' => $totalTtc,
+            'recordCount' => $recordCount,
+        ];
     }
 
     /**

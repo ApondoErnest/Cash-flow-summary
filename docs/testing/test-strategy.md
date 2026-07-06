@@ -115,7 +115,7 @@ On push/PR to `main`:
 
 1. `composer install`
 2. `cp .env.example .env` + `php artisan key:generate`
-3. `php artisan test` (Pest; sqlite `:memory:` per `phpunit.xml`)
+3. `php artisan test` (Pest; sqlite `:memory:` per `phpunit.xml`; manual fixture generator excluded — run `./vendor/bin/pest tests/Feature/_GenerateCsvFixturesTest.php` when catalogue changes)
 4. `npm ci` + `npm run build`
 
 ---
@@ -132,6 +132,12 @@ On push/PR to `main`:
 ---
 
 ## UAT (S8)
+
+| Step | Audience | Runbook |
+|------|----------|---------|
+| 106 | Owner | [uat-owner-staging.md](uat-owner-staging.md) |
+| 107 | Manager / Cashier reps | [uat-manager-cashier-staging.md](uat-manager-cashier-staging.md) |
+| 108 | Owner sign-off | [acceptance-criteria.md](acceptance-criteria.md) |
 
 Owner + Manager + Cashier reps execute [user-stories.md](../product/user-stories.md) on staging with sanitized real-format files.
 

@@ -29,7 +29,7 @@ test('verification error report can be downloaded when invalid rows are detected
         ->and($verification->row_stats['invalid'])->toBe(1);
 
     $this->actingAs(\App\Models\User::query()->findOrFail($verification->user_id))
-        ->get(route('verifications.errors.download', $verification->token))
+        ->get(signedDownloadUrl('verifications.errors.download', ['token' => $verification->token]))
         ->assertOk()
         ->assertHeader('content-type', 'text/csv; charset=UTF-8')
         ->assertDownload(pathinfo($verification->original_filename, PATHINFO_FILENAME).'-errors.csv');
@@ -38,42 +38,42 @@ test('verification error report can be downloaded when invalid rows are detected
 });
 
 test('cashier can download import error report after committing file with invalid rows', function () {
-    $verification = runVerificationPipelineForContents(loadCsvFixture('invalid_amount.csv'));
-    $cashier = actingAsCashier(
-        \App\Modules\Centers\Models\Center::query()->findOrFail($verification->center_id),
-    );
+    $center = createTestCenter();
+    $cashier = actingAsCashier($center);
 
+    $verification = startVerificationFor($cashier, $center, loadCsvFixture('invalid_amount.csv'));
+    runProcessVerificationJob($verification->token);
     $import = commitVerificationFor($cashier, $verification->fresh());
 
     expect($import->invalid_count)->toBe(1);
 
     $response = $this->actingAs($cashier)
-        ->get(route('imports.errors.download', $import));
+        ->get(signedDownloadUrl('imports.errors.download', ['import' => $import->id]));
 
     $response->assertOk()
         ->assertHeader('content-type', 'text/csv; charset=UTF-8')
         ->assertDownload(pathinfo($import->original_filename, PATHINFO_FILENAME).'-errors.csv');
 
-    $csv = $response->streamedContent();
+    $csv = $response->getContent();
 
     expect($csv)
         ->toContain("\xEF\xBB\xBF")
-        ->toContain('invalid_amount')
+        ->toContain('negative_amount')
         ->toContain('Source row');
 });
 
 test('cashier import error download page shows action on result and detail pages', function () {
-    $verification = runVerificationPipelineForContents(loadCsvFixture('invalid_amount.csv'));
-    $cashier = actingAsCashier(
-        \App\Modules\Centers\Models\Center::query()->findOrFail($verification->center_id),
-    );
+    $center = createTestCenter();
+    $cashier = actingAsCashier($center);
+
+    $verification = startVerificationFor($cashier, $center, loadCsvFixture('invalid_amount.csv'));
+    runProcessVerificationJob($verification->token);
     $import = commitVerificationFor($cashier, $verification->fresh());
 
     $this->actingAs($cashier)
         ->get(route('imports.result', $import))
         ->assertOk()
-        ->assertSee(__('csv_import.result.actions.download_errors'), false)
-        ->assertSee(route('imports.errors.download', $import), false);
+        ->assertSee(__('csv_import.result.actions.download_errors'), false);
 
     $this->actingAs($cashier)
         ->get(route('imports.show', $import))
@@ -90,7 +90,7 @@ test('cashier cannot download import error report from another center', function
 
     actingAsCashier();
 
-    $this->get(route('imports.errors.download', $import))
+    $this->get(signedDownloadUrl('imports.errors.download', ['import' => $import->id]))
         ->assertNotFound();
 });
 
@@ -102,7 +102,7 @@ test('import error download returns not found when import has no invalid rows', 
     $import = commitVerificationFor($manager, $verification);
 
     $this->actingAs($manager)
-        ->get(route('imports.errors.download', $import))
+        ->get(signedDownloadUrl('imports.errors.download', ['import' => $import->id]))
         ->assertNotFound();
 });
 
@@ -115,5 +115,5 @@ test('verification summary shows error report download when invalid rows exist',
         ->set('verificationToken', $verification->token)
         ->call('refreshVerification')
         ->assertSee(__('csv_verification.summary.download_errors'), false)
-        ->assertSee(route('verifications.errors.download', $verification->token), false);
+        ->assertSee('signature=', false);
 });

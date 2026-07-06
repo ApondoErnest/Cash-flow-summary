@@ -38,7 +38,7 @@
                 <flux:button
                     variant="outline"
                     icon="arrow-down-tray"
-                    :href="route('imports.errors.download', $this->import)"
+                    :href="$this->importErrorDownloadUrl"
                     class="mf-btn-secondary"
                 >
                     {{ __('csv_import.result.actions.download_errors') }}

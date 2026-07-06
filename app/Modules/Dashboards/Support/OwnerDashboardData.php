@@ -22,6 +22,9 @@ final readonly class OwnerDashboardData
         public int $unfinishedCount,
         public int $zeroValueCount,
         public int $duplicatesIgnored,
+        /** @var list<OwnerDashboardCategoryCount> */
+        public array $categoryCounts,
+        public int $cvInspectionCount,
         public array $trend,
         public float $trendMaxTtc,
         public array $alerts,

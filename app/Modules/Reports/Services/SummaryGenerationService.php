@@ -105,6 +105,12 @@ final class SummaryGenerationService
 
     public function queueRegeneration(int $centerId, string $businessDate): void
     {
+        if (config('csv_verification.process_synchronously')) {
+            $this->regenerate($centerId, $businessDate);
+
+            return;
+        }
+
         GenerateDailySummaryJob::dispatch($centerId, $businessDate);
     }
 

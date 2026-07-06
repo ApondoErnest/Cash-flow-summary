@@ -16,7 +16,7 @@ use App\Modules\Dashboards\Support\ManagerDashboardData;
 use App\Modules\Dashboards\Support\OwnerDashboardAlert;
 use App\Modules\Dashboards\Support\OwnerDashboardTrendPoint;
 use App\Modules\Reports\Models\Anomaly;
-use App\Modules\Reports\Models\DailySummary;
+use App\Modules\Reports\Services\ReportQueryService;
 use Illuminate\Support\Carbon;
 
 final class ManagerDashboardService
@@ -24,6 +24,7 @@ final class ManagerDashboardService
     public function __construct(
         private readonly OwnerDashboardService $ownerDashboardService,
         private readonly SubmissionStatusService $submissionStatusService,
+        private readonly ReportQueryService $reportQueryService,
     ) {}
 
     public function build(
@@ -74,27 +75,18 @@ final class ManagerDashboardService
 
     private function totalTtcForPeriod(int $centerId, DashboardPeriod $period, Carbon $reference): string
     {
-        [$rangeStart, $rangeEnd] = $period->range($reference);
+        $totals = $this->reportQueryService->periodTotals($centerId, $period, $reference);
 
-        $summaries = DailySummary::query()
-            ->withoutCenterScope()
-            ->where('center_id', $centerId)
-            ->whereDate('business_date', '>=', $rangeStart->toDateString())
-            ->whereDate('business_date', '<=', $rangeEnd->toDateString())
-            ->pluck('total_ttc');
-
-        return DashboardMoney::format(DashboardMoney::sum($summaries->all()));
+        return DashboardMoney::format($totals['ttc']);
     }
 
     private function activeRecordsToday(int $centerId, Carbon $reference): int
     {
-        $summary = DailySummary::query()
-            ->withoutCenterScope()
-            ->where('center_id', $centerId)
-            ->whereDate('business_date', $reference->toDateString())
-            ->first();
-
-        return $summary?->record_count ?? 0;
+        return $this->reportQueryService->periodTotals(
+            $centerId,
+            DashboardPeriod::Today,
+            $reference,
+        )['recordCount'];
     }
 
     /**

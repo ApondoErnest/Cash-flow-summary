@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Settings\Livewire;
 
+use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Models\Organization;
 use App\Modules\Settings\Services\SettingsService;
 use App\Modules\Settings\Support\WhatsAppSettingsData;
+use App\Modules\WhatsApp\Exceptions\WhatsAppApiException;
+use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -27,6 +30,8 @@ class WhatsappSettings extends Component
     public bool $accessTokenConfigured = false;
 
     public bool $webhookVerifyTokenConfigured = false;
+
+    public ?string $testMessageFeedback = null;
 
     public function mount(SettingsService $settingsService): void
     {
@@ -69,6 +74,46 @@ class WhatsappSettings extends Component
         $this->fillFromSettings($settings);
 
         session()->flash('status', __('settings.whatsapp.saved'));
+    }
+
+    public function sendTestMessage(
+        SettingsService $settingsService,
+        WhatsAppNotificationService $notificationService,
+    ): void {
+        $owner = auth()->user();
+
+        abort_unless($owner?->isOwner(), 403, __('center.owner_only'));
+
+        $this->resetErrorBag();
+        $this->testMessageFeedback = null;
+
+        if (! $settingsService->whatsAppOutboundConfigured((int) $this->organization->id)) {
+            $this->addError('testMessage', __('settings.whatsapp.test_not_configured'));
+
+            return;
+        }
+
+        $centerId = Center::query()
+            ->where('organization_id', $this->organization->id)
+            ->where('is_active', true)
+            ->orderBy('id')
+            ->value('id');
+
+        try {
+            $message = $notificationService->sendTestMessage(
+                organizationId: (int) $this->organization->id,
+                centerId: $centerId !== null ? (int) $centerId : null,
+            );
+
+            $this->testMessageFeedback = __('settings.whatsapp.test_sent', [
+                'phone' => $message->recipient_phone,
+                'message_id' => $message->provider_message_id ?? '—',
+            ]);
+        } catch (WhatsAppApiException $exception) {
+            $this->addError('testMessage', __('settings.whatsapp.test_failed', [
+                'error' => $exception->getMessage(),
+            ]));
+        }
     }
 
     public function render(): View
