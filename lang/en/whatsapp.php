@@ -22,7 +22,10 @@ return [
         'reconciliation_mismatch' => 'Reconciliation mismatch',
         'missing_submission' => 'Missing submission',
         'delivery_failure' => 'Delivery failure',
-        'daily_summary' => 'Daily summary',
+        'daily_summary' => 'Daily activity summary',
+        'weekly_summary' => 'Weekly activity summary',
+        'monthly_summary' => 'Monthly activity summary',
+        'yearly_summary' => 'Yearly activity summary',
         'historical_import' => 'Historical import',
     ],
     'history' => [

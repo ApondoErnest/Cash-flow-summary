@@ -17,13 +17,19 @@ Owner needs timely import summaries. Email excluded from v1.
 
 ## Events
 
-Successful import; with duplicates; duplicate-only file; revision pending/approved; financial mismatch; missing submission; delivery failure; consolidated daily summary.
+**Scheduled activity summaries** (ADR [0012](0012-whatsapp-scheduled-summaries.md)) — daily, weekly (Saturday), monthly (last day), yearly (31 December). Per-center send time configured by Owner. **No per-import WhatsApp.**
 
-**Historical imports:** suppressed by default; optional "Notify Owner" checkbox (BR-014).
+Legacy per-import event types (`import_success`, etc.) may appear on historical `whatsapp_messages` rows only.
+
+Future (not in scope): revision pending/approved; financial mismatch; missing submission; delivery failure alerts.
+
+**Historical imports:** no immediate WhatsApp; activity rolls into scheduled summaries (BR-014 updated).
 
 ## Content rules
 
 Aggregate totals and metadata only — no customer or plate lists.
+
+**Template parameters:** center name, period, inspection count, category summary (A–D counts for the period), HT/VAT/TTC — seven body fields via Meta template `import_activity_summary`. See [api/README.md](../../api/README.md#import-template-import_activity_summary).
 
 ## Configuration tiers
 
@@ -39,4 +45,5 @@ Implementation: when `whatsapp.webhook_verify_token` is absent, skip webhook reg
 ## Related
 
 - [api/README.md](../../api/README.md)
-- REQ-090–REQ-096
+- [0012-whatsapp-scheduled-summaries.md](0012-whatsapp-scheduled-summaries.md)
+- REQ-090–REQ-096, REQ-097–REQ-101

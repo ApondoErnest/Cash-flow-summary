@@ -22,7 +22,6 @@ use App\Modules\DailyVersions\Support\VersionComparisonProcessResult;
 use App\Modules\DuplicateDetection\Services\MasterLedgerService;
 use App\Modules\DuplicateDetection\Support\MasterLedgerProcessResult;
 use App\Modules\Reports\Services\SummaryGenerationService;
-use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -39,7 +38,6 @@ final class ImportService
         private readonly SummaryGenerationService $summaryGenerationService,
         private readonly VerificationCleanupService $verificationCleanupService,
         private readonly CorrectionSubmissionService $correctionSubmissionService,
-        private readonly WhatsAppNotificationService $whatsAppNotificationService,
         private readonly AuditLogger $auditLogger,
         private readonly VerificationService $verificationService,
     ) {}
@@ -188,8 +186,6 @@ final class ImportService
         if ($import->import_verification_id !== $verification->id) {
             throw new ExactFileDuplicateException($import);
         }
-
-        $this->whatsAppNotificationService->queueImportNotification($import);
 
         return $import;
     }

@@ -36,6 +36,8 @@ class ManageCenterForm extends Component
 
     public string $submission_deadline = '';
 
+    public string $whatsapp_summary_time = '';
+
     public bool $is_active = true;
 
     public bool $setAsDefault = false;
@@ -83,6 +85,7 @@ class ManageCenterForm extends Component
             'phone' => $validated['phone'] !== '' ? $validated['phone'] : null,
             'default_language' => $validated['default_language'],
             'submission_deadline' => $validated['submission_deadline'] !== '' ? $validated['submission_deadline'] : null,
+            'whatsapp_summary_time' => $validated['whatsapp_summary_time'] !== '' ? $validated['whatsapp_summary_time'] : null,
             'is_active' => $this->center !== null ? $validated['is_active'] : true,
         ];
 
@@ -146,6 +149,7 @@ class ManageCenterForm extends Component
             'phone' => ['nullable', 'string', 'max:40'],
             'default_language' => ['required', 'in:fr,en'],
             'submission_deadline' => ['nullable', 'date_format:H:i'],
+            'whatsapp_summary_time' => ['nullable', 'date_format:H:i'],
             'is_active' => ['boolean'],
             'setAsDefault' => ['boolean'],
         ];
@@ -165,6 +169,7 @@ class ManageCenterForm extends Component
             'phone' => __('center.manage.fields.phone'),
             'default_language' => __('center.manage.fields.default_language'),
             'submission_deadline' => __('center.manage.fields.submission_deadline'),
+            'whatsapp_summary_time' => __('center.manage.fields.whatsapp_summary_time'),
         ];
     }
 
@@ -179,6 +184,9 @@ class ManageCenterForm extends Component
         $this->default_language = $center->default_language ?? 'fr';
         $this->submission_deadline = $center->submission_deadline !== null
             ? substr((string) $center->submission_deadline, 0, 5)
+            : '';
+        $this->whatsapp_summary_time = $center->whatsapp_summary_time !== null
+            ? substr((string) $center->whatsapp_summary_time, 0, 5)
             : '';
         $this->is_active = $center->is_active;
         $this->setAsDefault = (int) auth()->user()?->preferred_center_id === (int) $center->id;

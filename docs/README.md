@@ -139,6 +139,7 @@
 | [0005](architecture/decisions/0005-exact-duplicate-ledger.md) | Exact duplicate ledger | Accepted |
 | [0006](architecture/decisions/0006-daily-versioning.md) | Daily versioning | Accepted |
 | [0007](architecture/decisions/0007-whatsapp.md) | WhatsApp Cloud API | Accepted |
+| [0012](architecture/decisions/0012-whatsapp-scheduled-summaries.md) | Scheduled WhatsApp summaries | Accepted |
 | [0008](architecture/decisions/0008-probable-duplicates.md) | Probable duplicates | Accepted |
 | [0009](architecture/decisions/0009-verification-token-flow.md) | Verification token flow | Accepted |
 | [0010](architecture/decisions/0010-owner-first-delivery.md) | Owner-first delivery | Accepted |

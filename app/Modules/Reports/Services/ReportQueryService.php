@@ -60,6 +60,20 @@ final class ReportQueryService
     /**
      * @return array{ht: float, vat: float, ttc: float, recordCount: int}
      */
+    public function totalsForDateRange(int $centerId, Carbon $rangeStart, Carbon $rangeEnd): array
+    {
+        return $this->periodTotals(
+            $centerId,
+            DashboardPeriod::Custom,
+            referenceDate: $rangeEnd,
+            customFrom: $rangeStart,
+            customTo: $rangeEnd,
+        );
+    }
+
+    /**
+     * @return array{ht: float, vat: float, ttc: float, recordCount: int}
+     */
     public function periodTotals(
         int $centerId,
         DashboardPeriod $period,

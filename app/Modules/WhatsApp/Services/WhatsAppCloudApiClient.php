@@ -14,6 +14,7 @@ final class WhatsAppCloudApiClient
 {
     /**
      * @param  list<string>  $bodyParameters
+     * @param  list<string>|null  $bodyParameterNames  Meta named-template parameter names (same order as values).
      */
     public function sendTemplateMessage(
         WhatsAppCredentials $credentials,
@@ -21,6 +22,7 @@ final class WhatsAppCloudApiClient
         string $templateName,
         string $languageCode,
         array $bodyParameters,
+        ?array $bodyParameterNames = null,
     ): WhatsAppSendResult {
         $response = Http::timeout((int) config('whatsapp.timeout_seconds', 30))
             ->withToken($credentials->accessToken)
@@ -34,7 +36,7 @@ final class WhatsAppCloudApiClient
                     'language' => [
                         'code' => $languageCode,
                     ],
-                    'components' => $this->bodyComponents($bodyParameters),
+                    'components' => $this->bodyComponents($bodyParameters, $bodyParameterNames),
                 ],
             ]);
 
@@ -56,9 +58,10 @@ final class WhatsAppCloudApiClient
 
     /**
      * @param  list<string>  $bodyParameters
+     * @param  list<string>|null  $parameterNames
      * @return list<array<string, mixed>>
      */
-    private function bodyComponents(array $bodyParameters): array
+    private function bodyComponents(array $bodyParameters, ?array $parameterNames = null): array
     {
         if ($bodyParameters === []) {
             return [];
@@ -68,11 +71,20 @@ final class WhatsAppCloudApiClient
             [
                 'type' => 'body',
                 'parameters' => array_map(
-                    fn (string $text): array => [
-                        'type' => 'text',
-                        'text' => $text,
-                    ],
+                    function (string $text, int $index) use ($parameterNames): array {
+                        $parameter = [
+                            'type' => 'text',
+                            'text' => $text,
+                        ];
+
+                        if ($parameterNames !== null) {
+                            $parameter['parameter_name'] = $parameterNames[$index];
+                        }
+
+                        return $parameter;
+                    },
                     $bodyParameters,
+                    array_keys($bodyParameters),
                 ),
             ],
         ];

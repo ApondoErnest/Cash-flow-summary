@@ -99,6 +99,10 @@ final class WhatsappHistoryService
     public function filterableEventTypes(): array
     {
         return [
+            'daily_summary',
+            'weekly_summary',
+            'monthly_summary',
+            'yearly_summary',
             'import_success',
             'import_with_duplicates',
             'duplicate_only',

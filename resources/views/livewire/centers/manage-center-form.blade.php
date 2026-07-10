@@ -69,6 +69,13 @@
                     <flux:description>{{ __('center.manage.fields.submission_deadline_help') }}</flux:description>
                     <flux:error name="submission_deadline" />
                 </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('center.manage.fields.whatsapp_summary_time') }}</flux:label>
+                    <flux:input wire:model="whatsapp_summary_time" type="time" step="60" />
+                    <flux:description>{{ __('center.manage.fields.whatsapp_summary_time_help') }}</flux:description>
+                    <flux:error name="whatsapp_summary_time" />
+                </flux:field>
             </div>
 
             @if ($isEditing)

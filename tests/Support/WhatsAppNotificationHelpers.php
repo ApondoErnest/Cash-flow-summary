@@ -39,6 +39,27 @@ function whatsAppImportFixture(): Import
 }
 
 /**
+ * @return array{0: \App\Modules\Centers\Models\Center, 1: User}
+ */
+function whatsAppScheduledSummaryFixture(array $centerAttributes = []): array
+{
+    test()->seed(\Database\Seeders\DatabaseSeeder::class);
+
+    $owner = User::query()
+        ->where('username', env('SEED_OWNER_USERNAME', 'owner'))
+        ->firstOrFail();
+
+    $center = createTestCenter($owner->organization, array_merge([
+        'name' => 'WhatsApp Center',
+        'whatsapp_summary_time' => '18:00',
+    ], $centerAttributes));
+
+    configureWhatsAppForOwner($owner);
+
+    return [$center, $owner];
+}
+
+/**
  * @return array{0: \App\Modules\CsvVerification\Models\ImportVerification, 1: User, 2: User}
  */
 function readyOwnerOrgVerificationForCommit(string $contents): array

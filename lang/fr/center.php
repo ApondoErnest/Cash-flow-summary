@@ -84,6 +84,8 @@ return [
             'default_language' => 'Langue par défaut',
             'submission_deadline' => 'Heure limite de soumission quotidienne',
             'submission_deadline_help' => 'Heure locale optionnelle pour la soumission CSV quotidienne.',
+            'whatsapp_summary_time' => 'Heure du résumé WhatsApp',
+            'whatsapp_summary_time_help' => 'Heure locale d\'envoi des résumés d\'activité programmés au propriétaire (défaut 18:00).',
             'is_active' => 'Centre actif',
             'is_active_help' => 'Les centres inactifs restent en base mais ne peuvent pas être sélectionnés pour les opérations.',
             'set_as_default' => 'Utiliser comme centre par défaut après connexion',

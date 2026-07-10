@@ -47,20 +47,25 @@ When webhook verify token is **not** configured, the application **must not** re
 
 ## Outbound flow
 
+Scheduled summaries (ADR [0012](../architecture/decisions/0012-whatsapp-scheduled-summaries.md)):
+
 ```mermaid
 sequenceDiagram
-  participant App as Laravel
+  participant Cron as schedule:run
+  participant Cmd as whatsapp:dispatch-scheduled-summaries
+  participant Svc as WhatsAppNotificationService
   participant Q as Redis_Queue
   participant API as Meta_Cloud_API
   participant Owner as Owner_Phone
 
-  App->>Q: WhatsAppJob with idempotency_key
-  Q->>App: WhatsAppCloudApiClient
-  App->>API: POST /messages
+  Cron->>Cmd: Every minute
+  Cmd->>Svc: queueScheduledSummary per center/cadence
+  Svc->>Q: SendWhatsAppNotificationJob
+  Q->>API: POST /messages
   API-->>Owner: Template message
-  API-->>App: message_id
-  App->>App: Update whatsapp_messages.status
 ```
+
+Per-import sends are **removed**. Imports no longer enqueue WhatsApp jobs.
 
 ---
 
@@ -68,26 +73,72 @@ sequenceDiagram
 
 Before send, check `whatsapp_messages.idempotency_key` unique.
 
-Suggested key format: `{event_type}:{import_id}:{revision_id?}`
+Scheduled summary key format:
 
-Duplicate job retries must not create second row with same key.
+```
+{cadence_event_type}:center:{center_id}:{period_key}
+```
+
+Examples:
+
+- `daily_summary:center:3:2026-07-09`
+- `weekly_summary:center:3:2026-W28`
+- `monthly_summary:center:3:2026-07`
+- `yearly_summary:center:3:2026`
+
+Duplicate job retries must not create a second row with the same key.
+
+---
+
+## Scheduled cadences
+
+| `event_type` | Send day | Period summarized |
+|--------------|----------|-------------------|
+| `daily_summary` | Every **operating day** (center calendar) | That calendar day **from 00:00 through the center’s configured send time** |
+| `weekly_summary` | Saturday | Monday–Saturday of that week |
+| `monthly_summary` | Last day of month | Full calendar month |
+| `yearly_summary` | 31 December | Full calendar year |
+
+Send **time** is per center (`centers.whatsapp_summary_time`, default `18:00`). Evaluated in `APP_TIMEZONE`.
+
+**Daily only:** send when today is an **operating day** for the center (`center_operating_calendars` + `center_calendar_exceptions`). Owner configures this under **Manage Centers → Operating calendar**. No daily message on holidays/closures or weekdays marked closed; `special_open` exceptions count as operating days.
+
+See [whatsapp-scheduled-summaries.md](../design/whatsapp-scheduled-summaries.md).
 
 ---
 
 ## Message templates
 
-Register templates in Meta Business Manager. Initial templates (names TBD at integration):
+Register templates in Meta Business Manager.
 
-| Event | Template purpose |
-|-------|----------------|
-| import_success | Successful import summary |
-| import_duplicates | Import with duplicates |
-| revision_pending | Awaiting Owner approval |
-| revision_approved | Revision activated |
-| missing_submission | Center did not submit |
-| daily_summary | Consolidated end-of-day |
+### Activity summary template (`import_activity_summary`)
 
-Template parameters: center name, period, row counts, HT/VAT/TTC totals, uploader — **no PII lists**.
+Used for **all scheduled cadences**. Seven named body parameters:
+
+| # | Meta variable | Scheduled summary source |
+|---|---------------|-------------------------|
+| 1 | `center_name` | Center name |
+| 2 | `import_period` | Formatted period for cadence |
+| 3 | `inspection_count` | Active master count in period |
+| 4 | `category_summary` | `A: n, B: n, B1: n, C: n, D: n` in period |
+| 5 | `amount_ht` | HT total (formatted) |
+| 6 | `amount_vat` | VAT total (formatted) |
+| 7 | `amount_ttc` | TTC total (formatted) |
+
+Configure via environment:
+
+```env
+WHATSAPP_IMPORT_TEMPLATE=import_activity_summary
+WHATSAPP_IMPORT_TEMPLATE_LANGUAGE=en
+```
+
+Use the exact language code shown in Meta Business Manager for your template (often `en` for English).
+
+Meta **named** templates require `parameter_name` on each API parameter. Configured in `whatsapp.import_template_body_parameter_names`.
+
+`event_type` on `whatsapp_messages` records cadence (`daily_summary`, `weekly_summary`, etc.) for history filters and idempotency.
+
+**French:** add a French translation in Meta, then set `WHATSAPP_IMPORT_TEMPLATE_LANGUAGE=fr`.
 
 ---
 
@@ -110,9 +161,9 @@ Store raw events in `whatsapp_webhook_events`; update `whatsapp_messages` delive
 
 ---
 
-## Historical import rule
+## Historical imports
 
-When `import_mode = historical` and `notify_owner = false`, skip WhatsApp job.
+No immediate WhatsApp on historical commit. Activity appears in the next scheduled summary for that center (BR-014).
 
 ---
 
@@ -133,5 +184,7 @@ WhatsApp connectivity optional in `/health` — degraded if token invalid, not h
 
 ## Related
 
-- REQ-090–REQ-096
+- REQ-090–REQ-101
+- [0012-whatsapp-scheduled-summaries.md](../architecture/decisions/0012-whatsapp-scheduled-summaries.md)
+- [whatsapp-scheduled-summaries.md](../design/whatsapp-scheduled-summaries.md)
 - [security-privacy.md](../architecture/security-privacy.md)

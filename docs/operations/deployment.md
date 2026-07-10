@@ -22,7 +22,7 @@
 | mysql | MySQL 8 |
 | redis | Redis 7 |
 | horizon | `php artisan horizon` |
-| scheduler | `php artisan schedule:work` |
+| scheduler | `php artisan schedule:work` — required for scheduled WhatsApp activity summaries (Steps 121–125) |
 
 ### Persistent volumes
 

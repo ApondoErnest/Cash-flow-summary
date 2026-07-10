@@ -204,6 +204,30 @@ final class OperatingCalendarService
         };
     }
 
+    public function isOperatingDay(Center $center, Carbon $date): bool
+    {
+        $exception = CenterCalendarException::query()
+            ->where('center_id', $center->id)
+            ->whereDate('exception_date', $date->toDateString())
+            ->first();
+
+        if ($exception !== null) {
+            return match ((string) $exception->type) {
+                CalendarExceptionType::Holiday->value,
+                CalendarExceptionType::Closure->value => false,
+                CalendarExceptionType::SpecialOpen->value => true,
+                default => false,
+            };
+        }
+
+        $schedule = CenterOperatingCalendar::query()
+            ->where('center_id', $center->id)
+            ->where('day_of_week', $date->dayOfWeek)
+            ->first();
+
+        return $schedule?->is_open ?? true;
+    }
+
     public function formatTimeForInput(mixed $time): string
     {
         if ($time === null || $time === '') {

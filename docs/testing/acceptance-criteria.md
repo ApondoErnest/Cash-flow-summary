@@ -41,9 +41,11 @@ Step checkpoints: [implementation-sequence.md Appendix C](../implementation-sequ
 | 27 | Manager center-locked dashboard and import | 80–85 | REQ-081, US-M01 |
 | 28 | Cashier compact dashboard and import | 86–89 | REQ-082 |
 | 29 | Midnight Finance theme applied | 19–24 | NFR-001 |
-| 30 | Historical import: WhatsApp off unless opted in | 72–79, 94–98 | REQ-048, BR-014 |
-| 31 | WhatsApp idempotent | 94–98 | REQ-093 |
+| 30 | No per-import WhatsApp; scheduled summaries only | 94–98+ | REQ-097, BR-014, ADR 0012 |
+| 31 | WhatsApp idempotent per center/cadence/period | 94–98+ | REQ-093 |
 | 32 | WhatsApp failure does not reverse import | 94–98 | REQ-094 |
+| 33a | Daily/weekly/monthly/yearly summaries at configured center time | 99+ | REQ-091, REQ-098, REQ-099 |
+| 33b | Daily summary skipped on non-operating days (center calendar) | 121+ | REQ-104, BR-026 |
 | 33 | Audit without rejected CSV body | 43–51, 99–102 | REQ-100 |
 | 34 | Docker deploy smoke tests pass | 109–111 | NFR-006 |
 | 35 | Backup restore verified | 115–117 | backup-monitoring.md |

@@ -12,15 +12,13 @@ use App\Modules\CsvImports\Support\ImportResultData;
 use App\Modules\CsvImports\Support\ImportStatusPresenter;
 use App\Modules\CsvVerification\Enums\ImportMode;
 use App\Modules\Dashboards\Support\DashboardMoney;
-use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
-use App\Modules\WhatsApp\Models\WhatsappMessage;
 use Illuminate\Support\Carbon;
 
 final class ImportResultService
 {
     public function build(Import $import, ?User $viewer = null): ImportResultData
     {
-        $import->loadMissing(['center', 'dayComparisons', 'whatsappMessages', 'importVerification']);
+        $import->loadMissing(['center', 'dayComparisons', 'importVerification']);
 
         $dayComparisons = $import->dayComparisons;
         $activeDays = $dayComparisons
@@ -93,47 +91,22 @@ final class ImportResultService
      */
     private function resolveWhatsappPresentation(Import $import): array
     {
-        /** @var WhatsappMessage|null $latest */
-        $latest = $import->whatsappMessages->sortByDesc('created_at')->first();
-
-        if ($latest !== null) {
-            return match ($latest->status) {
-                WhatsappMessageStatus::Queued => [
-                    __('csv_import.result.whatsapp.queued'),
-                    'info',
-                ],
-                WhatsappMessageStatus::Sent => [
-                    __('csv_import.result.whatsapp.sent'),
-                    'success',
-                ],
-                WhatsappMessageStatus::Delivered => [
-                    __('csv_import.result.whatsapp.delivered'),
-                    'success',
-                ],
-                WhatsappMessageStatus::Read => [
-                    __('csv_import.result.whatsapp.read'),
-                    'success',
-                ],
-                WhatsappMessageStatus::Failed => [
-                    __('csv_import.result.whatsapp.failed'),
-                    'error',
-                ],
-            };
-        }
-
-        $notifyOwner = $import->importVerification?->notify_owner === true;
-
-        if ($import->import_mode === ImportMode::Historical && $notifyOwner) {
+        if ($import->status === ImportStatus::ExactFileDuplicate) {
             return [
-                __('csv_import.result.whatsapp.pending'),
-                'info',
+                __('csv_import.result.whatsapp.not_applicable'),
+                'neutral',
             ];
         }
 
-        if ($import->import_mode === ImportMode::Historical) {
+        if (in_array($import->status, [
+            ImportStatus::Completed,
+            ImportStatus::CompletedWithDuplicates,
+            ImportStatus::CompletedWithWarnings,
+            ImportStatus::AwaitingOwnerApproval,
+        ], true)) {
             return [
-                __('csv_import.result.whatsapp.not_requested'),
-                'neutral',
+                __('csv_import.result.whatsapp.scheduled_summary'),
+                'info',
             ];
         }
 

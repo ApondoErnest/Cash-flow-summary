@@ -84,6 +84,8 @@ return [
             'default_language' => 'Default language',
             'submission_deadline' => 'Daily submission deadline',
             'submission_deadline_help' => 'Optional local time for expected daily CSV submission.',
+            'whatsapp_summary_time' => 'WhatsApp summary time',
+            'whatsapp_summary_time_help' => 'Local time when scheduled activity summaries are sent to the owner (default 18:00).',
             'is_active' => 'Center is active',
             'is_active_help' => 'Inactive centers stay in the database but cannot be selected for operations.',
             'set_as_default' => 'Use as my default center after login',

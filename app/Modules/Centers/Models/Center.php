@@ -24,6 +24,7 @@ class Center extends Model
         'phone',
         'default_language',
         'submission_deadline',
+        'whatsapp_summary_time',
         'is_active',
     ];
 

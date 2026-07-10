@@ -64,7 +64,9 @@ Application service catalogue. One service class per bounded context; injected v
 | `FileStorageService` | Temp → permanent private path |
 | `ImportHistoryService` | Query imports for role scope |
 
-**Commit pipeline:** Lock token → move file → create import → rows → masters → duplicates → day comparisons → versions → summaries → queue WhatsApp.
+**Commit pipeline:** Lock token → move file → create import → rows → masters → duplicates → day comparisons → versions → summaries.
+
+Scheduled WhatsApp summaries are dispatched separately by the scheduler (not during commit).
 
 ---
 
@@ -125,7 +127,10 @@ All query **active daily snapshots** only.
 
 | Service | Responsibility |
 |---------|----------------|
-| `WhatsAppNotificationService` | Build message, idempotency key |
+| `WhatsAppNotificationService` | Build scheduled summary payload, idempotency key, queue send |
+| `WhatsAppScheduledSummaryService` | Resolve due cadences, aggregate period stats |
+| `DispatchScheduledWhatsAppSummariesCommand` | Minute scheduler entry point |
+| `OperatingCalendarService` / `SubmissionStatusService` | `isOperatingDay` gate for **daily** sends only |
 | `WhatsAppCloudApiClient` | Meta API HTTP |
 | `WebhookProcessorService` | Delivery status updates — **only when** webhook verify token is configured (REQ-096) |
 

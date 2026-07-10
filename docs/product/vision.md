@@ -40,5 +40,5 @@ See [personas.md](personas.md).
 
 - Zero duplicate master records in production
 - Import verification under acceptable time for typical files
-- Owner receives one WhatsApp per event (idempotent)
+- Owner receives scheduled WhatsApp summaries (daily / weekly / monthly / yearly) per center
 - All acceptance criteria signed off before rollout

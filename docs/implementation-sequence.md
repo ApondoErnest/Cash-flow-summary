@@ -1653,6 +1653,58 @@ flowchart LR
 
 ---
 
+## Phase 23 — Scheduled WhatsApp summaries (planned)
+
+**Reference:** ADR [0012](../architecture/decisions/0012-whatsapp-scheduled-summaries.md), [whatsapp-scheduled-summaries.md](../design/whatsapp-scheduled-summaries.md)
+
+### Step 121 — Migration: `centers.whatsapp_summary_time`
+
+| | |
+|---|---|
+| **Group** | Scheduled WhatsApp summaries (Phase 23) |
+| **Done when** | Column added; default handling documented |
+| **Status** | Planned |
+
+### Step 122 — `WhatsAppScheduledSummaryService` + period aggregation
+
+| | |
+|---|---|
+| **Group** | Scheduled WhatsApp summaries (Phase 23) |
+| **Done when** | Daily/weekly/monthly/yearly stats match dashboard/report logic for date ranges; daily send gated by `isOperatingDay` (reuse `SubmissionStatusService` logic or extract shared helper) |
+| **Status** | Planned |
+
+### Step 123 — `DispatchScheduledWhatsAppSummariesCommand` + scheduler
+
+| | |
+|---|---|
+| **Group** | Scheduled WhatsApp summaries (Phase 23) |
+| **Done when** | `routes/console.php` every minute; idempotency; queue job |
+| **Status** | Planned |
+
+### Step 124 — Remove per-import send; center time UI; history labels
+
+| | |
+|---|---|
+| **Group** | Scheduled WhatsApp summaries (Phase 23) |
+| **Done when** | `ImportService` no longer queues WhatsApp; `ManageCenterForm` time field; EN/FR event types; import result copy |
+| **Status** | Planned |
+
+### Step 125 — Tests + deployment note for `schedule:run`
+
+| | |
+|---|---|
+| **Group** | Scheduled WhatsApp summaries (Phase 23) |
+| **Done when** | Feature tests for cadences, idempotency, scheduler; `deployment.md` cron |
+| **Status** | Planned |
+
+**Checkpoint after Step 125:**
+
+- **Gate:** No WhatsApp on import; summary sends at configured center time for each cadence
+- **Requirements:** REQ-091, REQ-097–099, REQ-104
+- **Gate tests (AC):** AC #30–33a
+
+---
+
 ## Appendix A — Step groups (phase rollup)
 
 | Steps | Group (Phase) | Sprint |
@@ -1680,6 +1732,7 @@ flowchart LR
 | 112–114 | VPS deployment | S8 |
 | 115–117 | Backup & monitoring | S8 |
 | 118–120 | Controlled production rollout | S8 |
+| 121–125 | Scheduled WhatsApp summaries | TBD |
 
 ## Appendix B — REQ/NFR by step group
 

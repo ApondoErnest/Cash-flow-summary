@@ -23,7 +23,10 @@
 | BR-011 | Cashier historical imports | Allowed |
 | BR-012 | Manager corrections | Manager uploads and submits; Owner approves |
 | BR-013 | Revision approval | Single step; required approve/reject reason |
-| BR-014 | Historical WhatsApp | Suppressed by default; optional "Notify Owner" on upload |
+| BR-014 | Historical WhatsApp | No immediate send; activity included in scheduled summaries |
+| BR-024 | WhatsApp summary cadence | Daily; weekly (Saturday); monthly (last day); yearly (31 Dec) |
+| BR-025 | WhatsApp summary time | Per center (`centers.whatsapp_summary_time`); Owner configures |
+| BR-026 | Daily WhatsApp on operating days only | Use center operating calendar + exceptions; no daily send on closed days |
 | BR-015 | Mixed-language headers | Reject file |
 | BR-016 | Exact duplicate normalization | **`field_specific_v1`** — see normalization-policy.md |
 | BR-017 | Probable duplicates | All roles see details; informational only |

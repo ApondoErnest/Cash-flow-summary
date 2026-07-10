@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Dashboards\Services;
 
-use App\Enums\CalendarExceptionType;
 use App\Modules\Centers\Models\Center;
-use App\Modules\Centers\Models\CenterCalendarException;
-use App\Modules\Centers\Models\CenterOperatingCalendar;
+use App\Modules\Centers\Services\OperatingCalendarService;
 use App\Modules\DailyVersions\Models\ActiveDailySnapshot;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -79,25 +77,6 @@ final class SubmissionStatusService
 
     private function isOperatingDay(Center $center, Carbon $date): bool
     {
-        $exception = CenterCalendarException::query()
-            ->where('center_id', $center->id)
-            ->whereDate('exception_date', $date->toDateString())
-            ->first();
-
-        if ($exception !== null) {
-            return match ((string) $exception->type) {
-                CalendarExceptionType::Holiday->value,
-                CalendarExceptionType::Closure->value => false,
-                CalendarExceptionType::SpecialOpen->value => true,
-                default => false,
-            };
-        }
-
-        $schedule = CenterOperatingCalendar::query()
-            ->where('center_id', $center->id)
-            ->where('day_of_week', $date->dayOfWeek)
-            ->first();
-
-        return $schedule?->is_open ?? true;
+        return app(OperatingCalendarService::class)->isOperatingDay($center, $date);
     }
 }

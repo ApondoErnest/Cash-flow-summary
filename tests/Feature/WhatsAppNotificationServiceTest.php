@@ -10,6 +10,7 @@ use App\Modules\WhatsApp\Models\WhatsappMessage;
 use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
 use Database\Seeders\HeaderAliasSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
@@ -23,34 +24,59 @@ beforeEach(function () {
     test()->seed(HeaderAliasSeeder::class);
 });
 
-test('whatsapp notification service sends import success message', function () {
+test('whatsapp notification service sends daily summary message', function () {
     Http::fake([
         'https://graph.facebook.com/*' => Http::response([
-            'messages' => [['id' => 'wamid.import-success']],
+            'messages' => [['id' => 'wamid.daily-summary']],
         ], 200),
     ]);
 
-    $import = whatsAppImportFixture();
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
 
-    $message = app(WhatsAppNotificationService::class)->notifyForImport($import);
+    $message = app(WhatsAppNotificationService::class)->notifyScheduledSummary(
+        $center,
+        WhatsappEventType::DailySummary,
+        $moment,
+    );
 
     expect($message)->not->toBeNull()
         ->and($message->status)->toBe(WhatsappMessageStatus::Sent)
-        ->and($message->event_type)->toBe(WhatsappEventType::ImportSuccess->value)
-        ->and($message->provider_message_id)->toBe('wamid.import-success')
+        ->and($message->event_type)->toBe(WhatsappEventType::DailySummary->value)
+        ->and($message->template_name)->toBe('import_activity_summary')
+        ->and($message->provider_message_id)->toBe('wamid.daily-summary')
         ->and($message->recipient_phone)->toBe('+237612345678')
         ->and($message->payload_summary['center_name'] ?? null)->toBe('WhatsApp Center')
+        ->and($message->payload_summary['category_summary'] ?? null)->toBeString()
         ->and($message->sent_at)->not->toBeNull();
 
-    Http::assertSentCount(1);
+    Http::assertSent(function ($request): bool {
+        $body = $request->data();
+        $params = $body['template']['components'][0]['parameters'] ?? [];
+
+        return ($body['template']['name'] ?? null) === 'import_activity_summary'
+            && ($body['template']['language']['code'] ?? null) === 'en'
+            && count($params) === 7
+            && ($params[0]['parameter_name'] ?? null) === 'center_name'
+            && ($params[0]['text'] ?? null) === 'WhatsApp Center';
+    });
 });
 
 test('whatsapp notification service returns null when outbound settings are incomplete', function () {
-    $import = whatsAppImportFixture();
+    test()->seed(\Database\Seeders\DatabaseSeeder::class);
 
-    $message = app(WhatsAppNotificationService::class)->notifyForImport($import);
+    $owner = User::query()
+        ->where('username', env('SEED_OWNER_USERNAME', 'owner'))
+        ->firstOrFail();
+
+    $center = createTestCenter($owner->organization, ['name' => 'WhatsApp Center']);
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
+
+    $message = app(WhatsAppNotificationService::class)->notifyScheduledSummary(
+        $center,
+        WhatsappEventType::DailySummary,
+        $moment,
+    );
 
     expect($message)->toBeNull()
         ->and(WhatsappMessage::query()->count())->toBe(0);
@@ -65,40 +91,17 @@ test('whatsapp notification service respects idempotency key for duplicate reque
         ], 200),
     ]);
 
-    $import = whatsAppImportFixture();
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
 
     $service = app(WhatsAppNotificationService::class);
-    $first = $service->notifyForImport($import);
-    $second = $service->notifyForImport($import->fresh());
+    $first = $service->notifyScheduledSummary($center, WhatsappEventType::DailySummary, $moment);
+    $second = $service->notifyScheduledSummary($center->fresh(), WhatsappEventType::DailySummary, $moment);
 
     expect($first?->id)->toBe($second?->id)
         ->and(WhatsappMessage::query()->count())->toBe(1);
 
     Http::assertSentCount(1);
-});
-
-test('whatsapp notification service resolves import with duplicates event type', function () {
-    Http::fake([
-        'https://graph.facebook.com/*' => Http::response([
-            'messages' => [['id' => 'wamid.duplicates']],
-        ], 200),
-    ]);
-
-    $import = whatsAppImportFixture();
-    $import->forceFill([
-        'duplicate_within_file_count' => 2,
-        'new_master_count' => 3,
-    ])->save();
-
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
-
-    $message = app(WhatsAppNotificationService::class)->notifyForImport($import->fresh());
-
-    expect($message?->event_type)->toBe(WhatsappEventType::ImportWithDuplicates->value)
-        ->and($message?->template_name)->toBe('import_with_duplicates');
 });
 
 test('whatsapp notification service marks message failed when meta api rejects request', function () {
@@ -108,12 +111,15 @@ test('whatsapp notification service marks message failed when meta api rejects r
         ], 400),
     ]);
 
-    $import = whatsAppImportFixture();
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
 
     try {
-        app(WhatsAppNotificationService::class)->notifyForImport($import);
+        app(WhatsAppNotificationService::class)->notifyScheduledSummary(
+            $center,
+            WhatsappEventType::DailySummary,
+            $moment,
+        );
     } catch (WhatsAppApiException) {
         // expected
     }
@@ -126,47 +132,52 @@ test('whatsapp notification service marks message failed when meta api rejects r
         ->and($message->error_reason)->toContain('Template name does not exist');
 });
 
-test('whatsapp notification service builds deterministic idempotency keys', function () {
+test('whatsapp notification service builds deterministic scheduled summary idempotency keys', function () {
     $service = app(WhatsAppNotificationService::class);
 
-    expect($service->idempotencyKey(WhatsappEventType::ImportSuccess, 42))
-        ->toBe('import_success:import:42')
-        ->and($service->idempotencyKey(WhatsappEventType::RevisionApproved, 42, 7))
-        ->toBe('revision_approved:import:42:revision:7');
+    expect($service->scheduledSummaryIdempotencyKey(
+        WhatsappEventType::DailySummary,
+        42,
+        '2026-07-08',
+    ))->toBe('daily_summary:center:42:2026-07-08')
+        ->and($service->scheduledSummaryIdempotencyKey(
+            WhatsappEventType::WeeklySummary,
+            7,
+            '2026-W28',
+        ))->toBe('weekly_summary:center:7:2026-W28');
 });
 
-test('whatsapp notification service skips historical imports without owner opt in', function () {
-    test()->seed(\Database\Seeders\DatabaseSeeder::class);
-
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
-
-    [$verification, $manager] = readyHistoricalVerificationForCommit(notifyOwner: false);
-    $import = commitVerificationFor($manager, $verification);
-
-    expect(app(WhatsAppNotificationService::class)->shouldQueueImportNotification($import))->toBeFalse()
-        ->and(app(WhatsAppNotificationService::class)->queueImportNotification($import))->toBeNull()
-        ->and(WhatsappMessage::query()->count())->toBe(0);
-});
-
-test('whatsapp notification service resolves historical import event type when opted in', function () {
+test('whatsapp notification service resolves weekly summary event type', function () {
     Http::fake([
         'https://graph.facebook.com/*' => Http::response([
-            'messages' => [['id' => 'wamid.historical']],
+            'messages' => [['id' => 'wamid.weekly']],
         ], 200),
     ]);
 
-    test()->seed(\Database\Seeders\DatabaseSeeder::class);
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-05 18:00:00', config('app.timezone'));
 
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
+    $message = app(WhatsAppNotificationService::class)->notifyScheduledSummary(
+        $center,
+        WhatsappEventType::WeeklySummary,
+        $moment,
+    );
 
-    [$verification, $manager] = readyHistoricalVerificationForCommit(notifyOwner: true);
-    $import = commitVerificationFor($manager, $verification);
+    expect($message?->event_type)->toBe(WhatsappEventType::WeeklySummary->value)
+        ->and($message?->template_name)->toBe('import_activity_summary')
+        ->and($message?->payload_summary['period_key'] ?? null)->toBe('2026-W27');
+});
 
-    $message = app(WhatsAppNotificationService::class)->notifyForImport($import);
+test('whatsapp notification service skips non scheduled event types when queuing', function () {
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
 
-    expect($message)->not->toBeNull()
-        ->and($message->event_type)->toBe(WhatsappEventType::HistoricalImport->value)
-        ->and($message->template_name)->toBe('historical_import');
+    $message = app(WhatsAppNotificationService::class)->queueScheduledSummary(
+        $center,
+        WhatsappEventType::ImportSuccess,
+        $moment,
+    );
+
+    expect($message)->toBeNull()
+        ->and(WhatsappMessage::query()->count())->toBe(0);
 });

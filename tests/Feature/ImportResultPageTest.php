@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 use App\Models\User;
 use App\Modules\CsvImports\Enums\DayComparisonResult;
-use App\Modules\CsvImports\Enums\ImportStatus;
 use App\Modules\CsvImports\Livewire\ImportResultPage;
 use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvImports\Models\ImportDayComparison;
 use App\Modules\CsvImports\Services\ImportResultService;
-use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
-use App\Modules\WhatsApp\Models\WhatsappMessage;
 use Database\Seeders\HeaderAliasSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -56,7 +53,7 @@ test('import result livewire component authorizes active center access', functio
 
     Livewire::test(ImportResultPage::class, ['import' => $import])
         ->assertSee(__('csv_import.result.headline.completed'), false)
-        ->assertSee(__('csv_import.result.whatsapp.not_applicable'), false);
+        ->assertSee(__('csv_import.result.whatsapp.scheduled_summary'), false);
 });
 
 test('owner cannot view import result for another center', function () {
@@ -100,20 +97,6 @@ test('import result service aggregates day impact and whatsapp status', function
         ->where('import_id', $import->id)
         ->update(['comparison_result' => DayComparisonResult::Unchanged]);
 
-    WhatsappMessage::query()->create([
-        'idempotency_key' => 'result-test-'.uniqid(),
-        'center_id' => $import->center_id,
-        'import_id' => $import->id,
-        'event_type' => 'historical_import',
-        'recipient_phone' => '+237600000000',
-        'template_name' => 'historical_import',
-        'payload_summary' => [
-            'center_name' => $import->center->name,
-            'row_count' => 1,
-        ],
-        'status' => WhatsappMessageStatus::Sent,
-    ]);
-
     $result = app(ImportResultService::class)->build($import->fresh());
 
     expect($result->sourceRows)->toBe(1)
@@ -121,7 +104,7 @@ test('import result service aggregates day impact and whatsapp status', function
         ->and($result->activeDays)->toBe(0)
         ->and($result->unchangedDays)->toBe(1)
         ->and($result->footerTtc)->toBe('11 925,00')
-        ->and($result->whatsappStatus)->toBe(__('csv_import.result.whatsapp.sent'))
+        ->and($result->whatsappStatus)->toBe(__('csv_import.result.whatsapp.scheduled_summary'))
         ->and($result->statusVariant)->toBe('success');
 });
 

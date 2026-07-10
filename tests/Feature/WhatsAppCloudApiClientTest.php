@@ -35,22 +35,34 @@ test('whatsapp cloud api client sends template message to meta graph api', funct
     $result = app(WhatsAppCloudApiClient::class)->sendTemplateMessage(
         credentials: whatsAppApiCredentials(),
         recipientPhone: '+237612345678',
-        templateName: 'import_success',
+        templateName: 'import_activity_summary',
         languageCode: 'en',
-        bodyParameters: ['Center A', '01/06/2026', '12', '1 000', '200', '1 200', 'Manager'],
+        bodyParameters: ['Center A', '01/06/2026', '42', 'A: 10, B: 8, B1: 5, C: 12, D: 7', '1 000', '200', '1 200'],
+        bodyParameterNames: [
+            'center_name',
+            'import_period',
+            'inspection_count',
+            'category_summary',
+            'amount_ht',
+            'amount_vat',
+            'amount_ttc',
+        ],
     );
 
     expect($result->providerMessageId)->toBe('wamid.test-message-id');
 
     Http::assertSent(function ($request): bool {
         $body = $request->data();
+        $params = $body['template']['components'][0]['parameters'] ?? [];
 
         return $request->url() === 'https://graph.facebook.com/v21.0/123456789012345/messages'
             && $request->hasHeader('Authorization', 'Bearer EAAtest-access-token-value-123456')
             && ($body['to'] ?? null) === '237612345678'
-            && ($body['template']['name'] ?? null) === 'import_success'
+            && ($body['template']['name'] ?? null) === 'import_activity_summary'
             && ($body['template']['language']['code'] ?? null) === 'en'
-            && count($body['template']['components'][0]['parameters'] ?? []) === 7;
+            && count($params) === 7
+            && ($params[0]['parameter_name'] ?? null) === 'center_name'
+            && ($params[3]['parameter_name'] ?? null) === 'category_summary';
     });
 });
 

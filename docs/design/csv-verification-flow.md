@@ -136,8 +136,7 @@ On **Import**:
 3. Queue or run `ImportService::commitFromVerification()`
 4. Permanent file storage
 5. import + import_rows + masters + daily versions + summaries
-6. Queue WhatsApp (unless historical + no opt-in)
-7. Show result page
+6. Show result page (no per-import WhatsApp; see [whatsapp-scheduled-summaries.md](../design/whatsapp-scheduled-summaries.md))
 
 ---
 
@@ -160,7 +159,7 @@ On **Reject**:
 - Source rows, new unique, duplicates ignored, invalid rows
 - Active days created, unchanged days, revisions pending approval
 - HT, VAT, TTC
-- WhatsApp status
+- Note: activity included in scheduled WhatsApp summary (not sent immediately)
 - Actions: Dashboard | Import details | Import another
 
 ---
@@ -173,7 +172,7 @@ On **Reject**:
 | user_id, center_id | Authorization |
 | temp_storage_path | Private disk path |
 | import_mode | operational/historical/correction |
-| notify_owner | boolean for historical WhatsApp |
+| notify_owner | boolean | Legacy historical flag; no immediate WhatsApp in v2.1 |
 | footer_summary | JSON |
 | validation_result | JSON (pass/fail per check) |
 | row_stats | JSON (counts) |

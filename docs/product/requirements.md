@@ -142,12 +142,16 @@ Requirements use `REQ-xxx` (functional) and `NFR-xxx` (non-functional).
 | ID | Requirement | Priority | Phase | Sprint |
 |----|-------------|----------|-------|--------|
 | REQ-090 | Meta WhatsApp Cloud API | Must | 15 | S8 |
-| REQ-091 | Events per plan.md §31 | Must | 15 | S8 |
+| REQ-091 | Scheduled summary cadences (daily / weekly / monthly / yearly) | Must | 15+ | S8+ |
 | REQ-092 | No customer/plate lists in messages | Must | 15 | S8 |
 | REQ-093 | Idempotency prevents duplicate sends | Must | 15 | S8 |
 | REQ-094 | Failure does not roll back import | Must | 15 | S8 |
 | REQ-095 | Owner number in admin settings | Must | 8, 15 | S3 |
 | REQ-096 | Webhook verify token optional for outbound-only testing; required in production for delivery status webhooks | Must | 15 | S8 |
+| REQ-097 | No per-import WhatsApp; summaries only at scheduled times | Must | 15+ | S8+ |
+| REQ-098 | Per-center summary send time configurable by Owner | Must | 15+ | S8+ |
+| REQ-099 | Scheduler dispatches due summaries (minute granularity) | Must | 15+ | S8+ |
+| REQ-104 | Daily WhatsApp only on center operating days | Must | 15+ | S8+ |
 
 ---
 

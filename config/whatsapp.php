@@ -18,6 +18,33 @@ return [
 
     'default_language' => env('WHATSAPP_TEMPLATE_LANGUAGE', 'en'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Import notifications
+    |--------------------------------------------------------------------------
+    |
+    | Meta template import_activity_summary (Utility) — seven body parameters:
+    | center_name, import_period, inspection_count, category_summary,
+    | amount_ht, amount_vat, amount_ttc. See docs/api/README.md.
+    |
+    */
+    'import_template' => env('WHATSAPP_IMPORT_TEMPLATE', 'import_activity_summary'),
+
+    'import_template_language' => env('WHATSAPP_IMPORT_TEMPLATE_LANGUAGE', 'en'),
+
+    'default_summary_time' => env('WHATSAPP_DEFAULT_SUMMARY_TIME', '18:00'),
+
+    /** @var list<string> Body parameter names for import_activity_summary (Meta named format). */
+    'import_template_body_parameter_names' => [
+        'center_name',
+        'import_period',
+        'inspection_count',
+        'category_summary',
+        'amount_ht',
+        'amount_vat',
+        'amount_ttc',
+    ],
+
     'timeout_seconds' => (int) env('WHATSAPP_API_TIMEOUT', 30),
 
     'max_attempts' => (int) env('WHATSAPP_QUEUE_MAX_ATTEMPTS', 3),

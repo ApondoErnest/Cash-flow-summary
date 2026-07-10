@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\WhatsApp\Services;
 
-use App\Modules\CsvImports\Enums\ImportStatus;
-use App\Modules\CsvImports\Models\Import;
-use App\Modules\CsvVerification\Enums\ImportMode;
-use App\Modules\Dashboards\Support\DashboardMoney;
+use App\Modules\Centers\Models\Center;
 use App\Modules\Settings\Services\SettingsService;
 use App\Modules\WhatsApp\Enums\WhatsappEventType;
 use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
@@ -23,24 +20,15 @@ final class WhatsAppNotificationService
     public function __construct(
         private readonly SettingsService $settingsService,
         private readonly WhatsAppCloudApiClient $cloudApiClient,
+        private readonly WhatsAppScheduledSummaryService $scheduledSummaryService,
     ) {}
 
-    public function idempotencyKey(
+    public function scheduledSummaryIdempotencyKey(
         WhatsappEventType $eventType,
-        ?int $importId = null,
-        ?int $revisionId = null,
+        int $centerId,
+        string $periodKey,
     ): string {
-        $segments = [$eventType->value];
-
-        if ($importId !== null) {
-            $segments[] = 'import:'.$importId;
-        }
-
-        if ($revisionId !== null) {
-            $segments[] = 'revision:'.$revisionId;
-        }
-
-        return implode(':', $segments);
+        return "{$eventType->value}:center:{$centerId}:{$periodKey}";
     }
 
     public function findByIdempotencyKey(string $idempotencyKey): ?WhatsappMessage
@@ -50,30 +38,16 @@ final class WhatsAppNotificationService
             ->first();
     }
 
-    public function resolveEventTypeForImport(Import $import): WhatsappEventType
-    {
-        if ($import->import_mode === ImportMode::Historical) {
-            return WhatsappEventType::HistoricalImport;
-        }
-
-        if ($import->duplicate_within_file_count > 0 || $import->historical_duplicate_count > 0) {
-            if ($import->new_master_count === 0) {
-                return WhatsappEventType::DuplicateOnly;
-            }
-
-            return WhatsappEventType::ImportWithDuplicates;
-        }
-
-        return WhatsappEventType::ImportSuccess;
-    }
-
-    public function queueImportNotification(Import $import, ?WhatsappEventType $eventType = null): ?WhatsappMessage
-    {
-        if (! $this->shouldQueueImportNotification($import)) {
+    public function queueScheduledSummary(
+        Center $center,
+        WhatsappEventType $eventType,
+        Carbon $referenceMoment,
+    ): ?WhatsappMessage {
+        if (! $eventType->isScheduledSummary()) {
             return null;
         }
 
-        $message = $this->prepareImportNotification($import, $eventType);
+        $message = $this->prepareScheduledSummary($center, $eventType, $referenceMoment);
 
         if ($message === null) {
             return null;
@@ -86,57 +60,23 @@ final class WhatsAppNotificationService
         return $message;
     }
 
-    public function resendFailedMessage(WhatsappMessage $message): ?WhatsappMessage
-    {
-        if ($message->status !== WhatsappMessageStatus::Failed) {
-            return null;
-        }
-
-        $message->forceFill([
-            'status' => WhatsappMessageStatus::Queued,
-            'error_reason' => null,
-            'retry_count' => 0,
-            'provider_message_id' => null,
-            'sent_at' => null,
-            'delivered_at' => null,
-            'read_at' => null,
-        ])->save();
-
-        SendWhatsAppNotificationJob::dispatch((int) $message->id);
-
-        return $message->fresh();
-    }
-
-    /**
-     * Synchronous send path used in tests and by the queue job.
-     */
-    public function notifyForImport(Import $import, ?WhatsappEventType $eventType = null): ?WhatsappMessage
-    {
-        if (! $this->shouldQueueImportNotification($import)) {
-            return null;
-        }
-
-        $message = $this->prepareImportNotification($import, $eventType);
-
-        if ($message === null || $message->status !== WhatsappMessageStatus::Queued) {
-            return $message;
-        }
-
-        return $this->sendMessage($message);
-    }
-
-    public function prepareImportNotification(Import $import, ?WhatsappEventType $eventType = null): ?WhatsappMessage
-    {
-        $import->loadMissing(['center', 'uploadedBy']);
-
-        $organizationId = (int) $import->center->organization_id;
+    public function prepareScheduledSummary(
+        Center $center,
+        WhatsappEventType $eventType,
+        Carbon $referenceMoment,
+    ): ?WhatsappMessage {
+        $organizationId = (int) $center->organization_id;
 
         if (! $this->settingsService->whatsAppOutboundConfigured($organizationId)) {
             return null;
         }
 
-        $eventType ??= $this->resolveEventTypeForImport($import);
-        $idempotencyKey = $this->idempotencyKey($eventType, $import->id);
+        $period = $this->scheduledSummaryService->periodFor($eventType, $referenceMoment);
+        $idempotencyKey = $this->scheduledSummaryIdempotencyKey(
+            $eventType,
+            (int) $center->id,
+            $period->periodKey,
+        );
 
         $existing = $this->findByIdempotencyKey($idempotencyKey);
 
@@ -150,29 +90,55 @@ final class WhatsAppNotificationService
             credentials: $credentials,
             eventType: $eventType,
             idempotencyKey: $idempotencyKey,
-            centerId: (int) $import->center_id,
-            importId: (int) $import->id,
-            payloadSummary: $this->buildPayloadSummaryForImport($import, $eventType),
+            centerId: (int) $center->id,
+            importId: null,
+            payloadSummary: $this->scheduledSummaryService->buildPayloadSummary(
+                $center,
+                $eventType,
+                $referenceMoment,
+            ),
         );
     }
 
-    public function shouldQueueImportNotification(Import $import): bool
+    /**
+     * Synchronous send path used in tests and by the queue job.
+     */
+    public function notifyScheduledSummary(
+        Center $center,
+        WhatsappEventType $eventType,
+        Carbon $referenceMoment,
+    ): ?WhatsappMessage {
+        $message = $this->prepareScheduledSummary($center, $eventType, $referenceMoment);
+
+        if ($message === null || $message->status !== WhatsappMessageStatus::Queued) {
+            return $message;
+        }
+
+        return $this->sendMessage($message);
+    }
+
+    public function resendFailedMessage(WhatsappMessage $message): ?WhatsappMessage
     {
-        if (! in_array($import->status, [
-            ImportStatus::Completed,
-            ImportStatus::CompletedWithDuplicates,
-            ImportStatus::CompletedWithWarnings,
-        ], true)) {
-            return false;
+        if ($message->status !== WhatsappMessageStatus::Failed) {
+            return null;
         }
 
-        if ($import->import_mode !== ImportMode::Historical) {
-            return true;
-        }
+        $eventType = WhatsappEventType::from($message->event_type);
 
-        $import->loadMissing('importVerification');
+        $message->forceFill([
+            'status' => WhatsappMessageStatus::Queued,
+            'error_reason' => null,
+            'retry_count' => 0,
+            'provider_message_id' => null,
+            'sent_at' => null,
+            'delivered_at' => null,
+            'read_at' => null,
+            'template_name' => $eventType->templateName(),
+        ])->save();
 
-        return $import->importVerification?->notify_owner === true;
+        SendWhatsAppNotificationJob::dispatch((int) $message->id);
+
+        return $message->fresh();
     }
 
     /**
@@ -208,7 +174,6 @@ final class WhatsAppNotificationService
         WhatsappMessage $message,
         ?WhatsAppCredentials $credentials = null,
         ?WhatsappEventType $eventType = null,
-        ?Import $import = null,
     ): WhatsappMessage {
         if ($message->status !== WhatsappMessageStatus::Queued) {
             return $message;
@@ -220,19 +185,14 @@ final class WhatsAppNotificationService
         $credentials ??= $this->credentialsForOrganization($organizationId);
         $eventType ??= WhatsappEventType::from($message->event_type);
 
-        if ($import === null && $message->import_id !== null) {
-            $import = Import::query()->with(['center', 'uploadedBy'])->find($message->import_id);
-        }
-
         try {
             $result = $this->cloudApiClient->sendTemplateMessage(
                 credentials: $credentials,
                 recipientPhone: $message->recipient_phone,
-                templateName: $message->template_name ?? $eventType->templateName(),
-                languageCode: (string) config('whatsapp.default_language', 'en'),
-                bodyParameters: $import !== null
-                    ? $this->templateBodyParametersForImport($import)
-                    : $this->templateBodyParametersFromSummary($message),
+                templateName: $eventType->templateName(),
+                languageCode: $eventType->templateLanguageCode(),
+                bodyParameters: $this->templateBodyParametersFromSummary($message),
+                bodyParameterNames: $eventType->templateBodyParameterNames(),
             );
 
             $message->forceFill([
@@ -251,45 +211,6 @@ final class WhatsAppNotificationService
 
             throw $exception;
         }
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function buildPayloadSummaryForImport(Import $import, WhatsappEventType $eventType): array
-    {
-        $import->loadMissing(['center', 'uploadedBy']);
-
-        return [
-            'event_type' => $eventType->value,
-            'center_name' => $import->center->name,
-            'period' => $this->formatImportPeriod($import),
-            'row_count' => $import->parsed_count,
-            'new_unique' => $import->new_master_count,
-            'duplicates_ignored' => $import->duplicate_within_file_count + $import->historical_duplicate_count,
-            'footer_ht' => DashboardMoney::format($import->source_ht),
-            'footer_vat' => DashboardMoney::format($import->source_vat),
-            'footer_ttc' => DashboardMoney::format($import->source_ttc),
-            'uploader' => $import->uploadedBy?->name,
-        ];
-    }
-
-    /**
-     * @return list<string>
-     */
-    public function templateBodyParametersForImport(Import $import): array
-    {
-        $import->loadMissing(['center', 'uploadedBy']);
-
-        return [
-            $import->center->name,
-            $this->formatImportPeriod($import) ?? '—',
-            (string) $import->parsed_count,
-            DashboardMoney::format($import->source_ht),
-            DashboardMoney::format($import->source_vat),
-            DashboardMoney::format($import->source_ttc),
-            $import->uploadedBy?->name ?? __('whatsapp.unknown_uploader'),
-        ];
     }
 
     private function credentialsForOrganization(int $organizationId): WhatsAppCredentials
@@ -314,23 +235,11 @@ final class WhatsAppNotificationService
             (string) ($summary['center_name'] ?? '—'),
             (string) ($summary['period'] ?? '—'),
             (string) ($summary['row_count'] ?? '0'),
+            (string) ($summary['category_summary'] ?? 'A: 0, B: 0, B1: 0, C: 0, D: 0'),
             (string) ($summary['footer_ht'] ?? '0'),
             (string) ($summary['footer_vat'] ?? '0'),
             (string) ($summary['footer_ttc'] ?? '0'),
-            (string) ($summary['uploader'] ?? __('whatsapp.unknown_uploader')),
         ];
-    }
-
-    private function formatImportPeriod(Import $import): ?string
-    {
-        if ($import->actual_period_start === null || $import->actual_period_end === null) {
-            return null;
-        }
-
-        $start = Carbon::parse($import->actual_period_start)->format('d/m/Y');
-        $end = Carbon::parse($import->actual_period_end)->format('d/m/Y');
-
-        return $start === $end ? $start : "{$start} – {$end}";
     }
 
     public function sendTestMessage(int $organizationId, ?int $centerId = null): WhatsappMessage
@@ -356,7 +265,7 @@ final class WhatsAppNotificationService
                 credentials: $credentials,
                 recipientPhone: $credentials->ownerPhone,
                 templateName: WhatsappEventType::TestMessage->templateName(),
-                languageCode: (string) config('whatsapp.test_template_language', 'en_US'),
+                languageCode: WhatsappEventType::TestMessage->templateLanguageCode(),
                 bodyParameters: [],
             );
 

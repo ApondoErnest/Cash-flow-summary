@@ -91,6 +91,7 @@ Spatie permission tables (`roles`, `permissions`, pivots) link to `users` via `m
 | phone | string nullable | |
 | default_language | string | |
 | submission_deadline | time nullable | BR-008 |
+| whatsapp_summary_time | time nullable | BR-025; default 18:00 when null |
 | is_active | boolean | Soft deactivate only |
 | timestamps | | |
 
@@ -493,8 +494,8 @@ Denormalized aggregates from active snapshots for report performance. Regenerata
 | id | bigint PK | |
 | idempotency_key | string unique | |
 | center_id | FK nullable | |
-| import_id | FK nullable | |
-| event_type | string | |
+| import_id | FK nullable | Legacy per-import rows only; null for scheduled summaries |
+| event_type | string | `daily_summary`, `weekly_summary`, `monthly_summary`, `yearly_summary`; legacy import_* values |
 | recipient_phone | string | |
 | template_name | string nullable | |
 | payload_summary | json | Aggregates only |

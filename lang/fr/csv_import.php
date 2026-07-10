@@ -67,6 +67,7 @@ return [
             'pending' => 'En attente',
             'not_requested' => 'Non demandé',
             'not_applicable' => 'Non applicable',
+            'scheduled_summary' => 'Inclus dans le prochain résumé WhatsApp programmé',
         ],
         'revisions_notice' => '{1} :count jour nécessite l\'approbation du propriétaire avant activation.|[2,*] :count jours nécessitent l\'approbation du propriétaire avant activation.',
         'correction' => [

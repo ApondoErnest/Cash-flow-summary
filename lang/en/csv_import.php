@@ -67,6 +67,7 @@ return [
             'pending' => 'Pending',
             'not_requested' => 'Not requested',
             'not_applicable' => 'Not applicable',
+            'scheduled_summary' => 'Included in the next scheduled WhatsApp summary',
         ],
         'revisions_notice' => '{1} :count day requires owner approval before the new version becomes active.|[2,*] :count days require owner approval before the new versions become active.',
         'correction' => [

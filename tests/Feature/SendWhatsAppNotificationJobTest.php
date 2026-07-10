@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use App\Modules\WhatsApp\Enums\WhatsappEventType;
 use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
 use App\Modules\WhatsApp\Exceptions\WhatsAppApiException;
 use App\Modules\WhatsApp\Jobs\SendWhatsAppNotificationJob;
@@ -10,6 +11,7 @@ use App\Modules\WhatsApp\Models\WhatsappMessage;
 use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
 use Database\Seeders\HeaderAliasSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
@@ -24,14 +26,17 @@ beforeEach(function () {
     test()->seed(HeaderAliasSeeder::class);
 });
 
-test('queue import notification dispatches send job once', function () {
+test('queue scheduled summary dispatches send job once', function () {
     Queue::fake();
 
-    $import = whatsAppImportFixture();
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
 
-    $message = app(WhatsAppNotificationService::class)->queueImportNotification($import);
+    $message = app(WhatsAppNotificationService::class)->queueScheduledSummary(
+        $center,
+        WhatsappEventType::DailySummary,
+        $moment,
+    );
 
     expect($message)->not->toBeNull()
         ->and($message->status)->toBe(WhatsappMessageStatus::Queued);
@@ -43,18 +48,18 @@ test('queue import notification dispatches send job once', function () {
     Queue::assertPushed(SendWhatsAppNotificationJob::class, 1);
 });
 
-test('queue import notification does not dispatch duplicate jobs for same import', function () {
+test('queue scheduled summary does not create duplicate messages for same period', function () {
     Queue::fake();
 
-    $import = whatsAppImportFixture();
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
 
     $service = app(WhatsAppNotificationService::class);
-    $first = $service->queueImportNotification($import);
-    $second = $service->queueImportNotification($import->fresh());
+    $first = $service->queueScheduledSummary($center, WhatsappEventType::DailySummary, $moment);
+    $second = $service->queueScheduledSummary($center->fresh(), WhatsappEventType::DailySummary, $moment);
 
-    expect($first?->id)->toBe($second?->id);
+    expect($first?->id)->toBe($second?->id)
+        ->and(WhatsappMessage::query()->count())->toBe(1);
 
     Queue::assertPushed(SendWhatsAppNotificationJob::class, 2);
 });
@@ -66,11 +71,14 @@ test('send whatsapp notification job sends queued message', function () {
         ], 200),
     ]);
 
-    $import = whatsAppImportFixture();
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
 
-    $message = app(WhatsAppNotificationService::class)->prepareImportNotification($import);
+    $message = app(WhatsAppNotificationService::class)->prepareScheduledSummary(
+        $center,
+        WhatsappEventType::DailySummary,
+        $moment,
+    );
     expect($message)->not->toBeNull();
 
     (new SendWhatsAppNotificationJob((int) $message->id))->handle(
@@ -91,11 +99,14 @@ test('send whatsapp notification job marks message failed after final attempt', 
         ], 429),
     ]);
 
-    $import = whatsAppImportFixture();
-    $owner = User::query()->where('username', env('SEED_OWNER_USERNAME', 'owner'))->firstOrFail();
-    configureWhatsAppForOwner($owner);
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
 
-    $message = app(WhatsAppNotificationService::class)->prepareImportNotification($import);
+    $message = app(WhatsAppNotificationService::class)->prepareScheduledSummary(
+        $center,
+        WhatsappEventType::DailySummary,
+        $moment,
+    );
     expect($message)->not->toBeNull();
 
     $job = new SendWhatsAppNotificationJob((int) $message->id);
@@ -120,7 +131,7 @@ test('send whatsapp notification job marks message failed after final attempt', 
         ->and($message->error_reason)->toBe('Rate limit hit');
 });
 
-test('import commit queues whatsapp notification when settings are configured', function () {
+test('import commit does not queue whatsapp notification', function () {
     Queue::fake();
 
     [$verification, $manager, $owner] = readyOwnerOrgVerificationForCommit(
@@ -129,55 +140,19 @@ test('import commit queues whatsapp notification when settings are configured', 
 
     configureWhatsAppForOwner($owner);
 
-    $import = commitVerificationFor($manager, $verification);
-
-    Queue::assertPushed(SendWhatsAppNotificationJob::class, function (SendWhatsAppNotificationJob $job) use ($import): bool {
-        $message = WhatsappMessage::query()->find($job->whatsappMessageId);
-
-        return $message !== null
-            && $message->import_id === $import->id
-            && $message->status === WhatsappMessageStatus::Queued;
-    });
-});
-
-test('import commit does not queue whatsapp notification when settings are missing', function () {
-    Queue::fake();
-
-    [$verification, $manager] = readyOwnerOrgVerificationForCommit(
-        verificationReadyFrenchCsv([completedFrenchDataRow()]),
-    );
-
     commitVerificationFor($manager, $verification);
 
     Queue::assertNotPushed(SendWhatsAppNotificationJob::class);
 });
 
-test('historical import commit does not queue whatsapp notification without owner opt in', function () {
-    Queue::fake();
-
-    [$verification, $manager, $owner] = readyHistoricalVerificationForCommit(notifyOwner: false);
-
-    configureWhatsAppForOwner($owner);
-
-    commitVerificationFor($manager, $verification);
-
-    Queue::assertNotPushed(SendWhatsAppNotificationJob::class);
-});
-
-test('historical import commit queues whatsapp notification when owner opt in is checked', function () {
+test('historical import commit does not queue whatsapp notification even with owner opt in', function () {
     Queue::fake();
 
     [$verification, $manager, $owner] = readyHistoricalVerificationForCommit(notifyOwner: true);
 
     configureWhatsAppForOwner($owner);
 
-    $import = commitVerificationFor($manager, $verification);
+    commitVerificationFor($manager, $verification);
 
-    Queue::assertPushed(SendWhatsAppNotificationJob::class, function (SendWhatsAppNotificationJob $job) use ($import): bool {
-        $message = WhatsappMessage::query()->find($job->whatsappMessageId);
-
-        return $message !== null
-            && $message->import_id === $import->id
-            && $message->event_type === 'historical_import';
-    });
+    Queue::assertNotPushed(SendWhatsAppNotificationJob::class);
 });

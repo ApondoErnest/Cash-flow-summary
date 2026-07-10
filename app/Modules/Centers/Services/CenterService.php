@@ -54,6 +54,7 @@ final class CenterService
             'phone' => $data['phone'] ?? null,
             'default_language' => $data['default_language'] ?? 'fr',
             'submission_deadline' => $data['submission_deadline'] ?? null,
+            'whatsapp_summary_time' => $data['whatsapp_summary_time'] ?? null,
             'is_active' => $data['is_active'] ?? true,
         ]);
 
@@ -96,6 +97,7 @@ final class CenterService
             'phone' => $data['phone'] ?? null,
             'default_language' => $data['default_language'] ?? 'fr',
             'submission_deadline' => $data['submission_deadline'] ?? null,
+            'whatsapp_summary_time' => $data['whatsapp_summary_time'] ?? null,
             'is_active' => $data['is_active'] ?? true,
         ])->save();
 

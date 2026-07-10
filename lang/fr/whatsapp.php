@@ -22,7 +22,10 @@ return [
         'reconciliation_mismatch' => 'Écart de rapprochement',
         'missing_submission' => 'Soumission manquante',
         'delivery_failure' => 'Échec de livraison',
-        'daily_summary' => 'Résumé quotidien',
+        'daily_summary' => 'Résumé d\'activité quotidien',
+        'weekly_summary' => 'Résumé d\'activité hebdomadaire',
+        'monthly_summary' => 'Résumé d\'activité mensuel',
+        'yearly_summary' => 'Résumé d\'activité annuel',
         'historical_import' => 'Import historique',
     ],
     'history' => [
