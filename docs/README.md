@@ -1,8 +1,8 @@
 # Documentation Hub
 
-**Doc set version:** 2.0.34  
+**Doc set version:** 2.1.09  
 **Last reviewed:** 2026-07-11  
-**Project phase:** Steps 1–126 tracked in implementation-sequence | Doc v2.0.34
+**Project phase:** Steps 1–108 complete — **Step 109** (Docker Compose) next | Doc v2.1.09
 
 [README](../README.md) | [plan.md](../plan.md)
 
@@ -27,7 +27,7 @@
 7. [design/csv-verification-flow.md](design/csv-verification-flow.md) — import UX
 8. [design/data-model.md](design/data-model.md) — database
 9. [architecture/overview.md](architecture/overview.md) — architecture
-10. [testing/acceptance-criteria.md](testing/acceptance-criteria.md) — sign-off
+10. [testing/acceptance-criteria.md](testing/acceptance-criteria.md) — sign-off ([uat-acceptance-signoff.md](testing/uat-acceptance-signoff.md))
 
 ### Legacy topic order (optional deep dive)
 
@@ -98,7 +98,8 @@
 | [test-strategy.md](testing/test-strategy.md) | Pest, fixtures, coverage |
 | [uat-owner-staging.md](testing/uat-owner-staging.md) | Owner UAT runbook (Step 106) |
 | [uat-manager-cashier-staging.md](testing/uat-manager-cashier-staging.md) | Manager/Cashier UAT runbook (Step 107) |
-| [acceptance-criteria.md](testing/acceptance-criteria.md) | Production acceptance (54 criteria) |
+| [uat-acceptance-signoff.md](testing/uat-acceptance-signoff.md) | Formal AC sign-off (Step 108) |
+| [acceptance-criteria.md](testing/acceptance-criteria.md) | Production acceptance (55 criteria) |
 
 ### API
 

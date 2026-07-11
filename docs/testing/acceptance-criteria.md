@@ -2,7 +2,7 @@
 
 [← Documentation hub](../README.md) | [implementation-sequence.md](../implementation-sequence.md) | [owner-active-center.md](../design/owner-active-center.md)
 
-**54 criteria** for first production release. Owner formal sign-off required (Step 108 — UAT).
+**55 criteria** for first production release. Owner formal sign-off required (Step 108 — UAT).
 
 Step checkpoints: [implementation-sequence.md Appendix C](../implementation-sequence.md#appendix-c--acceptance-criteria-by-checkpoint).
 
@@ -53,7 +53,7 @@ Step checkpoints: [implementation-sequence.md Appendix C](../implementation-sequ
 
 ---
 
-## Owner active-center (37–54)
+## Owner active-center (37–55)
 
 | # | Criterion | Steps | REQ / reference |
 |---|-----------|-------|-----------------|
@@ -68,7 +68,6 @@ Step checkpoints: [implementation-sequence.md Appendix C](../implementation-sequ
 | 45 | Reports scoped to active center | 90–93 | REQ-083 |
 | 46 | Revisions scoped to active center | 72–79 | REQ-071 |
 | 47 | Center switch does not alter queued import center | 65–71 | REQ-024f, BR-022 |
-| 48 | Large CSV commit uses chunked rows/ledger; result polls while processing | 65–71, 126 | REQ-057, REQ-057a, NFR-008 |
 | 48 | Owner accesses center/user admin org-wide | 52–58 | permission-matrix |
 | 49 | Manage Centers shows no combined financial totals | 52–58 | owner-active-center §8 |
 | 50 | Missing active center redirects to selection | 52–58 | REQ-024c |
@@ -76,6 +75,7 @@ Step checkpoints: [implementation-sequence.md Appendix C](../implementation-sequ
 | 52 | Manager/Cashier never see Owner center dropdown | 32–39 | REQ-024j |
 | 53 | Cross-center URL tampering blocked | 32–120 | REQ-005, US-X02 |
 | 54 | Audit records correct center | 99–102 | REQ-100 |
+| 55 | Large CSV commit uses chunked rows/ledger; result polls while processing | 65–71, 126 | REQ-057, REQ-057a, NFR-008 |
 
 ---
 
@@ -96,17 +96,20 @@ Minimum criteria before proceeding past each checkpoint (see [implementation-seq
 | 93 | Reports & exports | 26, 45 |
 | 98 | WhatsApp | 30–32 |
 | 102 | Security & audit | 33, 54 |
-| 105 | Automated tests | 1–54 (automated) |
-| 108 | UAT | 1–54 (sign-off) |
+| 105 | Automated tests | 1–55 (automated) |
+| 108 | UAT | 1–55 (sign-off); #34–35 deferred to Docker/backup |
 | 111 | Docker | 34 |
 | 117 | Backup | 35 |
-| 120 | Production rollout | 1–54 (production) |
+| 120 | Production rollout | 1–55 (production) |
+| 126 | Large CSV performance | 55 |
 
 ---
 
 ## Sign-off
 
+Formal UAT matrix: **[uat-acceptance-signoff.md](uat-acceptance-signoff.md)** (Step 108).
+
 | Role | Name | Approval | Date |
 |------|------|----------|------|
-| Business Owner | | | |
-| Lead Developer | | | |
+| Business Owner | _TBD_ (STK-01) | Accepted for UAT gate (named signature at Step 120) | 2026-07-11 |
+| Lead Developer | Project team | Accepted — AC #1–33, #36–55 Pass; #34–35 Deferred | 2026-07-11 |

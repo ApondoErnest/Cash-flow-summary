@@ -89,11 +89,11 @@ Mark **Pass / Fail / N/A** and note defects in the session log (bottom).
 
 | Check | Expected |
 |-------|----------|
-| Outbound template after import | Message queued/sent when credentials configured |
+| Scheduled summaries (not per-import) | Daily/weekly/monthly/yearly at center `whatsapp_summary_time`; no send on import commit |
 | Meta test number | Webhook verify token may be blank; delivery webhooks optional |
-| Import not reversed on send failure | Import remains completed if API fails |
+| Send failure | Does not reverse completed imports |
 
-See [api/README.md](../api/README.md).
+See [api/README.md](../api/README.md) and ADR 0012.
 
 ---
 
@@ -111,7 +111,7 @@ See [api/README.md](../api/README.md).
 
 **Owner session outcome:** ☐ Proceed to Manager/Cashier UAT (Step 107) &nbsp; ☐ Rework required
 
-*(Formal AC 1–54 sign-off remains Step 108.)*
+*(Formal AC 1–55 sign-off: [uat-acceptance-signoff.md](uat-acceptance-signoff.md) — Step 108.)*
 
 ---
 

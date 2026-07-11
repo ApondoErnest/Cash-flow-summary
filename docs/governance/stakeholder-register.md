@@ -20,4 +20,4 @@
 | Documentation | Owner | Review business-rules.md, requirements.md — **Step 9 approved 2026-07-01** |
 | S3–S4 | Owner | Validate admin and import flows |
 | S6–S7 | Manager/Cashier reps | UAT sessions |
-| S8 | Owner | Production sign-off |
+| S8 | Owner | UAT sign-off (Step 108, 2026-07-11); production sign-off (Step 120) |

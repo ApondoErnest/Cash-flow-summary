@@ -39,7 +39,7 @@ See [plan.md](../../plan.md) section 42.
 - No duplicate master records under concurrent import
 - Center isolation enforced on all routes and exports
 - Owner approves all financial revisions
-- 54 production acceptance criteria met ([acceptance-criteria.md](../testing/acceptance-criteria.md))
+- 55 production acceptance criteria met ([acceptance-criteria.md](../testing/acceptance-criteria.md))
 
 ## Major risks
 
@@ -78,7 +78,7 @@ Business Owner approves: requirements, architecture, UX, UAT, production rollout
 | Requirements (REQ/NFR) | [requirements.md](../product/requirements.md) | ✓ |
 | Business rules | [business-rules.md](../product/business-rules.md) | ✓ |
 | Permission matrix | [permission-matrix.md](../product/permission-matrix.md) | ✓ |
-| Acceptance criteria (54 items) | [acceptance-criteria.md](../testing/acceptance-criteria.md) | ✓ |
+| Acceptance criteria (55 items) | [acceptance-criteria.md](../testing/acceptance-criteria.md) | ✓ |
 | v1 scope boundary | [plan.md](../../plan.md) §42 | ✓ |
 
 ### Approval statement

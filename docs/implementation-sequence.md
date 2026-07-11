@@ -26,9 +26,9 @@ flowchart LR
 
 | Item | Value |
 |------|-------|
-| Doc set | v2.1.08 |
-| Steps complete | **1–107** |
-| **Next step** | **Step 108** — Sign off acceptance criteria |
+| Doc set | v2.1.09 |
+| Steps complete | **1–108** |
+| **Next step** | **Step 109** — Docker Compose — nginx, app, mysql, redis, horizon |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -145,7 +145,7 @@ flowchart LR
 | 105 | CI green on main | Automated test suite | S8 | Complete |
 | 106 | UAT with Owner on staging | User acceptance testing | S8 | Complete |
 | 107 | UAT with Manager/Cashier reps | User acceptance testing | S8 | Complete |
-| 108 | Sign off [acceptance-criteria.md](../testing/acceptance-crit… | User acceptance testing | S8 | Not started |
+| 108 | Sign off [acceptance-criteria.md](../testing/acceptance-criteria.md) (55 items) | User acceptance testing | S8 | Complete |
 | 109 | Docker Compose — nginx, app, mysql, redis, horizon | Dockerization | S8 | Not started |
 | 110 | Persistent volumes | Dockerization | S8 | Not started |
 | 111 | Smoke tests in containers | Dockerization | S8 | Not started |
@@ -1470,7 +1470,7 @@ flowchart LR
 
 - **Gate:** CI passes; coverage targets met
 - **Requirements:** NFR-005, NFR-007
-- **Gate tests (AC):** AC #1–54 (automated subset)
+- **Gate tests (AC):** AC #1–55 (automated subset)
 
 ---
 
@@ -1496,20 +1496,22 @@ flowchart LR
 | **Status** | Complete |
 | **Completed** | 2026-07-05 — Manager/Cashier UAT runbook [uat-manager-cashier-staging.md](../testing/uat-manager-cashier-staging.md) (US-M01–M04, US-C01–C03 checklists); automated staging journey in `ManagerCashierUatStagingTest` (7 tests green) |
 
-### Step 108 — Sign off [acceptance-criteria.md](../testing/acceptance-criteria.md) (54 items)
+### Step 108 — Sign off [acceptance-criteria.md](../testing/acceptance-criteria.md) (55 items)
 
 | | |
 |---|---|
 | **Group** | User acceptance testing (Phase 18) |
 | **Sprint** | S8 |
-| **Reference** | [acceptance-criteria.md](../testing/acceptance-criteria.md) |
+| **Reference** | [acceptance-criteria.md](../testing/acceptance-criteria.md), [uat-acceptance-signoff.md](../testing/uat-acceptance-signoff.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-07-11 — Formal AC matrix in [uat-acceptance-signoff.md](../testing/uat-acceptance-signoff.md); **752** tests green; AC #1–33, #36–55 Pass; AC #34–35 Deferred to Docker/backup steps; Lead Developer + Business Owner (UAT gate) sign-off recorded |
 
 **Checkpoint after Step 108** (end of User acceptance testing):
 
-- **Gate:** Owner signs UAT
-- **Requirements:** All REQ/NFR
-- **Gate tests (AC):** AC #1–54 (full sign-off)
+- **Gate:** Owner signs UAT (pre-production); Docker/backup AC deferred
+- **Requirements:** All REQ/NFR except deploy/backup NFRs pending Steps 109–117
+- **Gate tests (AC):** AC #1–55 (full sign-off; #34–35 deferred)
 
 ---
 
@@ -1649,7 +1651,7 @@ flowchart LR
 
 - **Gate:** Production live; monitoring green
 - **Requirements:** —
-- **Gate tests (AC):** AC #1–54 (production)
+- **Gate tests (AC):** AC #1–55 (production)
 
 ---
 
@@ -1719,7 +1721,7 @@ flowchart LR
 
 - **Gate:** 10k-class CSVs can verify and commit without 60s worker timeout; production uses async queue when sync flags are false
 - **Requirements:** REQ-057, REQ-057a, NFR-008
-- **Gate tests (AC):** AC #48
+- **Gate tests (AC):** AC #55
 
 ---
 
@@ -1794,11 +1796,12 @@ Minimum AC to pass at each checkpoint (after the listed step):
 | 93 | Reports & exports | #26, #45 |
 | 98 | WhatsApp | #30–32 |
 | 102 | Security & audit | #33, #54 |
-| 105 | Automated tests | #1–54 (automated) |
-| 108 | UAT | #1–54 (sign-off) |
+| 105 | Automated tests | #1–55 (automated) |
+| 108 | UAT | #1–55 (sign-off; #34–35 deferred) |
 | 111 | Docker | #34 |
 | 117 | Backup | #35 |
-| 120 | Production rollout | #1–54 (production) |
+| 120 | Production rollout | #1–55 (production) |
+| 126 | Large CSV performance | #55 |
 
 Full criteria: [acceptance-criteria.md](../testing/acceptance-criteria.md).
 
