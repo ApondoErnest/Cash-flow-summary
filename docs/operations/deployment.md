@@ -102,10 +102,12 @@ Document exact commands in `deploy/` when implemented.
 
 - [ ] Health endpoint returns OK
 - [ ] Owner login
-- [ ] Horizon dashboard accessible (protected)
+- [ ] Horizon dashboard accessible (protected) **or** `queue:work` running with `--timeout=600`
 - [ ] Verify sample CSV end-to-end on staging
+- [ ] *(Recommended)* Import a multi-thousand-row CSV; confirm result page leaves `processing` and masters are created
 - [ ] WhatsApp test message (Meta test number or staging — phone number ID + access token; webhook optional)
 - [ ] *(Production only)* Meta webhook verified; delivery status updates observed
+- [ ] Confirm `.env`: `CSV_IMPORTS_SYNC=false`, `CSV_VERIFICATION_SYNC=false`, `REDIS_QUEUE_RETRY_AFTER` > job timeout
 
 ---
 

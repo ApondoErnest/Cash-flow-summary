@@ -44,45 +44,88 @@ final class ImportRowService
         $delimiter = $verification->delimiter ?? $inspection->delimiter;
         $policyVersion = $this->normalizationService->policyVersion();
         $fallbackBusinessDate = $verification->actual_period_start?->toDateString() ?? now()->toDateString();
+        $chunkSize = max(1, (int) config('csv_imports.row_insert_chunk_size', 500));
+        $now = now()->toDateTimeString();
         $persisted = 0;
+
+        /** @var list<array<string, mixed>> $buffer */
+        $buffer = [];
+        /** @var list<\App\Modules\CsvVerification\Support\ParsedCsvRow> $invalidInBuffer */
+        $invalidInBuffer = [];
+
+        $flush = function () use (&$buffer, &$invalidInBuffer, $import): void {
+            if ($buffer === []) {
+                return;
+            }
+
+            ImportRow::query()->insert($buffer);
+
+            foreach ($invalidInBuffer as $invalidRow) {
+                $this->errorRecorder->recordFromParsedRow(
+                    row: $invalidRow,
+                    importId: (int) $import->id,
+                    importVerificationId: null,
+                );
+            }
+
+            $buffer = [];
+            $invalidInBuffer = [];
+        };
 
         foreach ($this->csvParsingService->streamRows($filePath, $delimiter, $mapping->mapping) as $row) {
             if ($row->status === CsvRowStatus::Invalid) {
-                $importRow = ImportRow::query()->create([
+                $buffer[] = [
                     'import_id' => $import->id,
                     'center_id' => $import->center_id,
                     'source_row_number' => $row->rowNumber,
                     'business_date' => $row->registrationDate ?? $fallbackBusinessDate,
-                    'original_values' => $row->rawValues,
-                    'canonical_values' => [],
+                    'original_values' => json_encode($row->rawValues, JSON_THROW_ON_ERROR),
+                    'canonical_values' => json_encode([], JSON_THROW_ON_ERROR),
                     'raw_row_checksum' => $row->rawRowChecksum(),
                     'exact_canonical_hash' => $row->rawRowChecksum(),
+                    'similarity_fingerprint' => null,
                     'normalization_policy_version' => $policyVersion,
-                    'row_status' => ImportRowStatus::Invalid,
-                    'validation_errors' => $row->errors,
-                ]);
-
-                $this->errorRecorder->recordFromImportRow($importRow);
+                    'master_record_id' => null,
+                    'row_status' => ImportRowStatus::Invalid->value,
+                    'duplicate_type' => null,
+                    'duplicate_of_import_row_id' => null,
+                    'validation_errors' => json_encode($row->errors, JSON_THROW_ON_ERROR),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+                $invalidInBuffer[] = $row;
             } else {
                 $canonical = $this->normalizationService->normalizeParsedRow($row);
 
-                ImportRow::query()->create([
+                $buffer[] = [
                     'import_id' => $import->id,
                     'center_id' => $import->center_id,
                     'source_row_number' => $row->rowNumber,
                     'business_date' => $row->registrationDate ?? $fallbackBusinessDate,
-                    'original_values' => $row->rawValues,
-                    'canonical_values' => $canonical->canonicalFields(),
+                    'original_values' => json_encode($row->rawValues, JSON_THROW_ON_ERROR),
+                    'canonical_values' => json_encode($canonical->canonicalFields(), JSON_THROW_ON_ERROR),
                     'raw_row_checksum' => $row->rawRowChecksum(),
                     'exact_canonical_hash' => $canonical->exactCanonicalHash(),
                     'similarity_fingerprint' => $this->similarityFingerprintService->fingerprint($canonical),
                     'normalization_policy_version' => $policyVersion,
-                    'row_status' => ImportRowStatus::New,
-                ]);
+                    'master_record_id' => null,
+                    'row_status' => ImportRowStatus::New->value,
+                    'duplicate_type' => null,
+                    'duplicate_of_import_row_id' => null,
+                    'validation_errors' => null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
 
             $persisted++;
+
+            if (count($buffer) >= $chunkSize) {
+                $flush();
+            }
         }
+
+        $flush();
 
         return $persisted;
     }

@@ -45,4 +45,16 @@ return [
 
     'process_synchronously' => env('CSV_VERIFICATION_SYNC', env('APP_ENV') === 'local'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Queue job limits (large CSV files)
+    |--------------------------------------------------------------------------
+    */
+
+    'job_timeout_seconds' => (int) env('CSV_VERIFICATION_JOB_TIMEOUT', 600),
+
+    'job_tries' => (int) env('CSV_VERIFICATION_JOB_TRIES', 1),
+
+    'job_memory_mb' => (int) env('CSV_VERIFICATION_JOB_MEMORY', 512),
+
 ];

@@ -1,8 +1,8 @@
 # Documentation Hub
 
-**Doc set version:** 2.0.29  
-**Last reviewed:** 2026-07-01  
-**Project phase:** Steps 1–34 complete — **Step 35** (forced password change) next | Doc v2.0.33
+**Doc set version:** 2.0.34  
+**Last reviewed:** 2026-07-11  
+**Project phase:** Steps 1–126 tracked in implementation-sequence | Doc v2.0.34
 
 [README](../README.md) | [plan.md](../plan.md)
 
@@ -12,7 +12,7 @@
 
 ### For building the application (chronological)
 
-1. **[implementation-sequence.md](implementation-sequence.md)** — start here; **Steps 1–120** in order (one step at a time)
+1. **[implementation-sequence.md](implementation-sequence.md)** — start here; **Steps 1–126** in order (one step at a time)
 2. [setup.md](operations/setup.md) — when starting Step 11
 3. Step-specific docs linked inside each step (design-system → Steps 19–24, data-model → Steps 25+, etc.)
 
@@ -56,7 +56,7 @@
 | [business-rules.md](product/business-rules.md) | Confirmed business rules |
 | [glossary.md](product/glossary.md) | Domain terminology |
 | [roadmap.md](product/roadmap.md) | Sprint summary → links to implementation-sequence |
-| [implementation-sequence.md](implementation-sequence.md) | **Chronological build order (Steps 1–120)** |
+| [implementation-sequence.md](implementation-sequence.md) | **Chronological build order (Steps 1–126)** |
 
 ### Design
 

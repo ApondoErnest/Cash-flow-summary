@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\CsvImports\Livewire;
 
+use App\Modules\CsvImports\Enums\ImportStatus;
 use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvImports\Services\ImportResultService;
 use App\Modules\CsvImports\Support\ImportResultData;
@@ -25,10 +26,28 @@ class ImportResultPage extends Component
         $this->import = $import->load(['center', 'dayComparisons', 'whatsappMessages', 'importVerification']);
     }
 
+    public function refreshImport(): void
+    {
+        $this->import = $this->import->fresh([
+            'center',
+            'dayComparisons',
+            'whatsappMessages',
+            'importVerification',
+        ]) ?? $this->import;
+
+        unset($this->result);
+    }
+
     #[Computed]
     public function result(): ImportResultData
     {
         return app(ImportResultService::class)->build($this->import, auth()->user());
+    }
+
+    #[Computed]
+    public function isProcessing(): bool
+    {
+        return $this->import->status === ImportStatus::Processing;
     }
 
     #[Computed]

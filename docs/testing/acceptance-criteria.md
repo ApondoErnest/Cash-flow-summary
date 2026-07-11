@@ -68,6 +68,7 @@ Step checkpoints: [implementation-sequence.md Appendix C](../implementation-sequ
 | 45 | Reports scoped to active center | 90–93 | REQ-083 |
 | 46 | Revisions scoped to active center | 72–79 | REQ-071 |
 | 47 | Center switch does not alter queued import center | 65–71 | REQ-024f, BR-022 |
+| 48 | Large CSV commit uses chunked rows/ledger; result polls while processing | 65–71, 126 | REQ-057, REQ-057a, NFR-008 |
 | 48 | Owner accesses center/user admin org-wide | 52–58 | permission-matrix |
 | 49 | Manage Centers shows no combined financial totals | 52–58 | owner-active-center §8 |
 | 50 | Missing active center redirects to selection | 52–58 | REQ-024c |

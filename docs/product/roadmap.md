@@ -6,7 +6,7 @@
 
 ## How to build (start here)
 
-Use the **chronological step guide** — work **Step 1 → Step 120** in strict order:
+Use the **chronological step guide** — work **Step 1 → Step 126** in strict order:
 
 **[docs/implementation-sequence.md](../implementation-sequence.md)**
 
@@ -56,6 +56,8 @@ Complete **one step at a time**. Do not start Step N+1 until Step N is done. Pas
 | 90–93 | Reports & exports | |
 | 94–98 | WhatsApp | |
 | 99–120 | Security, tests, UAT, Docker, VPS, rollout | |
+| 121–125 | Scheduled WhatsApp summaries | ✓ |
+| 126 | Large CSV import performance (queued/chunked commit) | ✓ |
 
 ---
 

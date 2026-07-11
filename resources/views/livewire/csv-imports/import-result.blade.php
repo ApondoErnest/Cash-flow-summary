@@ -1,7 +1,13 @@
 @php($result = $this->result)
 
 <x-ui.page class="max-w-3xl mf-import-result">
-    <div class="space-y-6" data-mf-import-result>
+    <div
+        class="space-y-6"
+        data-mf-import-result
+        @if ($this->isProcessing)
+            wire:poll.3s="refreshImport"
+        @endif
+    >
         <div class="space-y-3">
             <div class="flex flex-wrap items-center gap-3">
                 <h1 class="text-xl font-semibold text-text-heading">{{ __('csv_import.result.title') }}</h1>
@@ -9,8 +15,8 @@
             </div>
 
             <flux:callout
-                :variant="$result->isExactFileDuplicate ? 'warning' : ($result->statusVariant === 'error' ? 'danger' : 'success')"
-                :icon="$result->isExactFileDuplicate ? 'exclamation-triangle' : 'check-circle'"
+                :variant="$result->isExactFileDuplicate ? 'warning' : ($this->isProcessing ? 'info' : ($result->statusVariant === 'error' ? 'danger' : 'success'))"
+                :icon="$result->isExactFileDuplicate ? 'exclamation-triangle' : ($this->isProcessing ? 'arrow-path' : 'check-circle')"
                 class="text-sm"
             >
                 {{ $result->headline }}

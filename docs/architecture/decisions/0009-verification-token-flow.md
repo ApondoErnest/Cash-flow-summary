@@ -13,9 +13,9 @@ v1 originally specified a 7-step wizard holding row previews in Livewire. v2 use
 2. Parsing runs server-side (queue for large files)
 3. Summary stored as JSON on verification record
 4. Livewire component holds **token only** (+ polling state)
-5. **Import** consumes token single-use → `ImportService::commitFromVerification()`
+5. **Import** consumes token single-use → `ImportService::commitFromVerification()` creates the import and queues **`ProcessImportJob`** for row/master/version work (inline when `CSV_IMPORTS_SYNC=true`)
 6. **Reject** deletes temp file, marks rejected, invalidates token
-7. UI polls `status` until `ready` or `failed`
+7. UI polls verification `status` until `ready` or `failed`; import result page polls while import `status` is `processing`
 
 ## Replaces
 

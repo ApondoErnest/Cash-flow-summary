@@ -6,6 +6,7 @@ return [
         'not_ready' => 'This verification is not ready to import.',
         'already_committed' => 'This verification has already been imported.',
         'exact_file_duplicate' => 'This file was already imported (import #:id).',
+        'processing_failed' => 'Import processing failed. Contact support if this persists.',
     ],
     'warnings' => [
         'probable_duplicates' => ':count probable duplicate row(s) detected.',
@@ -36,7 +37,7 @@ return [
             'correction_submitted' => 'Correction submitted. Awaiting owner approval.',
             'exact_file_duplicate' => 'This file was already imported. Showing the existing import result.',
             'failed' => 'Import failed.',
-            'processing' => 'Import is still processing.',
+            'processing' => 'Import is still processing. Large files can take a few minutes — this page refreshes automatically.',
             'cancelled' => 'Import was cancelled.',
         ],
         'status' => [

@@ -421,6 +421,39 @@ Set in `.env.example` / `.env`:
 IMPORT_VERIFICATION_TTL_MINUTES=120
 ```
 
+Abandoned verifications expire after this TTL. Cleanup: `php artisan csv-verification:cleanup` (scheduled).
+
+---
+
+## Queue workers & large CSV imports
+
+Verification and import finalize run as queue jobs in production.
+
+| Env | Typical values |
+|-----|----------------|
+| Local / testing | `CSV_VERIFICATION_SYNC=true`, `CSV_IMPORTS_SYNC=true` (defaults when `APP_ENV=local\|testing`) — work runs inline |
+| Production | `CSV_VERIFICATION_SYNC=false`, `CSV_IMPORTS_SYNC=false` + Redis queue worker |
+
+```bash
+# Production / async local
+php artisan queue:work redis --timeout=600
+# or
+php artisan horizon
+```
+
+| Setting | Default | Purpose |
+|---------|---------|---------|
+| `CSV_IMPORTS_JOB_TIMEOUT` / `CSV_VERIFICATION_JOB_TIMEOUT` | `600` | Job timeout (seconds) |
+| `CSV_IMPORTS_ROW_CHUNK` | `500` | Bulk `import_rows` insert size |
+| `CSV_IMPORTS_LEDGER_CHUNK` | `500` | Master ledger chunk size |
+| `REDIS_QUEUE_RETRY_AFTER` | `660` | Must be **greater** than job timeout |
+
+Horizon supervisor timeout is **600s** (`config/horizon.php`). After changing these values, restart workers / Horizon.
+
+**Large files:** 10k+ rows are supported (stream parse + chunked commit). Local smoke (2026-07-11): 3 000 rows verified ~0.2 s, committed ~14 s. Keep a worker running when sync flags are false; the import result page polls while status is `processing`.
+
+See [csv-verification-flow.md](../design/csv-verification-flow.md) and [backend-services.md](../architecture/backend-services.md).
+
 ---
 
 ## Running tests

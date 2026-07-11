@@ -93,6 +93,7 @@ Requirements use `REQ-xxx` (functional) and `NFR-xxx` (non-functional).
 | REQ-055 | Reconcile parsed totals with footer | Must | 7 | S2 |
 | REQ-056 | Invalid rows excluded from activation; preserved in errors | Must | 7, 10 | S2 |
 | REQ-057 | Stream-parse large files | Should | 7 | S2 |
+| REQ-057a | Commit large files via queued/chunked pipeline (≥10k rows) | Should | 10 | S5 |
 
 ---
 
@@ -177,6 +178,7 @@ Requirements use `REQ-xxx` (functional) and `NFR-xxx` (non-functional).
 | NFR-005 | Pest test suite | Must | 17 | S8 |
 | NFR-006 | Docker deploy from docs | Must | 19 | S8 |
 | NFR-007 | Center isolation tests on every phase gate | Must | 5+ | All |
+| NFR-008 | Import/verify jobs tolerate large CSVs (chunked I/O, ≥600s worker timeout) | Should | 7, 10 | S5 |
 
 ---
 
@@ -189,10 +191,10 @@ Requirements use `REQ-xxx` (functional) and `NFR-xxx` (non-functional).
 | 25–31 | 4 | REQ-001, REQ-002, REQ-003, REQ-022 |
 | 32–39 | 5 | REQ-001–005, REQ-024i, REQ-024j, REQ-008, REQ-009, REQ-102, REQ-103 |
 | 40–42 | 6 | REQ-032 (seeds) |
-| 43–51 | 7 | REQ-030–036, REQ-041–043, REQ-047, REQ-050–057, REQ-060–063, REQ-067, REQ-069, REQ-101, NFR-003 |
+| 43–51 | 7 | REQ-030–036, REQ-041–043, REQ-047, REQ-050–057, REQ-060–063, REQ-067, REQ-069, REQ-101, NFR-003, NFR-008 |
 | 52–58 | 8 | REQ-006, REQ-008–009, REQ-020–024h, REQ-024g, REQ-038, REQ-095, REQ-100 (shell) |
 | 59–64 | 9 | REQ-066 (schema) |
-| 65–71 | 10 | REQ-024f, REQ-051, REQ-056, REQ-060–066, REQ-069, REQ-070–072, REQ-071 (backend) |
+| 65–71 | 10 | REQ-024f, REQ-051, REQ-056, REQ-057a, REQ-060–066, REQ-069, REQ-070–072, REQ-071 (backend), NFR-008 |
 | 72–79 | 11 | REQ-007, REQ-024e, REQ-037, REQ-039–049, REQ-068, REQ-071 (UI), REQ-080, NFR-003 (UI) |
 | 80–85 | 12 | REQ-073, REQ-039, REQ-040–046, REQ-049, REQ-068, REQ-081 |
 | 86–89 | 13 | REQ-039–046, REQ-049, REQ-068, REQ-082 |

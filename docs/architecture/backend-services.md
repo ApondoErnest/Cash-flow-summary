@@ -53,21 +53,36 @@ Application service catalogue. One service class per bounded context; injected v
 
 **Verify pipeline:** Inspection → Mapping → Parse → Footer → Reconcile → Normalize → Duplicate preview → Update `import_verifications` JSON.
 
+**Job:** `ProcessVerificationJob` (queued unless `CSV_VERIFICATION_SYNC=true`). Timeout from `CSV_VERIFICATION_JOB_TIMEOUT` (default **600s**). Horizon supervisor timeout should match (≥ job timeout; `retry_after` > timeout).
+
 ---
 
 ## CsvImports module
 
-| Service | Responsibility |
-|---------|----------------|
-| `ImportService` | `commitFromVerification(token)` — permanent pipeline |
-| `ImportRowService` | Persist rows, link masters |
+| Service / job | Responsibility |
+|---------------|----------------|
+| `ImportService` | `commitFromVerification(token)` — create import, promote file; `finalizeQueuedCommit()` — rows/masters/versions |
+| `ProcessImportJob` | Queued finalize for large files (center-scoped); timeout from `csv_imports.job_timeout_seconds` |
+| `ImportRowService` | Stream CSV → chunked bulk `import_rows` insert |
 | `FileStorageService` | Temp → permanent private path |
 | `ImportHistoryService` | Query imports for role scope |
 
-**Commit pipeline:** Lock token → move file → create import → rows → masters → duplicates → day comparisons → versions → summaries.
+**Commit pipeline:**
+
+1. Lock token → exact-file-dupe check → create `imports` (`processing`) → promote file → mark verification imported
+2. **`ProcessImportJob`** (or inline when `csv_imports.process_synchronously`): chunked rows → chunked master ledger → day comparisons → versions → summaries → terminal status
+3. Result UI polls while `processing`
+
+| Config | Default | Purpose |
+|--------|---------|---------|
+| `CSV_IMPORTS_SYNC` | `true` in local/testing | Finalize commit inline |
+| `CSV_IMPORTS_JOB_TIMEOUT` | `600` | Job timeout (seconds) |
+| `CSV_IMPORTS_ROW_CHUNK` | `500` | Bulk insert batch size |
+| `CSV_IMPORTS_LEDGER_CHUNK` | `500` | Ledger `chunkById` size |
 
 Scheduled WhatsApp summaries are dispatched separately by the scheduler (not during commit).
 
+**Large-file note:** Stream parsing + queued/chunked commit supports 10k+ rows. Smoke (local, 2026-07-11): **3 000 rows** verified in ~0.2 s and committed in ~14 s.
 ---
 
 ## Normalization module
@@ -84,9 +99,9 @@ Scheduled WhatsApp summaries are dispatched separately by the scheduler (not dur
 
 | Service | Responsibility |
 |---------|----------------|
-| `ExactDuplicateService` | Match against in-file and master ledger |
+| `ExactDuplicateService` | Match against in-file and master ledger (optional preloaded historical map) |
 | `ProbableDuplicateService` | Similarity matches for warnings |
-| `MasterLedgerService` | Insert master with unique constraint handling |
+| `MasterLedgerService` | Chunked ledger processing; batched historical hash lookup; unique-constraint-safe inserts |
 
 ---
 

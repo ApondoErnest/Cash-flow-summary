@@ -967,7 +967,7 @@ flowchart LR
 | **Reference** | [backend-services.md](../architecture/backend-services.md) |
 | **Done when** | Deliverable complete and locally verified |
 | **Status** | Complete |
-| **Completed** | 2026-07-02 — `ImportService::commitFromVerification`, `FileStorageService`, `ImportRowService`; temp→permanent storage; import + import_rows from ready verification; exact file duplicate detection; audit events; `ImportServiceTest` |
+| **Completed** | 2026-07-02 — `ImportService::commitFromVerification`, `FileStorageService`, `ImportRowService`; temp→permanent storage; import + import_rows from ready verification; exact file duplicate detection; audit events; `ImportServiceTest`. **Updated 2026-07-11** — queued finalize via `ProcessImportJob` + chunked inserts (see Step 126). |
 
 ### Step 66 — MasterLedgerService + ExactDuplicateService
 
@@ -1705,6 +1705,24 @@ flowchart LR
 
 ---
 
+### Step 126 — Large CSV import performance (queued commit + chunking)
+
+| | |
+|---|---|
+| **Group** | Financial & import backend hardening |
+| **Reference** | [backend-services.md](../architecture/backend-services.md), [csv-verification-flow.md](../design/csv-verification-flow.md), [setup.md](../operations/setup.md#queue-workers--large-csv-imports) |
+| **Done when** | Chunked `import_rows` + ledger; `ProcessImportJob`; 600s timeouts; result-page poll; docs + tests |
+| **Status** | Complete |
+| **Completed** | 2026-07-11 — `ProcessImportJob` + `finalizeQueuedCommit`; bulk insert chunks (`CSV_IMPORTS_ROW_CHUNK`); ledger `chunkById` + batched historical hashes; Horizon/job timeout **600s**; `CSV_IMPORTS_SYNC` for local/testing inline finalize; import result `wire:poll` while `processing`; tests `ProcessImportJobTest` + full suite (752); local smoke **3 000 rows** verify ~0.2 s / commit ~14 s |
+
+**Checkpoint after Step 126:**
+
+- **Gate:** 10k-class CSVs can verify and commit without 60s worker timeout; production uses async queue when sync flags are false
+- **Requirements:** REQ-057, REQ-057a, NFR-008
+- **Gate tests (AC):** AC #48
+
+---
+
 ## Appendix A — Step groups (phase rollup)
 
 | Steps | Group (Phase) | Sprint |
@@ -1733,6 +1751,7 @@ flowchart LR
 | 115–117 | Backup & monitoring | S8 |
 | 118–120 | Controlled production rollout | S8 |
 | 121–125 | Scheduled WhatsApp summaries | TBD |
+| 126 | Large CSV import performance | TBD |
 
 ## Appendix B — REQ/NFR by step group
 

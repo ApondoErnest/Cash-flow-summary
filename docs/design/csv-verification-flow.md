@@ -133,10 +133,15 @@ On **Import**:
 
 1. Reconfirm center authorization
 2. Lock verification token (single use)
-3. Queue or run `ImportService::commitFromVerification()`
-4. Permanent file storage
-5. import + import_rows + masters + daily versions + summaries
-6. Show result page (no per-import WhatsApp; see [whatsapp-scheduled-summaries.md](../design/whatsapp-scheduled-summaries.md))
+3. `ImportService::commitFromVerification()` creates the `imports` row (`processing`), promotes the CSV to permanent storage, and marks the verification `imported`
+4. Heavy work runs via **`ProcessImportJob`** (queued in production; inline when `CSV_IMPORTS_SYNC=true` / local+testing defaults):
+   - Chunked `import_rows` insert (`CSV_IMPORTS_ROW_CHUNK`, default 500)
+   - Chunked master ledger + day versions + summaries (`CSV_IMPORTS_LEDGER_CHUNK`)
+5. Redirect to import result page immediately
+6. Result page polls while status is `processing` (large files may take minutes)
+7. No per-import WhatsApp; see [whatsapp-scheduled-summaries.md](../design/whatsapp-scheduled-summaries.md)
+
+**Large files (10k+ rows):** supported via streaming parse + queued/chunked commit. Worker timeout defaults to **600s** (`CSV_IMPORTS_JOB_TIMEOUT` / Horizon). Keep `queue:work` or Horizon running when `CSV_IMPORTS_SYNC=false`.
 
 ---
 
@@ -154,13 +159,15 @@ On **Reject**:
 
 ## Import result page
 
-- Import successful
+- Import successful **or** still processing (auto-refresh)
 - Center, file, period
 - Source rows, new unique, duplicates ignored, invalid rows
 - Active days created, unchanged days, revisions pending approval
 - HT, VAT, TTC
 - Note: activity included in scheduled WhatsApp summary (not sent immediately)
 - Actions: Dashboard | Import details | Import another
+
+While `status = processing`, the page polls every few seconds until a terminal status (`completed`, `completed_with_*`, `awaiting_owner_approval`, or `failed`).
 
 ---
 

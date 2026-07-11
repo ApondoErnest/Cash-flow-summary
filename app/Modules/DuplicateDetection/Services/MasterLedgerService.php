@@ -14,6 +14,7 @@ use App\Modules\CsvImports\Models\MasterCashFlowRecord;
 use App\Modules\DuplicateDetection\Support\ExactDuplicateKind;
 use App\Modules\DuplicateDetection\Support\MasterLedgerProcessResult;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Collection;
 
 final class MasterLedgerService
 {
@@ -26,60 +27,91 @@ final class MasterLedgerService
         $newMasters = 0;
         $withinFileDuplicates = 0;
         $historicalDuplicates = 0;
+        $chunkSize = max(1, (int) config('csv_imports.ledger_chunk_size', 500));
 
         /** @var array<string, ImportRow> $firstRowByHashInImport */
         $firstRowByHashInImport = [];
 
-        $rows = ImportRow::query()
+        ImportRow::query()
             ->withoutCenterScope()
             ->where('import_id', $import->id)
-            ->orderBy('source_row_number')
-            ->get();
+            ->orderBy('id')
+            ->chunkById($chunkSize, function (Collection $rows) use (
+                $import,
+                &$newMasters,
+                &$withinFileDuplicates,
+                &$historicalDuplicates,
+                &$firstRowByHashInImport,
+            ): void {
+                /** @var Collection<int, ImportRow> $rows */
+                $policyVersion = (string) ($rows->first(
+                    static fn (ImportRow $row): bool => $row->row_status !== ImportRowStatus::Invalid,
+                )?->normalization_policy_version ?? '');
 
-        foreach ($rows as $row) {
-            if ($row->row_status === ImportRowStatus::Invalid) {
-                continue;
-            }
+                if ($policyVersion === '') {
+                    return;
+                }
 
-            $match = $this->exactDuplicateService->matchForImportRow(
-                row: $row,
-                centerId: $import->center_id,
-                firstRowByHashInImport: $firstRowByHashInImport,
-            );
+                $hashes = $rows
+                    ->reject(static fn (ImportRow $row): bool => $row->row_status === ImportRowStatus::Invalid)
+                    ->pluck('exact_canonical_hash')
+                    ->unique()
+                    ->values()
+                    ->all();
 
-            if ($match->kind === ExactDuplicateKind::WithinFile) {
-                $withinFileDuplicates++;
-                $row->update([
-                    'row_status' => ImportRowStatus::DuplicateWithinFile,
-                    'duplicate_type' => DuplicateType::WithinFile,
-                    'duplicate_of_import_row_id' => $match->withinFileSourceRow?->id,
-                    'master_record_id' => $match->masterRecord?->id,
-                ]);
+                $historicalByHash = $this->historicalMastersByHash(
+                    centerId: (int) $import->center_id,
+                    policyVersion: $policyVersion,
+                    hashes: $hashes,
+                );
 
-                continue;
-            }
+                foreach ($rows as $row) {
+                    if ($row->row_status === ImportRowStatus::Invalid) {
+                        continue;
+                    }
 
-            if ($match->kind === ExactDuplicateKind::Historical) {
-                $historicalDuplicates++;
-                $row->update([
-                    'row_status' => ImportRowStatus::HistoricalDuplicate,
-                    'duplicate_type' => DuplicateType::Historical,
-                    'master_record_id' => $match->masterRecord?->id,
-                ]);
+                    $match = $this->exactDuplicateService->matchForImportRow(
+                        row: $row,
+                        centerId: (int) $import->center_id,
+                        firstRowByHashInImport: $firstRowByHashInImport,
+                        historicalByHash: $historicalByHash,
+                    );
 
-                continue;
-            }
+                    if ($match->kind === ExactDuplicateKind::WithinFile) {
+                        $withinFileDuplicates++;
+                        $row->update([
+                            'row_status' => ImportRowStatus::DuplicateWithinFile,
+                            'duplicate_type' => DuplicateType::WithinFile,
+                            'duplicate_of_import_row_id' => $match->withinFileSourceRow?->id,
+                            'master_record_id' => $match->masterRecord?->id,
+                        ]);
 
-            $master = $this->insertFromImportRow($row);
-            $newMasters++;
+                        continue;
+                    }
 
-            $row->update([
-                'row_status' => ImportRowStatus::Accepted,
-                'master_record_id' => $master->id,
-            ]);
+                    if ($match->kind === ExactDuplicateKind::Historical) {
+                        $historicalDuplicates++;
+                        $row->update([
+                            'row_status' => ImportRowStatus::HistoricalDuplicate,
+                            'duplicate_type' => DuplicateType::Historical,
+                            'master_record_id' => $match->masterRecord?->id,
+                        ]);
 
-            $firstRowByHashInImport[$row->exact_canonical_hash] = $row->fresh();
-        }
+                        continue;
+                    }
+
+                    $master = $this->insertFromImportRow($row);
+                    $newMasters++;
+
+                    $row->update([
+                        'row_status' => ImportRowStatus::Accepted,
+                        'master_record_id' => $master->id,
+                    ]);
+
+                    $firstRowByHashInImport[$row->exact_canonical_hash] = $row->fresh();
+                    $historicalByHash[$row->exact_canonical_hash] = $master;
+                }
+            });
 
         return new MasterLedgerProcessResult(
             newMasters: $newMasters,
@@ -117,6 +149,26 @@ final class MasterLedgerService
                 ->where('exact_canonical_hash', $attributes['exact_canonical_hash'])
                 ->firstOrFail();
         }
+    }
+
+    /**
+     * @param  list<string>  $hashes
+     * @return array<string, MasterCashFlowRecord>
+     */
+    private function historicalMastersByHash(int $centerId, string $policyVersion, array $hashes): array
+    {
+        if ($hashes === []) {
+            return [];
+        }
+
+        return MasterCashFlowRecord::query()
+            ->withoutCenterScope()
+            ->where('center_id', $centerId)
+            ->where('normalization_policy_version', $policyVersion)
+            ->whereIn('exact_canonical_hash', $hashes)
+            ->get()
+            ->keyBy('exact_canonical_hash')
+            ->all();
     }
 
     /**

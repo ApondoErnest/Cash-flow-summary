@@ -25,10 +25,17 @@ class ProcessVerificationJob implements ShouldQueue
 {
     use Queueable;
 
+    public int $tries;
+
+    public int $timeout;
+
     public function __construct(
         public readonly string $token,
         public readonly int $centerId,
-    ) {}
+    ) {
+        $this->tries = max(1, (int) config('csv_verification.job_tries', 1));
+        $this->timeout = max(60, (int) config('csv_verification.job_timeout_seconds', 600));
+    }
 
     public function handle(
         CsvInspectionService $inspectionService,

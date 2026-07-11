@@ -14,11 +14,13 @@ final class ExactDuplicateService
 {
     /**
      * @param  array<string, ImportRow>  $firstRowByHashInImport
+     * @param  array<string, MasterCashFlowRecord>|null  $historicalByHash
      */
     public function matchForImportRow(
         ImportRow $row,
         int $centerId,
         array $firstRowByHashInImport,
+        ?array $historicalByHash = null,
     ): ExactDuplicateMatch {
         $canonical = $this->canonicalFromImportRow($row);
         $hash = $row->exact_canonical_hash;
@@ -37,11 +39,13 @@ final class ExactDuplicateService
             }
         }
 
-        $historical = $this->findHistoricalMatch(
-            centerId: $centerId,
-            canonical: $canonical,
-            policyVersion: $row->normalization_policy_version,
-        );
+        $historical = $historicalByHash !== null
+            ? $this->matchFromHistoricalMap($canonical, $historicalByHash)
+            : $this->findHistoricalMatch(
+                centerId: $centerId,
+                canonical: $canonical,
+                policyVersion: $row->normalization_policy_version,
+            );
 
         if ($historical !== null) {
             return new ExactDuplicateMatch(
@@ -51,6 +55,26 @@ final class ExactDuplicateService
         }
 
         return new ExactDuplicateMatch(kind: ExactDuplicateKind::None);
+    }
+
+    /**
+     * @param  array<string, MasterCashFlowRecord>  $historicalByHash
+     */
+    private function matchFromHistoricalMap(
+        CanonicalRecord $canonical,
+        array $historicalByHash,
+    ): ?MasterCashFlowRecord {
+        $record = $historicalByHash[$canonical->exactCanonicalHash()] ?? null;
+
+        if ($record === null) {
+            return null;
+        }
+
+        if (! $this->masterRecordMatchesCanonical($record, $canonical)) {
+            return null;
+        }
+
+        return $record;
     }
 
     public function findHistoricalMatch(

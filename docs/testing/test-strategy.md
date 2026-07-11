@@ -83,6 +83,8 @@ Real samples remain in private storage; parity tests in UAT.
 - Import disabled when validation fails
 - Import double-click sends once
 - Reject returns to empty state
+- Queued commit (`ProcessImportJob`) when `CSV_IMPORTS_SYNC=false`; result page polls while `processing`
+- Chunked row insert / ledger path covered via `ProcessImportJobTest` + integration commit tests
 
 ---
 

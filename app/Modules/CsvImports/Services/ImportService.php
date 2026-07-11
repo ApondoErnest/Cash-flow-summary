@@ -10,6 +10,7 @@ use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Modules\CsvImports\Enums\ImportStatus;
 use App\Modules\CsvImports\Exceptions\ExactFileDuplicateException;
+use App\Modules\CsvImports\Jobs\ProcessImportJob;
 use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvVerification\Enums\VerificationStatus;
 use App\Modules\CsvVerification\Models\ImportVerification;
@@ -25,6 +26,7 @@ use App\Modules\Reports\Services\SummaryGenerationService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Throwable;
 
 final class ImportService
 {
@@ -138,21 +140,9 @@ final class ImportService
             ]);
 
             $storagePath = $this->fileStorageService->promoteVerificationFile($locked, $import->id);
-            $absolutePath = $this->fileStorageService->absolutePath($storagePath);
-            $rowCount = $this->importRowService->persistRows($import, $locked, $absolutePath);
-            $ledgerResult = $this->masterLedgerService->processImport($import->fresh());
-            $comparisonResult = $this->versionComparisonService->processImport($import->fresh());
-            $this->revisionService->applyImportComparisons($import->fresh(), $user);
-            $this->summaryGenerationService->queueRegenerationForImport($import->fresh());
 
             $import->update([
                 'storage_path' => $storagePath,
-                'parsed_count' => $rowCount,
-                'duplicate_within_file_count' => $ledgerResult->withinFileDuplicates,
-                'historical_duplicate_count' => $ledgerResult->historicalDuplicates,
-                'new_master_count' => $ledgerResult->newMasters,
-                'status' => $this->resolveImportStatus($duplicateSummary, $ledgerResult, $comparisonResult),
-                'completed_at' => now(),
             ]);
 
             $locked->update([
@@ -171,12 +161,10 @@ final class ImportService
                     'token' => $locked->token,
                     'filename' => $locked->original_filename,
                     'import_id' => $import->id,
-                    'row_count' => $rowCount,
                     'import_mode' => $import->import_mode->value,
+                    'queued' => true,
                 ],
             );
-
-            $this->correctionSubmissionService->recordSubmission($import->fresh(), $user);
 
             return $import->fresh();
         });
@@ -187,7 +175,59 @@ final class ImportService
             throw new ExactFileDuplicateException($import);
         }
 
-        return $import;
+        if ((bool) config('csv_imports.process_synchronously')) {
+            $this->finalizeQueuedCommit($import->fresh(), $user);
+        } else {
+            ProcessImportJob::dispatch((int) $import->id, (int) $user->id);
+        }
+
+        return $import->fresh();
+    }
+
+    public function finalizeQueuedCommit(Import $import, User $user): Import
+    {
+        if ($import->status !== ImportStatus::Processing) {
+            return $import;
+        }
+
+        $verification = ImportVerification::query()
+            ->withoutCenterScope()
+            ->findOrFail($import->import_verification_id);
+
+        try {
+            $absolutePath = $this->fileStorageService->absolutePath($import->storage_path);
+            $rowCount = $this->importRowService->persistRows($import, $verification, $absolutePath);
+            $ledgerResult = $this->masterLedgerService->processImport($import->fresh());
+            $comparisonResult = $this->versionComparisonService->processImport($import->fresh());
+            $this->revisionService->applyImportComparisons($import->fresh(), $user);
+            $this->summaryGenerationService->queueRegenerationForImport($import->fresh());
+
+            $duplicateSummary = $verification->duplicate_summary ?? [];
+
+            $import->update([
+                'parsed_count' => $rowCount,
+                'duplicate_within_file_count' => $ledgerResult->withinFileDuplicates,
+                'historical_duplicate_count' => $ledgerResult->historicalDuplicates,
+                'new_master_count' => $ledgerResult->newMasters,
+                'status' => $this->resolveImportStatus($duplicateSummary, $ledgerResult, $comparisonResult),
+                'completed_at' => now(),
+            ]);
+
+            $this->correctionSubmissionService->recordSubmission($import->fresh(), $user);
+
+            return $import->fresh();
+        } catch (Throwable $exception) {
+            $warnings = $import->warnings ?? [];
+            $warnings[] = __('csv_import.commit.processing_failed');
+
+            $import->forceFill([
+                'status' => ImportStatus::Failed,
+                'completed_at' => now(),
+                'warnings' => array_values(array_unique($warnings)),
+            ])->save();
+
+            throw $exception;
+        }
     }
 
     private function markExactFileDuplicate(

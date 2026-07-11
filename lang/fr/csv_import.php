@@ -6,6 +6,7 @@ return [
         'not_ready' => 'Cette vérification n\'est pas prête à être importée.',
         'already_committed' => 'Cette vérification a déjà été importée.',
         'exact_file_duplicate' => 'Ce fichier a déjà été importé (import n° :id).',
+        'processing_failed' => 'Le traitement de l\'import a échoué. Contactez le support si le problème persiste.',
     ],
     'warnings' => [
         'probable_duplicates' => ':count ligne(s) probablement en double détectée(s).',
@@ -36,7 +37,7 @@ return [
             'correction_submitted' => 'Correction soumise. En attente de l\'approbation du propriétaire.',
             'exact_file_duplicate' => 'Ce fichier a déjà été importé. Affichage du résultat de l\'import existant.',
             'failed' => 'Échec de l\'import.',
-            'processing' => 'Import encore en cours.',
+            'processing' => 'Import encore en cours. Les gros fichiers peuvent prendre quelques minutes — cette page se rafraîchit automatiquement.',
             'cancelled' => 'Import annulé.',
         ],
         'status' => [
