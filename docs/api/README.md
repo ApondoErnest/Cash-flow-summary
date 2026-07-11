@@ -127,18 +127,18 @@ Used for **all scheduled cadences**. Seven named body parameters:
 
 Configure via environment:
 
+Configure via environment (template name; language falls back only if org preference is missing):
+
 ```env
 WHATSAPP_IMPORT_TEMPLATE=import_activity_summary
 WHATSAPP_IMPORT_TEMPLATE_LANGUAGE=en
 ```
 
-Use the exact language code shown in Meta Business Manager for your template (often `en` for English).
+**Template language** follows the organization **Preferred language** in **Owner → Organization Settings** (`organizations.default_language`: `en` or `fr`). That selects the matching Meta language variation of `import_activity_summary`.
 
 Meta **named** templates require `parameter_name` on each API parameter. Configured in `whatsapp.import_template_body_parameter_names`.
 
 `event_type` on `whatsapp_messages` records cadence (`daily_summary`, `weekly_summary`, etc.) for history filters and idempotency.
-
-**French:** add a French translation in Meta, then set `WHATSAPP_IMPORT_TEMPLATE_LANGUAGE=fr`.
 
 ---
 

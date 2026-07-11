@@ -55,10 +55,38 @@ test('whatsapp notification service sends daily summary message', function () {
         $params = $body['template']['components'][0]['parameters'] ?? [];
 
         return ($body['template']['name'] ?? null) === 'import_activity_summary'
-            && ($body['template']['language']['code'] ?? null) === 'en'
+            && ($body['template']['language']['code'] ?? null) === 'fr'
             && count($params) === 7
             && ($params[0]['parameter_name'] ?? null) === 'center_name'
             && ($params[0]['text'] ?? null) === 'WhatsApp Center';
+    });
+});
+
+test('whatsapp notification service uses english template when org preferred language is en', function () {
+    Http::fake([
+        'https://graph.facebook.com/*' => Http::response([
+            'messages' => [['id' => 'wamid.daily-en']],
+        ], 200),
+    ]);
+
+    [$center] = whatsAppScheduledSummaryFixture();
+    $center->organization->update(['default_language' => 'en']);
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
+
+    $message = app(WhatsAppNotificationService::class)->notifyScheduledSummary(
+        $center->fresh(),
+        WhatsappEventType::DailySummary,
+        $moment,
+    );
+
+    expect($message)->not->toBeNull()
+        ->and($message->status)->toBe(WhatsappMessageStatus::Sent);
+
+    Http::assertSent(function ($request): bool {
+        $body = $request->data();
+
+        return ($body['template']['name'] ?? null) === 'import_activity_summary'
+            && ($body['template']['language']['code'] ?? null) === 'en';
     });
 });
 

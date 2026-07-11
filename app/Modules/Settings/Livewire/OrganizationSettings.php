@@ -7,6 +7,7 @@ namespace App\Modules\Settings\Livewire;
 use App\Modules\Centers\Models\Organization;
 use App\Modules\Settings\Services\SettingsService;
 use App\Modules\Settings\Support\OrganizationProfileData;
+use App\Support\Locale\AppLocale;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -20,6 +21,8 @@ class OrganizationSettings extends Component
     public string $name = '';
 
     public string $code = '';
+
+    public string $defaultLanguage = 'fr';
 
     public string $contactEmail = '';
 
@@ -58,6 +61,7 @@ class OrganizationSettings extends Component
             payload: [
                 'name' => $validated['name'],
                 'code' => $validated['code'],
+                'default_language' => $validated['defaultLanguage'],
                 'contact_email' => $validated['contactEmail'] !== '' ? $validated['contactEmail'] : null,
                 'contact_phone' => $validated['contactPhone'] !== '' ? $validated['contactPhone'] : null,
             ],
@@ -87,6 +91,7 @@ class OrganizationSettings extends Component
                 'alpha_dash:ascii',
                 Rule::unique('organizations', 'code')->ignore($this->organization->id),
             ],
+            'defaultLanguage' => ['required', 'in:'.implode(',', AppLocale::supported())],
             'contactEmail' => ['nullable', 'email', 'max:255'],
             'contactPhone' => ['nullable', 'string', 'max:50'],
         ];
@@ -100,6 +105,7 @@ class OrganizationSettings extends Component
         return [
             'name' => __('settings.organization.fields.name'),
             'code' => __('settings.organization.fields.code'),
+            'defaultLanguage' => __('settings.organization.fields.default_language'),
             'contactEmail' => __('settings.organization.fields.contact_email'),
             'contactPhone' => __('settings.organization.fields.contact_phone'),
         ];
@@ -109,6 +115,7 @@ class OrganizationSettings extends Component
     {
         $this->name = $profile->name;
         $this->code = $profile->code;
+        $this->defaultLanguage = $profile->defaultLanguage;
         $this->contactEmail = $profile->contactEmail ?? '';
         $this->contactPhone = $profile->contactPhone ?? '';
     }

@@ -207,7 +207,13 @@ final class SettingsService
     }
 
     /**
-     * @param  array{name: string, code: string, contact_email?: string|null, contact_phone?: string|null}  $payload
+     * @param  array{
+     *     name: string,
+     *     code: string,
+     *     default_language: string,
+     *     contact_email?: string|null,
+     *     contact_phone?: string|null,
+     * }  $payload
      */
     public function updateOrganizationProfile(Organization $organization, User $user, array $payload): Organization
     {
@@ -217,6 +223,7 @@ final class SettingsService
             $oldValues = [
                 'name' => $organization->name,
                 'code' => $organization->code,
+                'default_language' => $organization->default_language,
                 'contact_email' => $oldContact['email'] ?? null,
                 'contact_phone' => $oldContact['phone'] ?? null,
             ];
@@ -244,6 +251,7 @@ final class SettingsService
             $organization->update([
                 'name' => trim($payload['name']),
                 'code' => $this->normalizeOrganizationCode($payload['code']),
+                'default_language' => strtolower(trim((string) $payload['default_language'])),
                 'contact_details' => $contactDetails === [] ? null : $contactDetails,
             ]);
 
@@ -261,6 +269,7 @@ final class SettingsService
                     'scope' => 'organization_profile',
                     'name' => $organization->name,
                     'code' => $organization->code,
+                    'default_language' => $organization->default_language,
                     'contact_email' => $newContact['email'] ?? null,
                     'contact_phone' => $newContact['phone'] ?? null,
                 ],
@@ -277,9 +286,25 @@ final class SettingsService
         return new OrganizationProfileData(
             name: $organization->name,
             code: $organization->code,
+            defaultLanguage: $organization->default_language ?? 'fr',
             contactEmail: $contact['email'] ?? null,
             contactPhone: $contact['phone'] ?? null,
         );
+    }
+
+    /**
+     * Meta template language code for activity summaries (matches org preferred language).
+     */
+    public function whatsAppTemplateLanguage(int $organizationId): string
+    {
+        $organization = Organization::query()->find($organizationId);
+        $preferred = strtolower((string) ($organization?->default_language ?? ''));
+
+        if (in_array($preferred, ['en', 'fr'], true)) {
+            return $preferred;
+        }
+
+        return (string) config('whatsapp.import_template_language', 'en');
     }
 
     private function normalizeOrganizationCode(string $code): string

@@ -18,6 +18,7 @@ test('owner can save organization profile name code and contact details', functi
     Livewire::test(OrganizationSettings::class)
         ->set('name', 'NACHO Inspection Group')
         ->set('code', 'nacho-group')
+        ->set('defaultLanguage', 'en')
         ->set('contactEmail', 'contact@nacho.example')
         ->set('contactPhone', '+237612345678')
         ->call('save')
@@ -28,6 +29,7 @@ test('owner can save organization profile name code and contact details', functi
 
     expect($organization->name)->toBe('NACHO Inspection Group')
         ->and($organization->code)->toBe('NACHO-GROUP')
+        ->and($organization->default_language)->toBe('en')
         ->and($organization->contact_details)->toBe([
             'email' => 'contact@nacho.example',
             'phone' => '+237612345678',
@@ -49,6 +51,7 @@ test('owner can clear optional organization contact fields', function () {
 
     Livewire::test(OrganizationSettings::class)
         ->set('name', $organization->name)
+        ->set('defaultLanguage', $organization->default_language)
         ->set('contactEmail', '')
         ->set('contactPhone', '')
         ->call('save')
@@ -66,19 +69,34 @@ test('organization profile save rejects invalid contact email', function () {
         ->assertHasErrors(['contactEmail' => 'email']);
 });
 
-test('organization profile save does not change read-only regional fields', function () {
+test('owner can update preferred language used for whatsapp templates', function () {
+    $owner = actingAsOwnerWithoutActiveCenter();
+    $organization = $owner->organization;
+
+    expect($organization->default_language)->toBe('fr');
+
+    Livewire::test(OrganizationSettings::class)
+        ->set('defaultLanguage', 'en')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($organization->fresh()->default_language)->toBe('en')
+        ->and(app(SettingsService::class)->whatsAppTemplateLanguage((int) $organization->id))->toBe('en');
+});
+
+test('organization profile save does not change read-only currency and timezone', function () {
     $owner = actingAsOwnerWithoutActiveCenter();
     $organization = $owner->organization;
 
     $original = [
         'currency' => $organization->currency,
         'timezone' => $organization->timezone,
-        'default_language' => $organization->default_language,
     ];
 
     Livewire::test(OrganizationSettings::class)
         ->set('name', 'Updated Name Only')
         ->set('code', 'UPDATED-CODE')
+        ->set('defaultLanguage', 'en')
         ->call('save')
         ->assertHasNoErrors();
 
@@ -86,9 +104,9 @@ test('organization profile save does not change read-only regional fields', func
 
     expect($organization->name)->toBe('Updated Name Only')
         ->and($organization->code)->toBe('UPDATED-CODE')
+        ->and($organization->default_language)->toBe('en')
         ->and($organization->currency)->toBe($original['currency'])
-        ->and($organization->timezone)->toBe($original['timezone'])
-        ->and($organization->default_language)->toBe($original['default_language']);
+        ->and($organization->timezone)->toBe($original['timezone']);
 });
 
 test('organization profile save rejects duplicate organization code', function () {
@@ -115,6 +133,7 @@ test('settings service update organization profile persists changes', function (
         payload: [
             'name' => 'Service Updated Org',
             'code' => 'SERVICE-ORG',
+            'default_language' => 'en',
             'contact_email' => 'ops@example.com',
             'contact_phone' => null,
         ],
@@ -122,6 +141,7 @@ test('settings service update organization profile persists changes', function (
 
     expect($updated->name)->toBe('Service Updated Org')
         ->and($updated->code)->toBe('SERVICE-ORG')
+        ->and($updated->default_language)->toBe('en')
         ->and($updated->contact_details)->toBe(['email' => 'ops@example.com']);
 });
 

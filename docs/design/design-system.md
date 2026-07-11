@@ -189,6 +189,17 @@ Rules:
 
 Custom SVG Blade components **only** for brand-specific marks (e.g. official WhatsApp logo). Brand icons must not define the visual style of the rest of the UI.
 
+**Verified Cash Shield** is the product mark (`public/brand/verified-cash-shield.svg`, `x-brand.icon`):
+
+| Element | Colour |
+|---------|--------|
+| Rounded square background | Midnight Navy `#14213D` |
+| Shield outline | White `#FFFFFF` |
+| Rising chart | Emerald `#0F766E` |
+| Verification check | Warm Gold `#D6A756` |
+
+Site icons: `favicon.svg`, `favicon-32x32.png`, `apple-touch-icon.png`, `site.webmanifest` (via `x-layouts.favicons`).
+
 ### Libraries not used
 
 | Library | Reason |

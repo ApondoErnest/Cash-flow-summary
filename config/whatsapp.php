@@ -20,12 +20,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Import notifications
+    | Import / scheduled activity summaries
     |--------------------------------------------------------------------------
     |
     | Meta template import_activity_summary (Utility) — seven body parameters:
     | center_name, import_period, inspection_count, category_summary,
     | amount_ht, amount_vat, amount_ttc. See docs/api/README.md.
+    |
+    | Template language for activity summaries is taken from the organization
+    | preferred language (Settings → Preferred language: en|fr). The env value
+    | below is only a fallback when that preference is missing/invalid.
     |
     */
     'import_template' => env('WHATSAPP_IMPORT_TEMPLATE', 'import_activity_summary'),

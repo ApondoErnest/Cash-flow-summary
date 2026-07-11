@@ -12,7 +12,7 @@
             >
                 <x-slot:logo>
                     <div class="mf-sidebar-brand-mark" aria-hidden="true">
-                        <flux:icon icon="chart-bar-square" variant="outline" class="size-4 text-white" />
+                        <x-brand.icon size="sm" class="!size-full !rounded-[inherit]" />
                     </div>
                 </x-slot:logo>
             </flux:sidebar.brand>

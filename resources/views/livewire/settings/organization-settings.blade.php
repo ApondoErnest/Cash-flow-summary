@@ -25,7 +25,7 @@
         />
         <x-ui.stat-card
             :label="__('settings.organization.stats.language')"
-            :value="strtoupper($organization->default_language)"
+            :value="strtoupper($defaultLanguage)"
         />
         <x-ui.stat-card
             :label="__('settings.organization.stats.status')"
@@ -52,8 +52,12 @@
 
                 <flux:field>
                     <flux:label>{{ __('settings.organization.fields.default_language') }}</flux:label>
-                    <flux:input :value="strtoupper($organization->default_language)" disabled />
-                    <flux:description>{{ __('settings.organization.fields.readonly_help') }}</flux:description>
+                    <flux:select wire:model.live="defaultLanguage">
+                        <flux:select.option value="fr">{{ __('settings.organization.languages.fr') }}</flux:select.option>
+                        <flux:select.option value="en">{{ __('settings.organization.languages.en') }}</flux:select.option>
+                    </flux:select>
+                    <flux:description>{{ __('settings.organization.fields.default_language_help') }}</flux:description>
+                    <flux:error name="defaultLanguage" />
                 </flux:field>
 
                 <flux:field>

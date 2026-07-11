@@ -12,24 +12,29 @@ return [
 
     'organization' => [
         'title' => 'Paramètres organisation',
-        'description' => 'Mettez à jour le profil et les coordonnées de votre organisation. Les valeurs régionales par défaut sont en lecture seule.',
+        'description' => 'Mettez à jour le profil, la langue préférée et les coordonnées de votre organisation. La devise et le fuseau horaire sont en lecture seule.',
         'profile_title' => 'Profil organisation',
         'saved' => 'Profil organisation enregistré.',
         'saving' => 'Enregistrement…',
         'stats' => [
             'currency' => 'Devise',
             'timezone' => 'Fuseau horaire',
-            'language' => 'Langue par défaut',
+            'language' => 'Langue préférée',
             'status' => 'Statut',
         ],
         'status' => [
             'active' => 'Active',
             'inactive' => 'Inactive',
         ],
+        'languages' => [
+            'en' => 'Anglais',
+            'fr' => 'Français',
+        ],
         'fields' => [
             'name' => 'Nom de l\'organisation',
             'code' => 'Code organisation',
-            'default_language' => 'Langue par défaut',
+            'default_language' => 'Langue préférée',
+            'default_language_help' => 'Utilisée pour les résumés d\'activité WhatsApp envoyés au propriétaire (modèle Meta anglais ou français).',
             'currency' => 'Devise',
             'timezone' => 'Fuseau horaire',
             'contact_email' => 'E-mail de contact',

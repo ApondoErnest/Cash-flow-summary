@@ -10,7 +10,7 @@
 
     <div class="mf-login-brand-content relative z-10">
         <div class="mf-login-brand-mark" aria-hidden="true">
-            <flux:icon icon="chart-bar-square" variant="outline" class="size-7 text-white" />
+            <x-brand.icon size="lg" class="!size-full !rounded-[inherit]" />
         </div>
 
         <div class="mf-login-brand-eyebrow">

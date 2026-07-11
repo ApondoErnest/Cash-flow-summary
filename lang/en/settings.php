@@ -12,24 +12,29 @@ return [
 
     'organization' => [
         'title' => 'Organization Settings',
-        'description' => 'Update your organization profile and contact information. Regional defaults are read-only.',
+        'description' => 'Update your organization profile, preferred language, and contact information. Currency and timezone are read-only.',
         'profile_title' => 'Organization profile',
         'saved' => 'Organization profile saved.',
         'saving' => 'Saving…',
         'stats' => [
             'currency' => 'Currency',
             'timezone' => 'Timezone',
-            'language' => 'Default language',
+            'language' => 'Preferred language',
             'status' => 'Status',
         ],
         'status' => [
             'active' => 'Active',
             'inactive' => 'Inactive',
         ],
+        'languages' => [
+            'en' => 'English',
+            'fr' => 'French',
+        ],
         'fields' => [
             'name' => 'Organization name',
             'code' => 'Organization code',
-            'default_language' => 'Default language',
+            'default_language' => 'Preferred language',
+            'default_language_help' => 'Used for WhatsApp activity summaries sent to the owner (English or French Meta template).',
             'currency' => 'Currency',
             'timezone' => 'Timezone',
             'contact_email' => 'Contact email',

@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ config('app.name') }}</title>
+        <x-layouts.favicons />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <x-flux.forced-light-appearance />

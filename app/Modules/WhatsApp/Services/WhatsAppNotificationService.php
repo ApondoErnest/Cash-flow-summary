@@ -190,7 +190,7 @@ final class WhatsAppNotificationService
                 credentials: $credentials,
                 recipientPhone: $message->recipient_phone,
                 templateName: $eventType->templateName(),
-                languageCode: $eventType->templateLanguageCode(),
+                languageCode: $this->resolveTemplateLanguage($organizationId, $eventType),
                 bodyParameters: $this->templateBodyParametersFromSummary($message),
                 bodyParameterNames: $eventType->templateBodyParameterNames(),
             );
@@ -222,6 +222,15 @@ final class WhatsAppNotificationService
         }
 
         return $credentials;
+    }
+
+    private function resolveTemplateLanguage(int $organizationId, WhatsappEventType $eventType): string
+    {
+        if ($eventType->usesActivitySummaryTemplate()) {
+            return $this->settingsService->whatsAppTemplateLanguage($organizationId);
+        }
+
+        return $eventType->templateLanguageCode();
     }
 
     /**
