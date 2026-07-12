@@ -122,7 +122,7 @@ test('generate export job writes csv file and marks export completed', function 
     $contents = Storage::disk('local')->get((string) $export->storage_path);
 
     expect($contents)->toContain('Export Center')
-        ->and($contents)->toContain('11 925,00')
+        ->and($contents)->toContain('11,925.00')
         ->and($contents)->toContain('01/06/2026');
 });
 

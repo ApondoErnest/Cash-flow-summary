@@ -43,7 +43,7 @@ test('verification summary service formats footer totals and row stats', functio
     $summary = app(VerificationSummaryService::class)->build($verification);
 
     expect($summary->centerName)->toBe('Summary Center');
-    expect($summary->footerTtc)->toBe('11 925,00');
+    expect($summary->footerTtc)->toBe('11,925.00');
     expect($summary->revenueGenerating)->toBe(1);
     expect($summary->canImport)->toBeTrue();
     expect($summary->checks)->toHaveCount(5);

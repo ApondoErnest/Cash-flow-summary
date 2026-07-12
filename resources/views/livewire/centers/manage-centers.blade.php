@@ -94,6 +94,9 @@
                             <x-ui.mobile-record-detail :label="__('center.manage.columns.users')">
                                 {{ $center->active_users_count }}
                             </x-ui.mobile-record-detail>
+                            <x-ui.mobile-record-detail :label="__('center.manage.columns.whatsapp_summary_time')">
+                                {{ \App\Support\Locale\LocalizedDateTime::time($center->resolvedWhatsappSummaryTime()) }}
+                            </x-ui.mobile-record-detail>
                         </x-slot:details>
 
                         <x-slot:actions>
@@ -137,6 +140,7 @@
                     <flux:table.column>{{ __('center.manage.columns.code') }}</flux:table.column>
                     <flux:table.column>{{ __('center.manage.columns.location') }}</flux:table.column>
                     <flux:table.column align="end">{{ __('center.manage.columns.users') }}</flux:table.column>
+                    <flux:table.column>{{ __('center.manage.columns.whatsapp_summary_time') }}</flux:table.column>
                     <flux:table.column>{{ __('center.manage.columns.status') }}</flux:table.column>
                     <flux:table.column align="end">{{ __('center.manage.columns.actions') }}</flux:table.column>
                 </flux:table.columns>
@@ -155,6 +159,9 @@
                             </flux:table.cell>
                             <flux:table.cell align="end" class="tabular-nums">
                                 {{ $center->active_users_count }}
+                            </flux:table.cell>
+                            <flux:table.cell class="tabular-nums text-text-muted">
+                                {{ \App\Support\Locale\LocalizedDateTime::time($center->resolvedWhatsappSummaryTime()) }}
                             </flux:table.cell>
                             <flux:table.cell>
                                 @if ($center->is_active)

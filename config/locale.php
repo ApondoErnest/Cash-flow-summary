@@ -18,4 +18,19 @@ return [
 
     'cookie' => 'locale',
 
+    /*
+    |--------------------------------------------------------------------------
+    | HTML / Intl language tags
+    |--------------------------------------------------------------------------
+    |
+    | Used for <html lang> and browser Intl formatting so dates/times follow
+    | day/month order common in Cameroon (not en-US month/day).
+    |
+    */
+
+    'html' => [
+        'en' => 'en-GB',
+        'fr' => 'fr-CM',
+    ],
+
 ];

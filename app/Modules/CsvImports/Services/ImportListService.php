@@ -55,9 +55,7 @@ final class ImportListService
 
         return new ImportListRow(
             id: $import->id,
-            importedAt: ($import->completed_at ?? $import->created_at)
-                ->timezone(config('app.timezone'))
-                ->format('Y-m-d H:i'),
+            importedAt: \App\Support\Locale\LocalizedDateTime::dateTime($import->completed_at ?? $import->created_at),
             filename: $import->original_filename,
             importModeLabel: $this->importModeLabel($import->import_mode),
             actualPeriod: $this->formatActualPeriod($import),

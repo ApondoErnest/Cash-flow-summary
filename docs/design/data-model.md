@@ -91,7 +91,7 @@ Spatie permission tables (`roles`, `permissions`, pivots) link to `users` via `m
 | phone | string nullable | |
 | default_language | string | |
 | submission_deadline | time nullable | BR-008 |
-| whatsapp_summary_time | time nullable | BR-025; default 18:00 when null |
+| whatsapp_summary_time | time nullable | BR-025; Owner sets on Manage Centers; defaults to **18:00** when null (`config('whatsapp.default_summary_time')`) |
 | is_active | boolean | Soft deactivate only |
 | timestamps | | |
 

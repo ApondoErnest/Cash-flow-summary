@@ -112,9 +112,9 @@ final class RecordExplorerService
             completionStatusVariant: $completion['variant'],
             financialStatusLabel: $financial['label'],
             financialStatusVariant: $financial['variant'],
-            firstSeenAt: $record->first_seen_at
-                ?->timezone(config('app.timezone'))
-                ->format('Y-m-d H:i'),
+            firstSeenAt: $record->first_seen_at !== null
+                ? \App\Support\Locale\LocalizedDateTime::dateTime($record->first_seen_at)
+                : null,
             firstImportId: $record->first_import_id,
             firstImportFilename: $record->firstImport?->original_filename,
             normalizationPolicyVersion: $record->normalization_policy_version,

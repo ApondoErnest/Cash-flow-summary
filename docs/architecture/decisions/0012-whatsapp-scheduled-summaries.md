@@ -18,8 +18,8 @@ Replace **per-import** WhatsApp notifications with **scheduled activity summarie
 
 | Cadence | When sent | Period summarized |
 |---------|-----------|-------------------|
-| **Daily** | Every **operating day** at center time | That day **00:00 through send time** (`APP_TIMEZONE`). **Skipped** on non-operating days per center calendar (BR-009, BR-010, BR-026). |
-| **Weekly** | Every **Saturday** | Monday–Saturday of that week (inclusive) |
+| **Daily** | Every **operating day** at center time | That day **00:00 through send time** (organization timezone). **Skipped** on non-operating days per center calendar (BR-009, BR-010, BR-026). |
+| **Weekly** | Every **Saturday** | **Mon–Sat** by default; **Sun–Sat** when Sunday is open on the center weekly calendar |
 | **Monthly** | Last calendar day of month | First–last day of that month |
 | **Yearly** | **31 December** | 1 January–31 December of that year |
 
@@ -31,7 +31,7 @@ Daily summaries are sent **only on operating days** configured by the Owner in t
 
 ### Per-center send time
 
-Each center stores one **local send time** (`HH:MM`, 24-hour). The scheduler evaluates times in `APP_TIMEZONE` (see [whatsapp-scheduled-summaries.md](../../design/whatsapp-scheduled-summaries.md)).
+Each center stores one **local send time** (`HH:MM`, 24-hour). The scheduler evaluates times in the **organization timezone** (`organizations.timezone`, else `APP_TIMEZONE` — see [whatsapp-scheduled-summaries.md](../../design/whatsapp-scheduled-summaries.md)).
 
 Owner configures the time in **Manage Centers** (center edit form). Organization-level WhatsApp credentials (phone, token) remain in **WhatsApp Settings**.
 

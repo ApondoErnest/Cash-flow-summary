@@ -20,4 +20,15 @@ return [
         'clear' => 'Clear',
         'back' => 'Back',
     ],
+    'time_picker' => [
+        'placeholder' => 'Select time',
+        'hour' => 'Hour',
+        'minute' => 'Minute',
+        'period' => 'AM/PM',
+        'am' => 'AM',
+        'pm' => 'PM',
+        'apply' => 'Apply',
+        'clear' => 'Clear',
+        'hint' => '12-hour format (h:mm AM/PM)',
+    ],
 ];

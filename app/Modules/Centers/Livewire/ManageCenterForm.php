@@ -36,7 +36,7 @@ class ManageCenterForm extends Component
 
     public string $submission_deadline = '';
 
-    public string $whatsapp_summary_time = '';
+    public string $whatsapp_summary_time = '18:00';
 
     public bool $is_active = true;
 
@@ -45,6 +45,7 @@ class ManageCenterForm extends Component
     public function mount(?Center $center = null): void
     {
         $this->center = $center;
+        $this->whatsapp_summary_time = substr((string) config('whatsapp.default_summary_time', '18:00'), 0, 5);
 
         if ($center !== null) {
             $this->authorize('update', $center);
@@ -85,7 +86,7 @@ class ManageCenterForm extends Component
             'phone' => $validated['phone'] !== '' ? $validated['phone'] : null,
             'default_language' => $validated['default_language'],
             'submission_deadline' => $validated['submission_deadline'] !== '' ? $validated['submission_deadline'] : null,
-            'whatsapp_summary_time' => $validated['whatsapp_summary_time'] !== '' ? $validated['whatsapp_summary_time'] : null,
+            'whatsapp_summary_time' => $validated['whatsapp_summary_time'],
             'is_active' => $this->center !== null ? $validated['is_active'] : true,
         ];
 
@@ -149,7 +150,7 @@ class ManageCenterForm extends Component
             'phone' => ['nullable', 'string', 'max:40'],
             'default_language' => ['required', 'in:fr,en'],
             'submission_deadline' => ['nullable', 'date_format:H:i'],
-            'whatsapp_summary_time' => ['nullable', 'date_format:H:i'],
+            'whatsapp_summary_time' => ['required', 'date_format:H:i'],
             'is_active' => ['boolean'],
             'setAsDefault' => ['boolean'],
         ];
@@ -185,9 +186,7 @@ class ManageCenterForm extends Component
         $this->submission_deadline = $center->submission_deadline !== null
             ? substr((string) $center->submission_deadline, 0, 5)
             : '';
-        $this->whatsapp_summary_time = $center->whatsapp_summary_time !== null
-            ? substr((string) $center->whatsapp_summary_time, 0, 5)
-            : '';
+        $this->whatsapp_summary_time = $center->resolvedWhatsappSummaryTime();
         $this->is_active = $center->is_active;
         $this->setAsDefault = (int) auth()->user()?->preferred_center_id === (int) $center->id;
     }

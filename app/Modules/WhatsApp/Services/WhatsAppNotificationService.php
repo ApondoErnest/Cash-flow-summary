@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\WhatsApp\Services;
 
 use App\Modules\Centers\Models\Center;
+use App\Modules\Dashboards\Support\DashboardMoney;
 use App\Modules\Settings\Services\SettingsService;
 use App\Modules\WhatsApp\Enums\WhatsappEventType;
 use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
@@ -42,12 +43,13 @@ final class WhatsAppNotificationService
         Center $center,
         WhatsappEventType $eventType,
         Carbon $referenceMoment,
+        bool $forceRebuild = false,
     ): ?WhatsappMessage {
         if (! $eventType->isScheduledSummary()) {
             return null;
         }
 
-        $message = $this->prepareScheduledSummary($center, $eventType, $referenceMoment);
+        $message = $this->prepareScheduledSummary($center, $eventType, $referenceMoment, $forceRebuild);
 
         if ($message === null) {
             return null;
@@ -64,6 +66,7 @@ final class WhatsAppNotificationService
         Center $center,
         WhatsappEventType $eventType,
         Carbon $referenceMoment,
+        bool $forceRebuild = false,
     ): ?WhatsappMessage {
         $organizationId = (int) $center->organization_id;
 
@@ -71,7 +74,7 @@ final class WhatsAppNotificationService
             return null;
         }
 
-        $period = $this->scheduledSummaryService->periodFor($eventType, $referenceMoment);
+        $period = $this->scheduledSummaryService->periodFor($eventType, $referenceMoment, $center);
         $idempotencyKey = $this->scheduledSummaryIdempotencyKey(
             $eventType,
             (int) $center->id,
@@ -79,9 +82,18 @@ final class WhatsAppNotificationService
         );
 
         $existing = $this->findByIdempotencyKey($idempotencyKey);
+        $payloadSummary = $this->scheduledSummaryService->buildPayloadSummary(
+            $center,
+            $eventType,
+            $referenceMoment,
+        );
 
         if ($existing !== null) {
-            return $existing;
+            if (! $forceRebuild) {
+                return $existing;
+            }
+
+            return $this->rebuildQueuedMessage($existing, $eventType, $payloadSummary);
         }
 
         $credentials = $this->credentialsForOrganization($organizationId);
@@ -92,12 +104,32 @@ final class WhatsAppNotificationService
             idempotencyKey: $idempotencyKey,
             centerId: (int) $center->id,
             importId: null,
-            payloadSummary: $this->scheduledSummaryService->buildPayloadSummary(
-                $center,
-                $eventType,
-                $referenceMoment,
-            ),
+            payloadSummary: $payloadSummary,
         );
+    }
+
+    /**
+     * @param  array<string, mixed>  $payloadSummary
+     */
+    private function rebuildQueuedMessage(
+        WhatsappMessage $message,
+        WhatsappEventType $eventType,
+        array $payloadSummary,
+    ): WhatsappMessage {
+        $message->forceFill([
+            'event_type' => $eventType->value,
+            'template_name' => $eventType->templateName(),
+            'payload_summary' => $payloadSummary,
+            'status' => WhatsappMessageStatus::Queued,
+            'error_reason' => null,
+            'retry_count' => 0,
+            'provider_message_id' => null,
+            'sent_at' => null,
+            'delivered_at' => null,
+            'read_at' => null,
+        ])->save();
+
+        return $message->fresh() ?? $message;
     }
 
     /**
@@ -243,11 +275,11 @@ final class WhatsAppNotificationService
         return [
             (string) ($summary['center_name'] ?? '—'),
             (string) ($summary['period'] ?? '—'),
-            (string) ($summary['row_count'] ?? '0'),
+            (string) ($summary['inspection_count'] ?? $summary['row_count'] ?? '0'),
             (string) ($summary['category_summary'] ?? 'A: 0, B: 0, B1: 0, C: 0, D: 0'),
-            (string) ($summary['footer_ht'] ?? '0'),
-            (string) ($summary['footer_vat'] ?? '0'),
-            (string) ($summary['footer_ttc'] ?? '0'),
+            (string) ($summary['footer_ht'] ?? DashboardMoney::format(0)),
+            (string) ($summary['footer_vat'] ?? DashboardMoney::format(0)),
+            (string) ($summary['footer_ttc'] ?? DashboardMoney::format(0)),
         ];
     }
 

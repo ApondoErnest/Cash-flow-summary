@@ -9,6 +9,7 @@ use App\Modules\Centers\Services\OperatingCalendarService;
 use App\Modules\Settings\Services\SettingsService;
 use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
 use App\Modules\WhatsApp\Support\WhatsAppCadenceResolver;
+use App\Modules\WhatsApp\Support\WhatsAppTimezone;
 use Illuminate\Console\Command;
 
 final class DispatchScheduledWhatsAppSummariesCommand extends Command
@@ -29,18 +30,21 @@ final class DispatchScheduledWhatsAppSummariesCommand extends Command
         WhatsAppCadenceResolver $cadenceResolver,
         WhatsAppNotificationService $notificationService,
     ): int {
-        $moment = now()->timezone(config('app.timezone'));
-        $currentTime = $moment->format('H:i');
         $queued = 0;
 
         $centers = Center::query()
             ->where('is_active', true)
+            ->with('organization')
             ->get();
 
         foreach ($centers as $center) {
             if (! $settingsService->whatsAppOutboundConfigured((int) $center->organization_id)) {
                 continue;
             }
+
+            $timezone = WhatsAppTimezone::forCenter($center);
+            $moment = now()->timezone($timezone);
+            $currentTime = $moment->format('H:i');
 
             if ($this->normalizedSummaryTime($center) !== $currentTime) {
                 continue;
@@ -58,10 +62,9 @@ final class DispatchScheduledWhatsAppSummariesCommand extends Command
         }
 
         $this->components->info(sprintf(
-            'Queued %d scheduled WhatsApp summar%s for %s.',
+            'Queued %d scheduled WhatsApp summar%s.',
             $queued,
             $queued === 1 ? 'y' : 'ies',
-            $currentTime,
         ));
 
         return self::SUCCESS;
@@ -69,9 +72,6 @@ final class DispatchScheduledWhatsAppSummariesCommand extends Command
 
     private function normalizedSummaryTime(Center $center): string
     {
-        $time = $center->whatsapp_summary_time
-            ?? (string) config('whatsapp.default_summary_time', '18:00');
-
-        return substr((string) $time, 0, 5);
+        return $center->resolvedWhatsappSummaryTime();
     }
 }

@@ -117,8 +117,6 @@ final class AnomalyListService
 
     private function formatTimestamp(?Carbon $timestamp): string
     {
-        return $timestamp
-            ?->timezone(config('app.timezone'))
-            ->format('Y-m-d H:i') ?? '—';
+        return \App\Support\Locale\LocalizedDateTime::dateTime($timestamp);
     }
 }

@@ -58,7 +58,7 @@ test('report query service aggregates active snapshot totals for period', functi
     expect($report->centerName)->toBe('Report Center')
         ->and($report->recordCount)->toBe(1)
         ->and($report->daysWithData)->toBe(1)
-        ->and($report->totalTtc)->toBe('11 925,00')
+        ->and($report->totalTtc)->toBe('11,925.00')
         ->and($report->dailyRows)->toHaveCount(1)
         ->and($report->dailyRows[0]->businessDate)->toBe('01/06/2026')
         ->and($report->hasData)->toBeTrue();
@@ -109,8 +109,8 @@ test('report query service ignores stale daily summary linked to superseded vers
     );
 
     expect($report->recordCount)->toBe(1)
-        ->and($report->totalTtc)->toBe('11 925,00')
-        ->and($report->totalHt)->toBe('10 000,00');
+        ->and($report->totalTtc)->toBe('11,925.00')
+        ->and($report->totalHt)->toBe('10,000.00');
 });
 
 test('report query service excludes proposed revision totals until snapshot activates', function () {
@@ -138,7 +138,7 @@ test('report query service excludes proposed revision totals until snapshot acti
     );
 
     expect($report->recordCount)->toBe(1)
-        ->and($report->totalTtc)->toBe('11 925,00')
+        ->and($report->totalTtc)->toBe('11,925.00')
         ->and($report->daysWithData)->toBe(1);
 });
 

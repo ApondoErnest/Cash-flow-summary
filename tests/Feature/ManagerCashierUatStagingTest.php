@@ -83,7 +83,7 @@ describe('Manager UAT staging journey (Step 107)', function () {
         $importComponent
             ->call('refreshVerification')
             ->assertSee(__('csv_verification.summary.footer_totals'), false)
-            ->assertSee('11 925,00', false)
+            ->assertSee('11,925.00', false)
             ->call('import');
 
         $import = Import::query()->latest('id')->firstOrFail();
@@ -197,7 +197,7 @@ describe('Cashier UAT staging journey (Step 107)', function () {
         $component
             ->call('refreshVerification')
             ->assertSee(__('csv_verification.summary.footer_totals'), false)
-            ->assertSee('11 925,00', false)
+            ->assertSee('11,925.00', false)
             ->call('import');
 
         $import = Import::query()->latest('id')->firstOrFail();

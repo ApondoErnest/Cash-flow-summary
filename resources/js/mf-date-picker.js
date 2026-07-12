@@ -1,4 +1,4 @@
-const locale = () => document.documentElement.lang || 'en';
+const locale = () => document.documentElement.lang || 'en-GB';
 
 const weekStartsOn = () => (locale().startsWith('fr') ? 1 : 0);
 
@@ -15,13 +15,17 @@ const formatDisplayDate = (isoDate) => {
         return '';
     }
 
-    const [year, month, day] = isoDate.split('-');
+    const [year, month, day] = isoDate.split('-').map(Number);
 
     if (!year || !month || !day) {
         return isoDate;
     }
 
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    return new Intl.DateTimeFormat(locale(), {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    }).format(new Date(year, month - 1, day));
 };
 
 const formatMonthYear = (year, monthIndex) =>

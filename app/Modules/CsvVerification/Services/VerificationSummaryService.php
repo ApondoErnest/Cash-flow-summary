@@ -57,7 +57,7 @@ final class VerificationSummaryService
             sourceLanguage: strtoupper((string) ($verification->source_language ?? 'fr')),
             reportedPeriod: $verification->reported_period,
             actualPeriod: $this->formatActualPeriod($verification),
-            footerCount: number_format((int) ($footer['count'] ?? 0), 0, '', ' '),
+            footerCount: DashboardMoney::formatInteger((int) ($footer['count'] ?? 0)),
             footerHt: DashboardMoney::format((int) ($footer['ht'] ?? 0)),
             footerVat: DashboardMoney::format((int) ($footer['vat'] ?? 0)),
             footerTtc: DashboardMoney::format((int) ($footer['ttc'] ?? 0)),

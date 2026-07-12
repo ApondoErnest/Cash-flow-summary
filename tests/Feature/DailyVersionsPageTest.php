@@ -38,7 +38,7 @@ test('daily versions page lists active version after import', function () {
         ->assertOk()
         ->assertSee(__('daily_versions.list.title'), false)
         ->assertSee(__('daily_versions.status.active'), false)
-        ->assertSee('11 925,00', false);
+        ->assertSee('11,925.00', false);
 });
 
 test('daily versions list filters by status', function () {
@@ -80,7 +80,7 @@ test('revision approval page lists pending revisions for owner', function () {
         ->assertOk()
         ->assertSee(__('daily_versions.revisions.title'), false)
         ->assertSee(__('daily_versions.revisions.review'), false)
-        ->assertSee('11 925,00', false);
+        ->assertSee('11,925.00', false);
 
     expect($import->fresh()->status)->toBe(ImportStatus::AwaitingOwnerApproval);
     expect($proposed->fresh()->status)->toBe(DailyVersionStatus::Proposed);

@@ -53,9 +53,7 @@
 
                     <flux:field>
                         <flux:label>{{ __('center.calendar.fields.open_time') }}</flux:label>
-                        <flux:input
-                            type="time"
-                            step="60"
+                        <x-ui.time-picker
                             wire:model="weeklyDays.{{ $dayOfWeek }}.open_time"
                             :disabled="! ($weeklyDays[$dayOfWeek]['is_open'] ?? false)"
                         />
@@ -63,9 +61,7 @@
 
                     <flux:field>
                         <flux:label>{{ __('center.calendar.fields.close_time') }}</flux:label>
-                        <flux:input
-                            type="time"
-                            step="60"
+                        <x-ui.time-picker
                             wire:model="weeklyDays.{{ $dayOfWeek }}.close_time"
                             :disabled="! ($weeklyDays[$dayOfWeek]['is_open'] ?? false)"
                         />
@@ -121,13 +117,13 @@
                 @if ($exception_type === \App\Enums\CalendarExceptionType::SpecialOpen->value)
                     <flux:field>
                         <flux:label>{{ __('center.calendar.fields.open_time') }}</flux:label>
-                        <flux:input type="time" step="60" wire:model="exception_open_time" />
+                        <x-ui.time-picker wire:model="exception_open_time" />
                         <flux:error name="exception_open_time" />
                     </flux:field>
 
                     <flux:field>
                         <flux:label>{{ __('center.calendar.fields.close_time') }}</flux:label>
-                        <flux:input type="time" step="60" wire:model="exception_close_time" />
+                        <x-ui.time-picker wire:model="exception_close_time" />
                         <flux:error name="exception_close_time" />
                     </flux:field>
                 @endif

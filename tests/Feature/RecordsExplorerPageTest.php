@@ -85,7 +85,7 @@ test('records explorer select record shows detail panel', function () {
         ->call('selectRecord', $recordId)
         ->assertSet('selectedRecordId', $recordId)
         ->assertSee(__('records.detail_title'), false)
-        ->assertSee('11 925,00', false);
+        ->assertSee('11,925.00', false);
 });
 
 test('owner cannot select record from another center', function () {
@@ -123,7 +123,7 @@ test('record explorer service maps row and detail data', function () {
     $row = $service->toRow($record);
     $detail = $service->toDetail($record->fresh());
 
-    expect($row->grossAmount)->toBe('11 925,00')
+    expect($row->grossAmount)->toBe('11,925.00')
         ->and($row->completionStatusVariant)->toBe('success')
         ->and($detail->firstImportId)->toBe($import->id)
         ->and($detail->financialStatusLabel)->toBe(__('records.status.financial.revenue'));

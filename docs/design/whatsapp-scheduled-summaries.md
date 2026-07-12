@@ -28,12 +28,12 @@ flowchart LR
 
 ## Cadences and periods
 
-All times use **`APP_TIMEZONE`** (default `Africa/Douala`).
+All times use each **organization’s timezone** (`organizations.timezone`, e.g. `Africa/Douala`), falling back to **`APP_TIMEZONE`** / `config('app.timezone')`.
 
 | Event type | `event_type` value | Fire condition | Period in message |
 |------------|-------------------|----------------|-------------------|
 | Daily | `daily_summary` | Every **operating day** at center time (see below) | **That calendar day from 00:00 through the send time** (inclusive). Example: send at 18:00 on 10/07/2026 → period is 10/07/2026, counts/TTC for activity recorded that day up to 18:00. |
-| Weekly | `weekly_summary` | Every **Saturday** at center time | `dd/mm/yyyy – dd/mm/yyyy` (Mon–Sat) |
+| Weekly | `weekly_summary` | Every **Saturday** at center time | `dd/mm/yyyy – dd/mm/yyyy` — **Mon–Sat** by default; **Sun–Sat** when Sunday is an open day on the center weekly calendar |
 | Monthly | `monthly_summary` | **Last day of month** at center time | `01/mm/yyyy – last/mm/yyyy` |
 | Yearly | `yearly_summary` | **31 December** at center time | `01/01/yyyy – 31/12/yyyy` |
 
@@ -51,7 +51,14 @@ Configured in **Manage Centers → Operating calendar** (BR-009, BR-010, REQ-021
 
 If today is **not** an operating day, **no daily WhatsApp** is sent. Activity on that date is still included in **weekly**, **monthly**, and **yearly** summaries when those cadences run.
 
-**Week definition:** Monday 00:00 through Saturday 23:59 of the week containing the send date. On Saturday, the summary covers the current week Mon–Sat.
+**Week definition:** On Saturday send, the period ends at the center send time that day.
+
+| Center weekly calendar | Period start | Period end |
+|------------------------|--------------|------------|
+| Sunday **closed** (default) | Monday 00:00 | Saturday send time |
+| Sunday **open** | Sunday 00:00 | Saturday send time |
+
+Uses the recurring weekly schedule (`center_operating_calendars`), not one-off exceptions.
 
 **Overlapping sends:** When multiple cadences fall on the same day (e.g. 31 Dec on Saturday), each cadence sends a **separate** message with its own `event_type` and idempotency key.
 
@@ -61,7 +68,7 @@ If today is **not** an operating day, **no daily WhatsApp** is sent. Activity on
 
 | Field | Storage | Who sets | Notes |
 |-------|---------|----------|-------|
-| Summary send time | `centers.whatsapp_summary_time` (`TIME`, nullable) | Owner on center edit | Default `18:00` when null |
+| Summary send time | `centers.whatsapp_summary_time` (`TIME`, nullable) | Owner on **Manage Centers** create/edit | Required in UI; defaults to **18:00** when blank/null (`WHATSAPP_DEFAULT_SUMMARY_TIME`) |
 | WhatsApp credentials | `organization_settings` | Owner on WhatsApp Settings | Unchanged (REQ-095) |
 
 Centers without outbound WhatsApp configured for the organization are skipped.
@@ -97,7 +104,12 @@ Aggregation reuses active daily snapshot logic (`ReportQueryService`, `ImportPer
    - For each applicable cadence, call `WhatsAppNotificationService::queueScheduledSummary($center, $cadence, $period)`.
 3. Service builds payload, `firstOrCreate` on idempotency key, dispatches `SendWhatsAppNotificationJob` if new and queued.
 
-**Missed minute:** If `schedule:run` is down, that minute’s window is missed (no retroactive catch-up in v1). Operations must run scheduler reliably.
+**Missed minute:** If `schedule:run` is down, that minute’s window is missed (no retroactive catch-up in v1). Operations must run scheduler reliably. To rebuild and re-send a period after the fact:
+
+```bash
+php artisan whatsapp:resend-scheduled-summary --center=1 --date=2026-07-11 --cadence=daily --force
+php artisan queue:work   # if not already running
+```
 
 **Empty periods:** Still send with zero counts and zero amounts so the Owner sees explicit “no activity” for that window.
 

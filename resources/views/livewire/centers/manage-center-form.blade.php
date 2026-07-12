@@ -65,14 +65,14 @@
 
                 <flux:field>
                     <flux:label>{{ __('center.manage.fields.submission_deadline') }}</flux:label>
-                    <flux:input wire:model="submission_deadline" type="time" step="60" />
+                    <x-ui.time-picker wire:model="submission_deadline" clearable />
                     <flux:description>{{ __('center.manage.fields.submission_deadline_help') }}</flux:description>
                     <flux:error name="submission_deadline" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('center.manage.fields.whatsapp_summary_time') }}</flux:label>
-                    <flux:input wire:model="whatsapp_summary_time" type="time" step="60" />
+                    <x-ui.time-picker wire:model="whatsapp_summary_time" required />
                     <flux:description>{{ __('center.manage.fields.whatsapp_summary_time_help') }}</flux:description>
                     <flux:error name="whatsapp_summary_time" />
                 </flux:field>

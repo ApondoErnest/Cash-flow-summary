@@ -20,7 +20,7 @@
 
                     <div>
                         <p class="text-xs font-medium uppercase tracking-wide text-text-muted">{{ __('audit.list.columns.occurred_at') }}</p>
-                        <p class="mt-1 text-sm text-text-heading">{{ $this->selectedLog->created_at?->timezone(config('app.timezone'))->format('Y-m-d H:i:s') }}</p>
+                        <p class="mt-1 text-sm text-text-heading">{{ \App\Support\Locale\LocalizedDateTime::dateTimeSeconds($this->selectedLog->created_at) }}</p>
                     </div>
 
                     <div>
@@ -147,7 +147,7 @@
                     @foreach ($this->logs as $log)
                         <flux:table.row wire:key="audit-log-row-{{ $log->id }}">
                             <flux:table.cell class="whitespace-nowrap text-sm text-text-muted">
-                                {{ $log->created_at?->timezone(config('app.timezone'))->format('Y-m-d H:i') }}
+                                {{ \App\Support\Locale\LocalizedDateTime::dateTime($log->created_at) }}
                             </flux:table.cell>
                             <flux:table.cell>
                                 <div class="font-medium text-text-heading">{{ $eventLabel($log->event) }}</div>

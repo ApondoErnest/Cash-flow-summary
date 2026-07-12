@@ -40,7 +40,7 @@ test('import result page shows completed import summary for manager', function (
         ->assertSee(__('csv_import.result.title'), false)
         ->assertSee($import->original_filename, false)
         ->assertSee(__('csv_import.result.stats.new_unique'), false)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee(__('csv_import.result.actions.import_another'), false);
 });
 
@@ -103,7 +103,7 @@ test('import result service aggregates day impact and whatsapp status', function
         ->and($result->newUnique)->toBe(1)
         ->and($result->activeDays)->toBe(0)
         ->and($result->unchangedDays)->toBe(1)
-        ->and($result->footerTtc)->toBe('11 925,00')
+        ->and($result->footerTtc)->toBe('11,925.00')
         ->and($result->whatsappStatus)->toBe(__('csv_import.result.whatsapp.scheduled_summary'))
         ->and($result->statusVariant)->toBe('success');
 });

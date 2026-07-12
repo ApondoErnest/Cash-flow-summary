@@ -84,7 +84,9 @@ final class OwnerDashboardService
             trendMaxTtc: $trendMax,
             alerts: $this->buildAlerts($center, $reference),
             recentImports: $recentImports->all(),
-            lastImportAt: $lastImport?->completed_at?->timezone(config('app.timezone'))->format('Y-m-d H:i'),
+            lastImportAt: $lastImport?->completed_at !== null
+                ? \App\Support\Locale\LocalizedDateTime::dateTime($lastImport->completed_at)
+                : null,
             hasData: $periodTotals['ttc'] > 0
                 || $periodTotals['recordCount'] > 0
                 || $recentImports->isNotEmpty(),
@@ -232,9 +234,7 @@ final class OwnerDashboardService
             ->map(function (Import $import): OwnerDashboardImportRow {
                 return new OwnerDashboardImportRow(
                     id: $import->id,
-                    importedAt: ($import->completed_at ?? $import->created_at)
-                        ->timezone(config('app.timezone'))
-                        ->format('Y-m-d H:i'),
+                    importedAt: \App\Support\Locale\LocalizedDateTime::dateTime($import->completed_at ?? $import->created_at),
                     filename: $import->original_filename,
                     totalTtc: DashboardMoney::format($import->calculated_ttc ?? $import->source_ttc ?? 0),
                     status: $import->status,

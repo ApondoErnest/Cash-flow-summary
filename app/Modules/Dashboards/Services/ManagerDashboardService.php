@@ -63,7 +63,9 @@ final class ManagerDashboardService
             alerts: $this->buildAlerts($center, $reference, $missingSubmissionDates),
             missingSubmissionDates: $missingSubmissionDates,
             recentImports: $recentImports,
-            lastImportAt: $lastImport?->completed_at?->timezone(config('app.timezone'))->format('Y-m-d H:i'),
+            lastImportAt: $lastImport?->completed_at !== null
+                ? \App\Support\Locale\LocalizedDateTime::dateTime($lastImport->completed_at)
+                : null,
             hasData: $todayTtc !== DashboardMoney::format(0)
                 || $yesterdayTtc !== DashboardMoney::format(0)
                 || $weekTtc !== DashboardMoney::format(0)

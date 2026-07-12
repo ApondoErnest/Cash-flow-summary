@@ -61,7 +61,7 @@ test('manager reports page shows fixed center header and period totals', functio
         ->assertSee(__('reports.page.manager.center_label'), false)
         ->assertSee($center->name, false)
         ->assertSee(__('reports.stats.total_ttc'), false)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee('01/06/2026', false)
         ->assertDontSee(__('reports.description'), false)
         ->assertSee(__('reports.export.title'), false)
@@ -101,7 +101,7 @@ test('manager reports scope to assigned center only', function () {
         ->get(route('reports.index'))
         ->assertOk()
         ->assertSee(__('reports.empty'), false)
-        ->assertDontSee('11 925,00', false);
+        ->assertDontSee('11,925.00', false);
 });
 
 test('manager reports period filter changes visible totals', function () {
@@ -109,10 +109,10 @@ test('manager reports period filter changes visible totals', function () {
 
     Livewire::actingAs($manager)
         ->test(CenterReport::class)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->set('period', DashboardPeriod::Yesterday->value)
         ->assertSee(__('reports.empty'), false)
-        ->assertDontSee('11 925,00', false);
+        ->assertDontSee('11,925.00', false);
 });
 
 test('cashier cannot access reports page', function () {
@@ -143,7 +143,7 @@ test('owner reports page shows active center totals', function () {
         ->assertOk()
         ->assertSee(__('reports.description'), false)
         ->assertSee('Owner Center', false)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee(__('reports.export.title'), false)
         ->assertSee(__('reports.export.formats.pdf'), false);
 });
@@ -178,7 +178,7 @@ test('owner reports scope to active center only', function () {
         ->assertOk()
         ->assertSee('Active Center', false)
         ->assertSee(__('reports.empty'), false)
-        ->assertDontSee('11 925,00', false);
+        ->assertDontSee('11,925.00', false);
 });
 
 test('owner reports custom period applies selected date range', function () {
@@ -204,7 +204,7 @@ test('owner reports custom period applies selected date range', function () {
         ->set('customFromDate', '2026-06-01')
         ->set('customToDate', '2026-06-01')
         ->call('applyCustomPeriod')
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee('01/06/2026', false);
 });
 
@@ -250,8 +250,8 @@ test('reports page ignores stale daily summary totals in ui', function () {
     $this->actingAs($manager)
         ->get(route('reports.index'))
         ->assertOk()
-        ->assertSee('11 925,00', false)
-        ->assertDontSee('35 775,00', false);
+        ->assertSee('11,925.00', false)
+        ->assertDontSee('35,775.00', false);
 });
 
 test('reports page excludes proposed revision totals until snapshot activates', function () {
@@ -269,8 +269,8 @@ test('reports page excludes proposed revision totals until snapshot activates', 
     $this->actingAs($owner)
         ->get(route('reports.index'))
         ->assertOk()
-        ->assertSee('11 925,00', false)
-        ->assertDontSee('59 625,00', false);
+        ->assertSee('11,925.00', false)
+        ->assertDontSee('59,625.00', false);
 });
 
 test('reports page shows missing submission callout for period gaps', function () {
@@ -295,7 +295,7 @@ test('report query service aggregates daily summaries for period', function () {
     expect($report->centerName)->toBe('Manager Center')
         ->and($report->recordCount)->toBe(1)
         ->and($report->daysWithData)->toBe(1)
-        ->and($report->totalTtc)->toBe('11 925,00')
+        ->and($report->totalTtc)->toBe('11,925.00')
         ->and($report->dailyRows)->toHaveCount(1)
         ->and($report->dailyRows[0]->businessDate)->toBe('01/06/2026');
 });

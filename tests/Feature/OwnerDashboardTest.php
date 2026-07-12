@@ -53,16 +53,16 @@ test('owner dashboard shows financial totals from active snapshots without daily
         trendGranularity: DashboardTrendGranularity::Daily,
     );
 
-    expect($dashboard->totalTtc)->toBe('11 925,00')
-        ->and($dashboard->totalHt)->toBe('10 000,00')
-        ->and($dashboard->totalVat)->toBe('1 925,00');
+    expect($dashboard->totalTtc)->toBe('11,925.00')
+        ->and($dashboard->totalHt)->toBe('10,000.00')
+        ->and($dashboard->totalVat)->toBe('1,925.00');
 
     $this->get(route('dashboard'))
         ->assertOk()
         ->assertSee(__('reports.stats.total_ttc'), false)
         ->assertSee(__('reports.stats.total_ht'), false)
         ->assertSee(__('reports.stats.total_vat'), false)
-        ->assertSee('11 925,00', false);
+        ->assertSee('11,925.00', false);
 });
 
 test('owner dashboard shows category and cv counts from active records', function () {
@@ -128,7 +128,7 @@ test('owner dashboard shows selected center title and primary stats from active 
     $this->get(route('dashboard'))
         ->assertOk()
         ->assertSee('NACHO Yaounde Cash-Flow Dashboard', false)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee(__('dashboard.stats.unique_records'), false)
         ->assertSee('cashflow-june.csv', false);
 });
@@ -154,7 +154,7 @@ test('owner dashboard scopes stats to active center not other organization cente
     );
 
     expect($dashboard->centerName)->toBe('Active Center');
-    expect($dashboard->totalTtc)->toBe('0,00');
+    expect($dashboard->totalTtc)->toBe('0.00');
     expect($dashboard->recentImports)->toBe([]);
 });
 
@@ -203,7 +203,7 @@ test('owner dashboard custom period applies selected date range', function () {
         ->assertSet('period', 'custom')
         ->assertSet('fromDate', '2026-06-01')
         ->assertSet('toDate', '2026-06-01')
-        ->assertSee('11 925,00', false);
+        ->assertSee('11,925.00', false);
 
     expect(session('owner.filters.dashboard_period'))->toBe('custom');
     expect(session('owner.filters.dashboard_period_from'))->toBe('2026-06-01');

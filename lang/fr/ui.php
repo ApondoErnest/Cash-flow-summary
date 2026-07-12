@@ -20,4 +20,15 @@ return [
         'clear' => 'Effacer',
         'back' => 'Retour',
     ],
+    'time_picker' => [
+        'placeholder' => 'Choisir une heure',
+        'hour' => 'Heure',
+        'minute' => 'Minute',
+        'period' => 'AM/PM',
+        'am' => 'AM',
+        'pm' => 'PM',
+        'apply' => 'Appliquer',
+        'clear' => 'Effacer',
+        'hint' => 'Format 24 heures (HH:MM)',
+    ],
 ];

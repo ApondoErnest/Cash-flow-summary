@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Models\CenterCalendarException;
 use App\Modules\Centers\Models\CenterOperatingCalendar;
+use App\Support\Locale\LocalizedDateTime;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -29,7 +30,11 @@ final class OperatingCalendarService
     {
         $labels = __('center.calendar.days');
 
-        return is_array($labels) ? ($labels[$dayOfWeek] ?? (string) $dayOfWeek) : (string) $dayOfWeek;
+        if (! is_array($labels)) {
+            return (string) $dayOfWeek;
+        }
+
+        return (string) ($labels[$dayOfWeek] ?? $labels[(string) $dayOfWeek] ?? $dayOfWeek);
     }
 
     /**
@@ -220,12 +225,23 @@ final class OperatingCalendarService
             };
         }
 
+        return $this->isWeeklyScheduleDayOpen($center, (int) $date->dayOfWeek);
+    }
+
+    /**
+     * Whether the center's recurring weekly schedule marks this weekday open
+     * (0 = Sunday … 6 = Saturday). Ignores date-specific exceptions.
+     */
+    public function isWeeklyScheduleDayOpen(Center $center, int $dayOfWeek): bool
+    {
+        $this->ensureWeeklySchedule($center);
+
         $schedule = CenterOperatingCalendar::query()
             ->where('center_id', $center->id)
-            ->where('day_of_week', $date->dayOfWeek)
+            ->where('day_of_week', $dayOfWeek)
             ->first();
 
-        return $schedule?->is_open ?? true;
+        return (bool) ($schedule?->is_open ?? ($dayOfWeek !== 0));
     }
 
     public function formatTimeForInput(mixed $time): string
@@ -241,7 +257,13 @@ final class OperatingCalendarService
     {
         $value = $this->formatTimeForInput($time);
 
-        return $value !== '' ? $value : null;
+        if ($value === '') {
+            return null;
+        }
+
+        $formatted = LocalizedDateTime::time($value);
+
+        return $formatted !== '—' ? $formatted : $value;
     }
 
     private function normalizeTime(?string $time): ?string

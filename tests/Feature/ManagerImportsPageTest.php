@@ -113,7 +113,7 @@ test('manager import detail page shows metadata day comparisons and center banne
         ->assertSee(__('csv_import.detail.metadata'), false)
         ->assertSee(__('csv_import.detail.day_comparisons_title'), false)
         ->assertSee(__('csv_import.detail.comparison.new'), false)
-        ->assertSee('11 925,00', false);
+        ->assertSee('11,925.00', false);
 });
 
 test('manager import detail livewire component loads assigned center import', function () {

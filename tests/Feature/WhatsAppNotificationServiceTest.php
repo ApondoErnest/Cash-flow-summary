@@ -6,12 +6,14 @@ use App\Models\User;
 use App\Modules\WhatsApp\Enums\WhatsappEventType;
 use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
 use App\Modules\WhatsApp\Exceptions\WhatsAppApiException;
+use App\Modules\WhatsApp\Jobs\SendWhatsAppNotificationJob;
 use App\Modules\WhatsApp\Models\WhatsappMessage;
 use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
 use Database\Seeders\HeaderAliasSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
@@ -183,7 +185,7 @@ test('whatsapp notification service resolves weekly summary event type', functio
     ]);
 
     [$center] = whatsAppScheduledSummaryFixture();
-    $moment = Carbon::parse('2026-07-05 18:00:00', config('app.timezone'));
+    $moment = Carbon::parse('2026-07-11 18:00:00', config('app.timezone'));
 
     $message = app(WhatsAppNotificationService::class)->notifyScheduledSummary(
         $center,
@@ -193,7 +195,38 @@ test('whatsapp notification service resolves weekly summary event type', functio
 
     expect($message?->event_type)->toBe(WhatsappEventType::WeeklySummary->value)
         ->and($message?->template_name)->toBe('import_activity_summary')
-        ->and($message?->payload_summary['period_key'] ?? null)->toBe('2026-W27');
+        ->and($message?->payload_summary['period_key'] ?? null)->toBe('2026-W28')
+        ->and($message?->payload_summary['period_start'] ?? null)->toBe('2026-07-06')
+        ->and($message?->payload_summary['period_end'] ?? null)->toBe('2026-07-11')
+        ->and($message?->payload_summary['period'] ?? null)->toBe('06/07/2026 – 11/07/2026');
+});
+
+test('weekly summary uses sunday start when sunday is an open operating day', function () {
+    Http::fake([
+        'https://graph.facebook.com/*' => Http::response([
+            'messages' => [['id' => 'wamid.weekly-sun']],
+        ], 200),
+    ]);
+
+    [$center, $owner] = whatsAppScheduledSummaryFixture();
+    $calendar = app(\App\Modules\Centers\Services\OperatingCalendarService::class);
+    $calendar->ensureWeeklySchedule($center);
+    $days = $calendar->weeklyScheduleForForm($center);
+    $days[0]['is_open'] = true;
+    $days[0]['open_time'] = '08:00';
+    $days[0]['close_time'] = '18:00';
+    $calendar->updateWeeklySchedule($center, $owner, $days);
+
+    $moment = Carbon::parse('2026-07-11 18:00:00', config('app.timezone'));
+    $message = app(WhatsAppNotificationService::class)->notifyScheduledSummary(
+        $center->fresh(),
+        WhatsappEventType::WeeklySummary,
+        $moment,
+    );
+
+    expect($message?->payload_summary['period_start'] ?? null)->toBe('2026-07-05')
+        ->and($message?->payload_summary['period_end'] ?? null)->toBe('2026-07-11')
+        ->and($message?->payload_summary['period'] ?? null)->toBe('05/07/2026 – 11/07/2026');
 });
 
 test('whatsapp notification service skips non scheduled event types when queuing', function () {
@@ -208,4 +241,70 @@ test('whatsapp notification service skips non scheduled event types when queuing
 
     expect($message)->toBeNull()
         ->and(WhatsappMessage::query()->count())->toBe(0);
+});
+
+test('whatsapp scheduled summary amounts follow organization preferred language', function () {
+    Http::fake([
+        'https://graph.facebook.com/*' => Http::response([
+            'messages' => [['id' => 'wamid.locale']],
+        ], 200),
+    ]);
+
+    [$center, $owner] = whatsAppScheduledSummaryFixture();
+    $owner->organization->forceFill(['default_language' => 'fr'])->save();
+
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
+    $message = app(WhatsAppNotificationService::class)->notifyScheduledSummary(
+        $center,
+        WhatsappEventType::DailySummary,
+        $moment,
+    );
+
+    expect($message?->payload_summary['locale'] ?? null)->toBe('fr')
+        ->and($message?->payload_summary['footer_ttc'] ?? null)->toBe('0,00');
+
+    $owner->organization->forceFill(['default_language' => 'en'])->save();
+    $center->unsetRelation('organization');
+
+    // Force rebuild under English org preference
+    $rebuilt = app(WhatsAppNotificationService::class)->queueScheduledSummary(
+        $center->fresh(['organization']),
+        WhatsappEventType::DailySummary,
+        $moment,
+        forceRebuild: true,
+    );
+
+    expect($rebuilt?->payload_summary['locale'] ?? null)->toBe('en')
+        ->and($rebuilt?->payload_summary['footer_ttc'] ?? null)->toBe('0.00');
+});
+
+test('force rebuild requeues sent scheduled summary with refreshed payload', function () {
+    Queue::fake();
+    Http::fake([
+        'https://graph.facebook.com/*' => Http::response([
+            'messages' => [['id' => 'wamid.force']],
+        ], 200),
+    ]);
+
+    [$center] = whatsAppScheduledSummaryFixture();
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
+    $service = app(WhatsAppNotificationService::class);
+
+    $first = $service->notifyScheduledSummary($center, WhatsappEventType::DailySummary, $moment);
+
+    expect($first?->status)->toBe(WhatsappMessageStatus::Sent)
+        ->and(WhatsappMessage::query()->count())->toBe(1);
+
+    $requeued = $service->queueScheduledSummary(
+        $center,
+        WhatsappEventType::DailySummary,
+        $moment,
+        forceRebuild: true,
+    );
+
+    expect($requeued?->id)->toBe($first?->id)
+        ->and($requeued?->status)->toBe(WhatsappMessageStatus::Queued)
+        ->and(WhatsappMessage::query()->count())->toBe(1);
+
+    Queue::assertPushed(SendWhatsAppNotificationJob::class, 1);
 });

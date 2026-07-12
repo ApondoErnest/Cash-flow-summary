@@ -50,7 +50,7 @@ test('manager dashboard shows fixed center title and primary stats', function ()
         ->assertSee(__('dashboard.manager.stats.today_ttc'), false)
         ->assertSee(__('dashboard.manager.stats.yesterday_ttc'), false)
         ->assertSee(__('dashboard.manager.stats.year_ttc'), false)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee('cashflow-june.csv', false)
         ->assertDontSee('Cash-Flow Dashboard', false);
 });
@@ -122,7 +122,7 @@ test('manager dashboard scopes data to assigned center only', function () {
     );
 
     expect($dashboard->centerName)->toBe('Assigned Center');
-    expect($dashboard->todayTtc)->toBe('0,00');
+    expect($dashboard->todayTtc)->toBe('0.00');
     expect($dashboard->recentImports)->toBe([]);
 });
 
@@ -146,9 +146,9 @@ test('manager dashboard computes yesterday and year ttc from daily summaries', f
         trendGranularity: DashboardTrendGranularity::Daily,
     );
 
-    expect($dashboard->todayTtc)->toBe('0,00');
-    expect($dashboard->yesterdayTtc)->toBe('11 925,00');
-    expect($dashboard->yearTtc)->toBe('11 925,00');
+    expect($dashboard->todayTtc)->toBe('0.00');
+    expect($dashboard->yesterdayTtc)->toBe('11,925.00');
+    expect($dashboard->yearTtc)->toBe('11,925.00');
 });
 
 test('manager dashboard trend granularity can be changed', function () {

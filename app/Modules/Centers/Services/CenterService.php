@@ -54,7 +54,7 @@ final class CenterService
             'phone' => $data['phone'] ?? null,
             'default_language' => $data['default_language'] ?? 'fr',
             'submission_deadline' => $data['submission_deadline'] ?? null,
-            'whatsapp_summary_time' => $data['whatsapp_summary_time'] ?? null,
+            'whatsapp_summary_time' => $this->normalizeWhatsappSummaryTime($data['whatsapp_summary_time'] ?? null),
             'is_active' => $data['is_active'] ?? true,
         ]);
 
@@ -97,7 +97,7 @@ final class CenterService
             'phone' => $data['phone'] ?? null,
             'default_language' => $data['default_language'] ?? 'fr',
             'submission_deadline' => $data['submission_deadline'] ?? null,
-            'whatsapp_summary_time' => $data['whatsapp_summary_time'] ?? null,
+            'whatsapp_summary_time' => $this->normalizeWhatsappSummaryTime($data['whatsapp_summary_time'] ?? null),
             'is_active' => $data['is_active'] ?? true,
         ])->save();
 
@@ -150,5 +150,14 @@ final class CenterService
                 'code' => __('center.manage.code_taken'),
             ]);
         }
+    }
+
+    private function normalizeWhatsappSummaryTime(mixed $value): string
+    {
+        if (is_string($value) && preg_match('/^\d{2}:\d{2}/', $value) === 1) {
+            return substr($value, 0, 5);
+        }
+
+        return substr((string) config('whatsapp.default_summary_time', '18:00'), 0, 5);
     }
 }

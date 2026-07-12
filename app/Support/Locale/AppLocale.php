@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Locale;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cookie;
 
 final class AppLocale
@@ -33,9 +34,25 @@ final class AppLocale
         return $locale;
     }
 
+    /**
+     * BCP 47 tag for <html lang> / Intl (Cameroon-friendly day-month order).
+     */
+    public static function htmlLang(?string $locale = null): string
+    {
+        $locale ??= self::resolve();
+
+        return match ($locale) {
+            'fr' => (string) config('locale.html.fr', 'fr-CM'),
+            'en' => (string) config('locale.html.en', 'en-GB'),
+            default => str_replace('_', '-', $locale),
+        };
+    }
+
     public static function apply(): void
     {
-        app()->setLocale(self::resolve());
+        $locale = self::resolve();
+        app()->setLocale($locale);
+        Carbon::setLocale($locale);
     }
 
     public static function set(string $locale): void
@@ -47,5 +64,6 @@ final class AppLocale
         session()->put(config('locale.session_key'), $locale);
         Cookie::queue(Cookie::forever(config('locale.cookie'), $locale));
         app()->setLocale($locale);
+        Carbon::setLocale($locale);
     }
 }

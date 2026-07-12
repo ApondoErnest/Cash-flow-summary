@@ -117,3 +117,17 @@ test('dispatch command does not queue when send time does not match', function (
 
     Queue::assertNotPushed(SendWhatsAppNotificationJob::class);
 });
+
+test('dispatch command uses organization timezone for send-time matching', function () {
+    Queue::fake();
+    Carbon::setTestNow(Carbon::parse('2026-07-08 17:00:00', 'UTC'));
+
+    [$center, $owner] = whatsAppScheduledSummaryFixture(['whatsapp_summary_time' => '18:00']);
+    $owner->organization->forceFill(['timezone' => 'Africa/Douala'])->save();
+
+    $this->artisan('whatsapp:dispatch-scheduled-summaries')
+        ->assertSuccessful();
+
+    Queue::assertPushed(SendWhatsAppNotificationJob::class, 1);
+    expect(WhatsappMessage::query()->value('event_type'))->toBe(WhatsappEventType::DailySummary->value);
+});

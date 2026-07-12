@@ -84,3 +84,40 @@ test('login persists selected locale after authentication', function () {
 
     expect(session(config('locale.session_key')))->toBe('fr');
 });
+
+test('html lang and carbon locale follow french ui preference', function () {
+    AppLocale::set('fr');
+
+    expect(AppLocale::htmlLang())->toBe('fr-CM')
+        ->and(\Illuminate\Support\Carbon::getLocale())->toStartWith('fr');
+
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertSee('lang="fr-CM"', false);
+});
+
+test('center form exposes french time picker copy when locale is french', function () {
+    actingAsOwnerWithoutActiveCenter();
+    AppLocale::set('fr');
+
+    $this->get(route('centers.create'))
+        ->assertOk()
+        ->assertSee('Heure du résumé WhatsApp', false)
+        ->assertSee('Choisir une heure', false)
+        ->assertSee('Format 24 heures', false)
+        ->assertSee('use12Hour: false', false)
+        ->assertDontSee('type="time"', false);
+});
+
+test('center form exposes english 12-hour time picker when locale is english', function () {
+    actingAsOwnerWithoutActiveCenter();
+    AppLocale::set('en');
+
+    $this->get(route('centers.create'))
+        ->assertOk()
+        ->assertSee('WhatsApp summary time', false)
+        ->assertSee('12-hour format', false)
+        ->assertSee('use12Hour: true', false)
+        ->assertSee('AM', false)
+        ->assertSee('PM', false);
+});

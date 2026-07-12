@@ -133,7 +133,7 @@ test('manager records explorer select record shows detail panel with import link
         ->call('selectRecord', $recordId)
         ->assertSet('selectedRecordId', $recordId)
         ->assertSee(__('records.detail_title'), false)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee(__('records.view_first_import', ['filename' => 'cashflow-june.csv']), false);
 });
 

@@ -145,7 +145,7 @@ describe('Owner UAT staging journey (Step 106)', function () {
         );
 
         expect($dashboard->centerName)->toBe('Active UAT Center')
-            ->and($dashboard->totalTtc)->toBe('0,00');
+            ->and($dashboard->totalTtc)->toBe('0.00');
 
         $this->get(route('reports.index'))
             ->assertOk()

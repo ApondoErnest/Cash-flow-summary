@@ -95,11 +95,11 @@ Duplicate job retries must not create a second row with the same key.
 | `event_type` | Send day | Period summarized |
 |--------------|----------|-------------------|
 | `daily_summary` | Every **operating day** (center calendar) | That calendar day **from 00:00 through the center’s configured send time** |
-| `weekly_summary` | Saturday | Monday–Saturday of that week |
+| `weekly_summary` | Saturday | Mon–Sat (default); Sun–Sat if Sunday is open on the center weekly calendar |
 | `monthly_summary` | Last day of month | Full calendar month |
 | `yearly_summary` | 31 December | Full calendar year |
 
-Send **time** is per center (`centers.whatsapp_summary_time`, default `18:00`). Evaluated in `APP_TIMEZONE`.
+Send **time** is per center (`centers.whatsapp_summary_time`, default `18:00`). Evaluated in the **organization timezone** (`organizations.timezone`, else `APP_TIMEZONE`).
 
 **Daily only:** send when today is an **operating day** for the center (`center_operating_calendars` + `center_calendar_exceptions`). Owner configures this under **Manage Centers → Operating calendar**. No daily message on holidays/closures or weekdays marked closed; `special_open` exceptions count as operating days.
 
@@ -121,9 +121,11 @@ Used for **all scheduled cadences**. Seven named body parameters:
 | 2 | `import_period` | Formatted period for cadence |
 | 3 | `inspection_count` | Active master count in period |
 | 4 | `category_summary` | `A: n, B: n, B1: n, C: n, D: n` in period |
-| 5 | `amount_ht` | HT total (formatted) |
-| 6 | `amount_vat` | VAT total (formatted) |
-| 7 | `amount_ttc` | TTC total (formatted) |
+| 5 | `amount_ht` | HT total (locale-formatted: FR `1 202 130,00` / EN `1,202,130.00`) |
+| 6 | `amount_vat` | VAT total (same formatting) |
+| 7 | `amount_ttc` | TTC total (same formatting) |
+
+Amount and inspection-count formatting follows the organization **preferred language** (`en` / `fr`), not the operator’s UI session.
 
 Configure via environment:
 

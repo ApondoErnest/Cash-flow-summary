@@ -57,7 +57,7 @@ test('cashier dashboard shows fixed center header today stats and import action'
         ->assertSee(__('dashboard.cashier.stats.today_ttc'), false)
         ->assertSee(__('dashboard.cashier.stats.yesterday_ttc'), false)
         ->assertSee(__('dashboard.cashier.stats.active_records_today'), false)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee('cashflow-june.csv', false)
         ->assertSee(__('dashboard.actions.import_csv'), false)
         ->assertDontSee(__('dashboard.staff.placeholder_title'), false)
@@ -99,7 +99,7 @@ test('cashier dashboard scopes data to assigned center only', function () {
     $dashboard = app(CashierDashboardService::class)->build($assignedCenter);
 
     expect($dashboard->centerName)->toBe('Assigned Center')
-        ->and($dashboard->todayTtc)->toBe('0,00')
+        ->and($dashboard->todayTtc)->toBe('0.00')
         ->and($dashboard->recentImports)->toBe([]);
 });
 
@@ -130,8 +130,8 @@ test('cashier dashboard computes yesterday ttc from daily summaries', function (
 
     $dashboard = app(CashierDashboardService::class)->build($center);
 
-    expect($dashboard->todayTtc)->toBe('0,00')
-        ->and($dashboard->yesterdayTtc)->toBe('11 925,00');
+    expect($dashboard->todayTtc)->toBe('0.00')
+        ->and($dashboard->yesterdayTtc)->toBe('11,925.00');
 });
 
 test('cashier dashboard limits recent imports to three rows', function () {

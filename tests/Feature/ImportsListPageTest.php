@@ -112,7 +112,7 @@ test('import detail page shows metadata and day comparisons', function () {
         ->assertSee(__('csv_import.detail.metadata'), false)
         ->assertSee(__('csv_import.detail.day_comparisons_title'), false)
         ->assertSee(__('csv_import.detail.comparison.new'), false)
-        ->assertSee('11 925,00', false);
+        ->assertSee('11,925.00', false);
 });
 
 test('import detail livewire component authorizes center scoped import', function () {
@@ -138,7 +138,7 @@ test('import list service maps import rows for table display', function () {
     $row = app(ImportListService::class)->toListRow($import->fresh());
 
     expect($row->filename)->toBe('cashflow-june.csv')
-        ->and($row->totalTtc)->toBe('11 925,00')
+        ->and($row->totalTtc)->toBe('11,925.00')
         ->and($row->statusVariant)->toBe('success');
 });
 

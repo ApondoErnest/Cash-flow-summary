@@ -10,6 +10,7 @@ use App\Modules\DailyVersions\Support\DailyVersionDetailData;
 use App\Modules\DailyVersions\Support\DailyVersionListRow;
 use App\Modules\DailyVersions\Support\DailyVersionStatusPresenter;
 use App\Modules\Dashboards\Support\DashboardMoney;
+use App\Support\Locale\LocalizedDateTime;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class DailyVersionListService
@@ -84,9 +85,9 @@ final class DailyVersionListService
             isActiveSnapshot: $version->activeSnapshot !== null,
             submittedByName: $version->submittedBy?->name,
             approvedByName: $version->approvedBy?->name,
-            approvedAt: $version->approved_at
-                ?->timezone(config('app.timezone'))
-                ->format('Y-m-d H:i'),
+            approvedAt: $version->approved_at !== null
+                ? LocalizedDateTime::dateTime($version->approved_at)
+                : null,
             rejectedReason: $version->rejected_reason,
             importId: $version->import_id,
             importFilename: $version->import?->original_filename,

@@ -63,6 +63,7 @@ test('owner can create a center and set it as login default', function () {
     $owner = actingAsOwnerWithoutActiveCenter();
 
     Livewire::test(ManageCenterForm::class)
+        ->assertSet('whatsapp_summary_time', '18:00')
         ->set('name', 'Douala Hub')
         ->set('code', 'DLA-01')
         ->set('city', 'Douala')
@@ -75,7 +76,26 @@ test('owner can create a center and set it as login default', function () {
 
     expect($center)->not->toBeNull();
     expect($center->name)->toBe('Douala Hub');
+    expect(substr((string) $center->whatsapp_summary_time, 0, 5))->toBe('18:00');
     expect($owner->fresh()->preferred_center_id)->toBe($center->id);
+});
+
+test('owner can set an explicit whatsapp summary time on a center', function () {
+    $owner = actingAsOwnerWithoutActiveCenter();
+    $center = createTestCenter($owner->organization, [
+        'name' => 'Timed Center',
+        'code' => 'TIME-01',
+        'whatsapp_summary_time' => null,
+    ]);
+
+    Livewire::test(ManageCenterForm::class, ['center' => $center])
+        ->assertSet('whatsapp_summary_time', '18:00')
+        ->set('whatsapp_summary_time', '19:30')
+        ->call('save')
+        ->assertRedirect(route('centers.index'));
+
+    expect(substr((string) $center->fresh()->whatsapp_summary_time, 0, 5))->toBe('19:30')
+        ->and($center->fresh()->resolvedWhatsappSummaryTime())->toBe('19:30');
 });
 
 test('first center form defaults set as default checkbox to checked', function () {

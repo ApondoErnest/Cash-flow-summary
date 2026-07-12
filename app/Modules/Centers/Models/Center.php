@@ -43,6 +43,20 @@ class Center extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * Configured WhatsApp summary send time (H:i), defaulting to 18:00 when unset.
+     */
+    public function resolvedWhatsappSummaryTime(): string
+    {
+        $time = $this->whatsapp_summary_time;
+
+        if (is_string($time) && trim($time) !== '') {
+            return substr($time, 0, 5);
+        }
+
+        return substr((string) config('whatsapp.default_summary_time', '18:00'), 0, 5);
+    }
+
     public function operatingCalendars(): HasMany
     {
         return $this->hasMany(CenterOperatingCalendar::class);

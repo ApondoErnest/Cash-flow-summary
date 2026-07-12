@@ -30,9 +30,9 @@ final class ImportDetailService
         return new ImportDetailData(
             result: $result,
             uploadedByName: $import->uploadedBy?->name ?? '—',
-            completedAt: $import->completed_at
-                ?->timezone(config('app.timezone'))
-                ->format('Y-m-d H:i'),
+            completedAt: $import->completed_at !== null
+                ? \App\Support\Locale\LocalizedDateTime::dateTime($import->completed_at)
+                : null,
             fileSizeLabel: $this->formatBytes((int) $import->file_size),
             errorCount: (int) $import->errors_count,
             dayComparisons: $import->dayComparisons

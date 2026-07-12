@@ -165,7 +165,7 @@ test('verification card shows summary panel after processing completes', functio
         ->assertSee(__('csv_verification.summary.footer_totals'), false)
         ->assertSee(__('csv_verification.summary.verification_status'), false)
         ->assertSee(__('csv_verification.summary.compact_stats'), false)
-        ->assertSee('11 925,00', false)
+        ->assertSee('11,925.00', false)
         ->assertSee(__('csv_verification.card.import'), false)
         ->assertSee(__('csv_verification.card.reject'), false);
 });
