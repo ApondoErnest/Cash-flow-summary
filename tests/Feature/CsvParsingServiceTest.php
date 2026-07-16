@@ -184,6 +184,27 @@ test('csv parsing stores raw row checksum on parsed rows', function () {
     expect($row->rawRowChecksum())->toHaveLength(64);
 });
 
+test('process verification job hard-fails when ht plus vat does not equal ttc', function () {
+    $center = createTestCenter();
+    $manager = actingAsManager($center);
+
+    $verification = startVerificationFor(
+        $manager,
+        $center,
+        reconciledFrenchCsv([
+            completedFrenchDataRow(net: '10 000', vat: '1 000', ttc: '11 925'),
+        ]),
+    );
+
+    runProcessVerificationJob($verification->token);
+
+    $verification->refresh();
+
+    expect($verification->status)->toBe(VerificationStatus::Failed)
+        ->and($verification->row_stats['invalid'])->toBe(1)
+        ->and($verification->error_message)->not->toBeNull();
+});
+
 test('process verification job stores row stats after parsing', function () {
     $center = createTestCenter();
     $manager = actingAsManager($center);

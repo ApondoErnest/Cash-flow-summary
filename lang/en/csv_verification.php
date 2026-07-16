@@ -39,6 +39,7 @@ return [
         'expired' => 'This verification has expired. Upload the file again.',
         'reject_not_allowed' => 'This verification cannot be rejected in its current state.',
         'processing_failed' => 'Verification could not be completed. Try again or contact support.',
+        'invalid_rows' => '{1} Verification failed: :count invalid row must be fixed before import.|[2,*] Verification failed: :count invalid rows must be fixed before import.',
     ],
     'import_mode' => [
         'operational' => 'Operational',

@@ -30,7 +30,7 @@
 | `sample_fr_production_footer.csv` | Happy-path import | Happy-path import |
 | `sample_real_patterns.csv` | Row pattern sanity check | Footer TTC visible in summary |
 | `financial_mismatch.csv` | Verify **Failed** | Verify **Failed** |
-| `invalid_amount.csv` | Invalid rows in summary | Error report download (if invalid rows committed) |
+| `invalid_amount.csv` | Hard-fail (negative amount) | Error report download on failed verification |
 
 ---
 

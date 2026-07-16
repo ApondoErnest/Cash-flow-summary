@@ -17,6 +17,7 @@ use App\Modules\DailyVersions\Models\DailyVersion;
 use App\Modules\DailyVersions\Models\DailyVersionMembership;
 use App\Modules\DailyVersions\Support\DailyDataset;
 use App\Modules\DailyVersions\Support\ImportVersionApplyResult;
+use App\Modules\DailyVersions\Support\RevisionActivationPolicy;
 use App\Modules\Reports\Services\SummaryGenerationService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,7 @@ final class RevisionService
         private readonly ActiveCenterContextService $activeCenterContext,
         private readonly SummaryGenerationService $summaryGenerationService,
         private readonly AuditLogger $auditLogger,
+        private readonly RevisionActivationPolicy $revisionActivationPolicy,
     ) {}
 
     public function applyImportComparisons(Import $import, User $submittedBy): ImportVersionApplyResult
@@ -58,15 +60,21 @@ final class RevisionService
 
             if ($comparison->comparison_result === DayComparisonResult::RevisionRequired) {
                 $previousVersion = $comparison->existingVersion;
+                $businessDate = $comparison->business_date->toDateString();
 
-                $this->createVersionForComparison(
+                $version = $this->createVersionForComparison(
                     import: $import,
                     comparison: $comparison,
                     submittedBy: $submittedBy,
                     previousVersion: $previousVersion,
                 );
 
-                $proposedRevisions++;
+                if ($this->revisionActivationPolicy->shouldAutoActivateRevision($import, $businessDate)) {
+                    $this->activeSnapshotService->activate($version);
+                    $activatedDays++;
+                } else {
+                    $proposedRevisions++;
+                }
             }
         }
 

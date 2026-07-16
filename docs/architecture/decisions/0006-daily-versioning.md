@@ -12,7 +12,8 @@ Source data can change for a business day after initial import. Reports must sho
 - `daily_versions` per center + business_date with version_number
 - `active_daily_snapshots` points to exactly one active version per center + date
 - Outcomes: New, Unchanged, Revision required, Covered without rows, Invalid
-- Changed data → **proposed** version; **Owner approves** before snapshot updates
+- Changed data on a **past** business day (or any **correction** import) → **proposed** version; **Owner approves** before snapshot updates
+- **Same-day operational/historical** imports that extend or amend the active day (center local date = registration/business date) **auto-activate** without Owner approval
 - Reports query active snapshots only
 
 ## Consequences

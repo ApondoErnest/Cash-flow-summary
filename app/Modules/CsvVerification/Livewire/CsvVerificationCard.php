@@ -9,6 +9,7 @@ use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Services\ActiveCenterContextService;
 use App\Support\Auth\RoleName;
 use App\Modules\CsvImports\Exceptions\ExactFileDuplicateException;
+use App\Modules\CsvImports\Models\ImportError;
 use App\Modules\CsvImports\Services\ImportService;
 use App\Modules\CsvVerification\Enums\CsvVerificationCardPhase;
 use App\Modules\CsvVerification\Enums\ImportMode;
@@ -62,7 +63,9 @@ class CsvVerificationCard extends Component
         $this->resetErrorBag();
 
         $this->validate([
-            'csvFile' => ['required', 'file', 'mimes:csv,txt', 'max:10240'],
+            // Prefer extension over MIME sniffing — English/source exports are sometimes
+            // misdetected as text/x-affix (or similar), which fails mimes:csv,txt.
+            'csvFile' => ['required', 'file', 'extensions:csv,txt', 'max:10240'],
             'importMode' => [
                 'required',
                 Rule::enum(ImportMode::class),
@@ -245,12 +248,33 @@ class CsvVerificationCard extends Component
     #[Computed]
     public function canDownloadErrorReport(): bool
     {
-        $summary = $this->summary;
+        if (! is_string($this->verificationToken) || $this->verificationToken === '') {
+            return false;
+        }
 
-        return $summary !== null
-            && $summary->invalidRows > 0
-            && is_string($this->verificationToken)
-            && $this->verificationToken !== '';
+        $verification = $this->currentVerification();
+
+        if ($verification === null) {
+            return false;
+        }
+
+        if ($verification->status === VerificationStatus::Ready) {
+            return ($this->summary?->invalidRows ?? 0) > 0;
+        }
+
+        if ($verification->status === VerificationStatus::Failed) {
+            $invalidCount = (int) ($verification->row_stats['invalid'] ?? 0);
+
+            if ($invalidCount > 0) {
+                return true;
+            }
+
+            return ImportError::query()
+                ->where('import_verification_id', $verification->id)
+                ->exists();
+        }
+
+        return false;
     }
 
     #[Computed]

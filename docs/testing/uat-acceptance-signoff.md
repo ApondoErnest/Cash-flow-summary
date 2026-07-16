@@ -47,7 +47,7 @@ Status: **Pass** = met by automated tests and/or UAT runbooks · **Deferred** = 
 | 10 | Footer record counts | Pass | Fixture verify tests |
 | 11 | HT/VAT/TTC reconcile | Pass | Fixture verify + `financial_mismatch.csv` fail path |
 | 12 | Zero-value rows valid | Pass | `zero_value_rows.csv`, `sample_real_patterns.csv` |
-| 13 | Negative amounts rejected | Pass | `invalid_amount.csv` |
+| 13 | Negative amounts rejected | Pass | `invalid_amount.csv` hard-fails verification |
 | 14 | Unfinished rows valid | Pass | `sample_real_patterns.csv` |
 | 15 | Select → Verify → Import/Reject | Pass | Livewire CSV card + UAT journeys |
 | 16 | Reject deletes temp data | Pass | Verification reject tests; UAT US-O06 / US-M02 |

@@ -62,8 +62,8 @@ Store under `tests/fixtures/csv/` — **sanitized only**. Primary gate: **Steps 
 | `all_duplicate.csv` | No new masters |
 | `missing_footer.csv` | Footer error |
 | `missing_header.csv` | Block processing |
-| `invalid_date.csv` | Row errors |
-| `invalid_amount.csv` | Negative amounts |
+| `invalid_date.csv` | Hard-fail (bad registration date) |
+| `invalid_amount.csv` | Hard-fail (negative amounts) |
 | `financial_mismatch.csv` | HT+VAT≠TTC |
 | `zero_value_rows.csv` | Valid zeros incl. CV |
 | `mixed_headers.csv` | Mixed FR/EN — must reject |

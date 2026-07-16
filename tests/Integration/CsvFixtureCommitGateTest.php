@@ -38,8 +38,6 @@ test('ready catalogue fixtures commit successfully', function (string $fixture, 
     'zero_value_rows.csv' => ['zero_value_rows.csv', ImportStatus::Completed],
     'probable_duplicate_customer.csv' => ['probable_duplicate_customer.csv', ImportStatus::CompletedWithWarnings],
     'multi_day_period.csv' => ['multi_day_period.csv', ImportStatus::Completed],
-    'invalid_amount.csv' => ['invalid_amount.csv', ImportStatus::Completed],
-    'invalid_date.csv' => ['invalid_date.csv', ImportStatus::Completed],
     'duplicate_in_file.csv' => ['duplicate_in_file.csv', ImportStatus::CompletedWithDuplicates],
 ]);
 
@@ -57,4 +55,6 @@ test('failed catalogue fixtures cannot commit', function (string $fixture) {
     'missing_header.csv',
     'mixed_headers.csv',
     'financial_mismatch.csv',
+    'invalid_amount.csv',
+    'invalid_date.csv',
 ]);

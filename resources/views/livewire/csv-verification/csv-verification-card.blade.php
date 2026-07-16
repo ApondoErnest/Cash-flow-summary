@@ -183,7 +183,17 @@
                 </div>
             </flux:callout>
 
-            <div class="flex justify-end">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                @if ($this->canDownloadErrorReport)
+                    <flux:button
+                        variant="outline"
+                        icon="arrow-down-tray"
+                        :href="$this->errorReportDownloadUrl"
+                        class="mf-btn-secondary"
+                    >
+                        {{ __('csv_verification.summary.download_errors') }}
+                    </flux:button>
+                @endif
                 <flux:button variant="ghost" wire:click="removeFile">
                     {{ __('csv_verification.card.remove_and_retry') }}
                 </flux:button>

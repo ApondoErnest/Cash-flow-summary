@@ -168,12 +168,12 @@ test('zero value rows fixture accepts completed and unfinished zero rows', funct
     expect($verification->row_stats['unfinished'])->toBe(1);
 });
 
-test('invalid amount fixture verifies when footer matches valid rows only', function () {
-    $verification = assertFixturePipeline('invalid_amount.csv', VerificationStatus::Ready);
+test('invalid amount fixture hard-fails verification', function () {
+    $verification = assertFixturePipeline('invalid_amount.csv', VerificationStatus::Failed);
 
-    expect($verification->row_stats['invalid'])->toBe(1);
-    expect($verification->row_stats['completed'])->toBe(1);
-    expect($verification->footer_summary['count'])->toBe(1);
+    expect($verification->row_stats['invalid'])->toBe(1)
+        ->and($verification->row_stats['completed'])->toBe(1)
+        ->and($verification->error_message)->toContain('1');
 });
 
 test('failure fixtures reject verification pipeline', function (string $fixture) {
@@ -185,15 +185,16 @@ test('failure fixtures reject verification pipeline', function (string $fixture)
     'missing_header.csv',
     'mixed_headers.csv',
     'financial_mismatch.csv',
+    'invalid_amount.csv',
+    'invalid_date.csv',
 ]);
 
-test('invalid date fixture verifies with invalid row excluded from footer reconciliation', function () {
+test('invalid date fixture hard-fails verification', function () {
     $verification = runVerificationPipelineForContents(loadCsvFixture('invalid_date.csv'));
 
-    expect($verification->status)->toBe(VerificationStatus::Ready);
-    expect($verification->row_stats['invalid'])->toBe(1);
-    expect($verification->row_stats['completed'])->toBe(1);
-    expect($verification->footer_summary['count'])->toBe(1);
+    expect($verification->status)->toBe(VerificationStatus::Failed)
+        ->and($verification->row_stats['invalid'])->toBe(1)
+        ->and($verification->row_stats['completed'])->toBe(1);
 });
 
 test('csv verification streaming handles five hundred row file within reasonable time', function () {
@@ -227,8 +228,8 @@ test('catalogue fixtures verify with documented status', function (string $fixtu
     'sample_real_patterns.csv' => ['sample_real_patterns.csv', VerificationStatus::Ready],
     'duplicate_in_file.csv' => ['duplicate_in_file.csv', VerificationStatus::Ready],
     'all_duplicate.csv' => ['all_duplicate.csv', VerificationStatus::Ready],
-    'invalid_date.csv' => ['invalid_date.csv', VerificationStatus::Ready],
-    'invalid_amount.csv' => ['invalid_amount.csv', VerificationStatus::Ready],
+    'invalid_date.csv' => ['invalid_date.csv', VerificationStatus::Failed],
+    'invalid_amount.csv' => ['invalid_amount.csv', VerificationStatus::Failed],
     'zero_value_rows.csv' => ['zero_value_rows.csv', VerificationStatus::Ready],
     'probable_duplicate_customer.csv' => ['probable_duplicate_customer.csv', VerificationStatus::Ready],
     'multi_day_period.csv' => ['multi_day_period.csv', VerificationStatus::Ready],

@@ -88,10 +88,10 @@ Requirements use `REQ-xxx` (functional) and `NFR-xxx` (non-functional).
 | REQ-051 | Preserve source row number and raw values | Must | 10 | S5 |
 | REQ-052 | Dash/empty completion → unfinished (not rejected) | Must | 7 | S2 |
 | REQ-053 | Zero HT/VAT/TTC valid per BR-005 | Must | 7 | S2 |
-| REQ-053a | Negative amounts → invalid row | Must | 7 | S2 |
-| REQ-054 | Validate HT + VAT = TTC per row | Must | 7 | S2 |
+| REQ-053a | Negative / unparseable amounts → invalid row; verification hard-fails | Must | 7 | S2 |
+| REQ-054 | Validate HT + VAT = TTC per row; mismatch → verification hard-fails | Must | 7 | S2 |
 | REQ-055 | Reconcile parsed totals with footer | Must | 7 | S2 |
-| REQ-056 | Invalid rows excluded from activation; preserved in errors | Must | 7, 10 | S2 |
+| REQ-056 | Invalid rows block Ready/Import; preserved in error report | Must | 7, 10 | S2 |
 | REQ-057 | Stream-parse large files | Should | 7 | S2 |
 | REQ-057a | Commit large files via queued/chunked pipeline (≥10k rows) | Should | 10 | S5 |
 
@@ -119,7 +119,7 @@ Requirements use `REQ-xxx` (functional) and `NFR-xxx` (non-functional).
 | ID | Requirement | Priority | Phase | Sprint |
 |----|-------------|----------|-------|--------|
 | REQ-070 | Per date: New, Unchanged, Revision required, etc. | Must | 10 | S5 |
-| REQ-071 | Changed day → proposed version; Owner approves (backend Phase 10, UI Phase 11) | Must | 10–11 | S4 |
+| REQ-071 | Changed **past** day → proposed version; Owner approves. Same-day operational/historical top-ups auto-activate | Must | 10–11 | S4 |
 | REQ-072 | Only active snapshots affect current reports | Must | 10, 14 | S5 |
 | REQ-073 | Manager submits correction; cannot activate | Must | 12 | S6 |
 

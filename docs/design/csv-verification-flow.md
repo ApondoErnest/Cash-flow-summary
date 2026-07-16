@@ -119,7 +119,18 @@ Structure, record-count, HT, VAT, TTC reconciliation — each Passed or Failed.
 
 ### Compact stats
 
-Completed, unfinished, revenue-generating, zero-value, exact duplicates, new unique, invalid rows, probable duplicates (informational).
+Completed, unfinished, revenue-generating, zero-value, exact duplicates, new unique, probable duplicates (informational).
+
+### Hard-fail row errors (block Ready / Import)
+
+Any of the following marks the row invalid and **fails verification** (no Import):
+
+- HT + VAT ≠ TTC
+- Negative or unparseable amounts
+- Missing or invalid registration date
+- Invalid registration time (same Invalid gate)
+
+Download the error report from the failed verification card, fix the export, and re-upload.
 
 ### Warnings (non-blocking)
 

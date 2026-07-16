@@ -79,8 +79,9 @@ Example (sanitized):
 
 - Strip spaces (thousands separators)
 - Parse as integer XAF
-- **Negative values → invalid row** (BR-004)
-- Validate HT + VAT = TTC per row
+- **Negative values → invalid row; verification hard-fails** (BR-004)
+- Validate HT + VAT = TTC per row (**mismatch → verification hard-fails**)
+- Missing/invalid registration date → invalid row; verification hard-fails
 
 ---
 
@@ -88,8 +89,10 @@ Example (sanitized):
 
 | Source | Canonical |
 |--------|-----------|
-| Valid date | `Y-m-d` |
-| `-`, empty, invalid | `null` (unfinished) |
+| Valid registration date | `Y-m-d` (required) |
+| Missing/invalid registration date | Invalid row — verification hard-fails |
+| Valid completion date | `Y-m-d` |
+| `-`, empty, invalid completion | `null` (unfinished — non-blocking) |
 
 ---
 

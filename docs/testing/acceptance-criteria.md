@@ -24,7 +24,7 @@ Step checkpoints: [implementation-sequence.md Appendix C](../implementation-sequ
 | 10 | Footer record counts reconcile | 43–51 | REQ-055 |
 | 11 | HT, VAT, TTC reconcile | 43–51 | REQ-054, REQ-055 |
 | 12 | Zero-value rows remain valid | 43–51 | REQ-053 |
-| 13 | Negative amounts rejected | 43–51 | REQ-053a |
+| 13 | Negative amounts / bad rows rejected (hard fail) | 43–51 | REQ-053a, REQ-054, REQ-056 |
 | 14 | Unfinished rows remain valid | 43–51 | REQ-052 |
 | 15 | 3-step flow: Select → Verify → Import/Reject | 72–89 | REQ-040 |
 | 16 | Reject deletes temp data | 43–51, 72–79 | REQ-043, REQ-101 |
@@ -35,7 +35,7 @@ Step checkpoints: [implementation-sequence.md Appendix C](../implementation-sequ
 | 21 | Probable duplicates flagged, not auto-deleted | 43–51, 72–79 | REQ-067, ADR 0008 |
 | 22 | DB prevents concurrent duplicate masters | 59–71 | REQ-066 |
 | 23 | Overlapping files do not double-count revenue | 65–71, 90–93 | REQ-072 |
-| 24 | Changed days create proposed revisions | 65–79 | REQ-071 |
+| 24 | Changed **past** days create proposed revisions; same-day top-ups auto-activate | 65–79 | REQ-071 |
 | 25 | Only Owner approves revisions | 72–79 | REQ-007 |
 | 26 | Reports use active daily snapshots only | 65–71, 90–93 | REQ-072, REQ-086 |
 | 27 | Manager center-locked dashboard and import | 80–85 | REQ-081, US-M01 |

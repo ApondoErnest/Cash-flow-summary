@@ -63,7 +63,7 @@ test('manager can download verification error report for cashier in same center'
     runProcessVerificationJob($verification->token);
     $verification->refresh();
 
-    expect($verification->status)->toBe(VerificationStatus::Ready);
+    expect($verification->status)->toBe(VerificationStatus::Failed);
 
     $manager = actingAsManager($center);
 

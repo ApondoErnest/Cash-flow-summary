@@ -187,6 +187,29 @@ class ProcessVerificationJob implements ShouldQueue
             $parseResult->toValidationPayload(),
         );
 
+        if ($parseResult->invalidRows !== []) {
+            $invalidCount = (int) ($parseResult->summary->toRowStats()['invalid'] ?? count($parseResult->invalidRows));
+            $errorMessage = (string) trans_choice(
+                'csv_verification.verification.invalid_rows',
+                $invalidCount,
+                ['count' => $invalidCount],
+            );
+
+            $verification->update([
+                'encoding' => $inspection->encoding,
+                'delimiter' => $inspection->delimiter,
+                'source_language' => $mapping->language,
+                'row_stats' => $parseResult->summary->toRowStats(),
+                'validation_result' => $validationResult,
+                'status' => VerificationStatus::Failed,
+                'error_message' => $errorMessage,
+            ]);
+
+            $this->recordVerificationFailure($auditLogger, $verification, $errorMessage);
+
+            return;
+        }
+
         $disk = (string) config('csv_verification.temp_disk', 'local');
         $filePath = Storage::disk($disk)->path($verification->temp_storage_path);
 

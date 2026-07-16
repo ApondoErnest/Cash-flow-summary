@@ -39,6 +39,7 @@ return [
         'expired' => 'Cette vérification a expiré. Téléversez à nouveau le fichier.',
         'reject_not_allowed' => 'Cette vérification ne peut pas être rejetée dans son état actuel.',
         'processing_failed' => 'La vérification n\'a pas pu aboutir. Réessayez ou contactez le support.',
+        'invalid_rows' => '{1} Échec de la vérification : :count ligne invalide doit être corrigée avant l\'import.|[2,*] Échec de la vérification : :count lignes invalides doivent être corrigées avant l\'import.',
     ],
     'import_mode' => [
         'operational' => 'Opérationnel',

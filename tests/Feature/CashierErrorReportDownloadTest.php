@@ -22,10 +22,10 @@ beforeEach(function () {
     test()->seed(HeaderAliasSeeder::class);
 });
 
-test('verification error report can be downloaded when invalid rows are detected', function () {
+test('verification error report can be downloaded when invalid rows hard-fail verification', function () {
     $verification = runVerificationPipelineForContents(loadCsvFixture('invalid_amount.csv'));
 
-    expect($verification->status)->toBe(VerificationStatus::Ready)
+    expect($verification->status)->toBe(VerificationStatus::Failed)
         ->and($verification->row_stats['invalid'])->toBe(1);
 
     $this->actingAs(\App\Models\User::query()->findOrFail($verification->user_id))
@@ -37,15 +37,26 @@ test('verification error report can be downloaded when invalid rows are detected
     expect(ImportError::query()->where('import_verification_id', $verification->id)->count())->toBeGreaterThan(0);
 });
 
-test('cashier can download import error report after committing file with invalid rows', function () {
+test('cashier can download import error report when import has stored errors', function () {
     $center = createTestCenter();
     $cashier = actingAsCashier($center);
 
-    $verification = startVerificationFor($cashier, $center, loadCsvFixture('invalid_amount.csv'));
+    $verification = startVerificationFor($cashier, $center, verificationReadyFrenchCsv([completedFrenchDataRow()]));
     runProcessVerificationJob($verification->token);
     $import = commitVerificationFor($cashier, $verification->fresh());
 
-    expect($import->invalid_count)->toBe(1);
+    ImportError::query()->create([
+        'import_id' => $import->id,
+        'import_verification_id' => $verification->id,
+        'source_row_number' => 2,
+        'field' => 'net_amount',
+        'error_code' => 'negative_amount',
+        'message' => 'Negative amount in net_amount.',
+        'original_value' => '-100',
+        'raw_row' => 'row',
+    ]);
+
+    $import->update(['invalid_count' => 1]);
 
     $response = $this->actingAs($cashier)
         ->get(signedDownloadUrl('imports.errors.download', ['import' => $import->id]));
@@ -66,9 +77,22 @@ test('cashier import error download page shows action on result and detail pages
     $center = createTestCenter();
     $cashier = actingAsCashier($center);
 
-    $verification = startVerificationFor($cashier, $center, loadCsvFixture('invalid_amount.csv'));
+    $verification = startVerificationFor($cashier, $center, verificationReadyFrenchCsv([completedFrenchDataRow()]));
     runProcessVerificationJob($verification->token);
     $import = commitVerificationFor($cashier, $verification->fresh());
+
+    ImportError::query()->create([
+        'import_id' => $import->id,
+        'import_verification_id' => $verification->id,
+        'source_row_number' => 2,
+        'field' => 'net_amount',
+        'error_code' => 'negative_amount',
+        'message' => 'Negative amount in net_amount.',
+        'original_value' => '-100',
+        'raw_row' => 'row',
+    ]);
+
+    $import->update(['invalid_count' => 1]);
 
     $this->actingAs($cashier)
         ->get(route('imports.result', $import))
@@ -82,11 +106,22 @@ test('cashier import error download page shows action on result and detail pages
 });
 
 test('cashier cannot download import error report from another center', function () {
-    $verification = runVerificationPipelineForContents(loadCsvFixture('invalid_amount.csv'));
+    $verification = runVerificationPipelineForContents(verificationReadyFrenchCsv([completedFrenchDataRow()]));
     $import = commitVerificationFor(
         \App\Models\User::query()->findOrFail($verification->user_id),
         $verification->fresh(),
     );
+
+    ImportError::query()->create([
+        'import_id' => $import->id,
+        'import_verification_id' => $verification->id,
+        'source_row_number' => 2,
+        'field' => 'net_amount',
+        'error_code' => 'negative_amount',
+        'message' => 'Negative amount in net_amount.',
+        'original_value' => '-100',
+        'raw_row' => 'row',
+    ]);
 
     actingAsCashier();
 
@@ -106,7 +141,7 @@ test('import error download returns not found when import has no invalid rows', 
         ->assertNotFound();
 });
 
-test('verification summary shows error report download when invalid rows exist', function () {
+test('verification failed card shows error report download when invalid rows exist', function () {
     $verification = runVerificationPipelineForContents(loadCsvFixture('invalid_amount.csv'));
     $user = \App\Models\User::query()->findOrFail($verification->user_id);
 

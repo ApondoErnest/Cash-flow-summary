@@ -8,8 +8,10 @@ use App\Modules\CsvImports\Livewire\ImportResultPage;
 use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvImports\Models\ImportDayComparison;
 use App\Modules\CsvImports\Services\ImportResultService;
+use App\Modules\CsvVerification\Livewire\CsvVerificationCard;
 use Database\Seeders\HeaderAliasSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -76,9 +78,20 @@ test('owner cannot view import result for another center', function () {
 });
 
 test('verification card import redirects to import result page', function () {
-    $component = readyVerificationCardComponent();
+    $owner = actingAsOwner();
+    $center = createTestCenter($owner->organization);
+    setOwnerActiveCenter($owner, $center);
 
-    $component->call('import');
+    $component = Livewire::test(CsvVerificationCard::class)
+        ->set('csvFile', UploadedFile::fake()->createWithContent(
+            'cashflow-june.csv',
+            verificationReadyFrenchCsv([completedFrenchDataRow()]),
+        ))
+        ->call('verify');
+
+    runProcessVerificationJob($component->get('verificationToken'));
+
+    $component->call('refreshVerification')->call('import');
 
     $import = Import::query()->latest('id')->firstOrFail();
 
@@ -101,7 +114,7 @@ test('import result service aggregates day impact and whatsapp status', function
 
     expect($result->sourceRows)->toBe(1)
         ->and($result->newUnique)->toBe(1)
-        ->and($result->activeDays)->toBe(0)
+        ->and($result->activeDays)->toBe(1)
         ->and($result->unchangedDays)->toBe(1)
         ->and($result->footerTtc)->toBe('11,925.00')
         ->and($result->whatsappStatus)->toBe(__('csv_import.result.whatsapp.scheduled_summary'))

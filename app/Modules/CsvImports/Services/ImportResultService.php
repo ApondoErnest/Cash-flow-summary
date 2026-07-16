@@ -11,6 +11,8 @@ use App\Modules\CsvImports\Models\Import;
 use App\Modules\CsvImports\Support\ImportResultData;
 use App\Modules\CsvImports\Support\ImportStatusPresenter;
 use App\Modules\CsvVerification\Enums\ImportMode;
+use App\Modules\DailyVersions\Enums\DailyVersionStatus;
+use App\Modules\DailyVersions\Models\DailyVersion;
 use App\Modules\Dashboards\Support\DashboardMoney;
 use Illuminate\Support\Carbon;
 
@@ -21,14 +23,18 @@ final class ImportResultService
         $import->loadMissing(['center', 'dayComparisons', 'importVerification']);
 
         $dayComparisons = $import->dayComparisons;
-        $activeDays = $dayComparisons
-            ->where('comparison_result', DayComparisonResult::New)
-            ->count();
         $unchangedDays = $dayComparisons
             ->where('comparison_result', DayComparisonResult::Unchanged)
             ->count();
-        $revisionsPending = $dayComparisons
-            ->where('comparison_result', DayComparisonResult::RevisionRequired)
+        $activeDays = DailyVersion::query()
+            ->withoutCenterScope()
+            ->where('import_id', $import->id)
+            ->where('status', DailyVersionStatus::Active)
+            ->count();
+        $revisionsPending = DailyVersion::query()
+            ->withoutCenterScope()
+            ->where('import_id', $import->id)
+            ->where('status', DailyVersionStatus::Proposed)
             ->count();
 
         [$headline, $statusBadge, $statusVariant] = $this->resolveStatusPresentation(

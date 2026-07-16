@@ -19,7 +19,7 @@ use App\Modules\CsvVerification\Services\VerificationCleanupService;
 use App\Modules\CsvVerification\Services\VerificationService;
 use App\Modules\DailyVersions\Services\RevisionService;
 use App\Modules\DailyVersions\Services\VersionComparisonService;
-use App\Modules\DailyVersions\Support\VersionComparisonProcessResult;
+use App\Modules\DailyVersions\Support\ImportVersionApplyResult;
 use App\Modules\DuplicateDetection\Services\MasterLedgerService;
 use App\Modules\DuplicateDetection\Support\MasterLedgerProcessResult;
 use App\Modules\Reports\Services\SummaryGenerationService;
@@ -198,8 +198,8 @@ final class ImportService
             $absolutePath = $this->fileStorageService->absolutePath($import->storage_path);
             $rowCount = $this->importRowService->persistRows($import, $verification, $absolutePath);
             $ledgerResult = $this->masterLedgerService->processImport($import->fresh());
-            $comparisonResult = $this->versionComparisonService->processImport($import->fresh());
-            $this->revisionService->applyImportComparisons($import->fresh(), $user);
+            $this->versionComparisonService->processImport($import->fresh());
+            $applyResult = $this->revisionService->applyImportComparisons($import->fresh(), $user);
             $this->summaryGenerationService->queueRegenerationForImport($import->fresh());
 
             $duplicateSummary = $verification->duplicate_summary ?? [];
@@ -209,7 +209,7 @@ final class ImportService
                 'duplicate_within_file_count' => $ledgerResult->withinFileDuplicates,
                 'historical_duplicate_count' => $ledgerResult->historicalDuplicates,
                 'new_master_count' => $ledgerResult->newMasters,
-                'status' => $this->resolveImportStatus($duplicateSummary, $ledgerResult, $comparisonResult),
+                'status' => $this->resolveImportStatus($duplicateSummary, $ledgerResult, $applyResult),
                 'completed_at' => now(),
             ]);
 
@@ -279,9 +279,9 @@ final class ImportService
     private function resolveImportStatus(
         array $duplicateSummary,
         MasterLedgerProcessResult $ledgerResult,
-        VersionComparisonProcessResult $comparisonResult,
+        ImportVersionApplyResult $applyResult,
     ): ImportStatus {
-        if ($comparisonResult->hasRevisionRequired()) {
+        if ($applyResult->proposedRevisions > 0) {
             return ImportStatus::AwaitingOwnerApproval;
         }
 

@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -73,6 +74,46 @@ test('owner verification card starts verify using active center not request inpu
     Queue::assertPushed(ProcessVerificationJob::class, function (ProcessVerificationJob $job) use ($center): bool {
         return $job->centerId === $center->id;
     });
+});
+
+test('csv upload validation accepts .csv even when mime is misdetected as text/x-affix', function () {
+    $path = sys_get_temp_dir().'/cashflow-english-mime-regression.csv';
+    file_put_contents($path, loadCsvFixture('sample_en_valid.csv'));
+
+    $upload = new UploadedFile(
+        $path,
+        "Cashier's statements - 2026-07-15 to 2026-07-15.csv",
+        'text/x-affix',
+        null,
+        true,
+    );
+
+    $validator = Validator::make(
+        ['csvFile' => $upload],
+        ['csvFile' => ['required', 'file', 'extensions:csv,txt', 'max:10240']],
+    );
+
+    expect($validator->fails())->toBeFalse();
+
+    @unlink($path);
+});
+
+test('verification card verifies english catalogue fixture', function () {
+    $owner = actingAsOwner();
+    $center = createTestCenter($owner->organization, ['name' => 'Active Center']);
+    setOwnerActiveCenter($owner, $center);
+
+    config(['csv_verification.process_synchronously' => true]);
+    Queue::swap(new \Illuminate\Support\Testing\Fakes\QueueFake(app()));
+
+    Livewire::test(CsvVerificationCard::class)
+        ->set('csvFile', UploadedFile::fake()->createWithContent(
+            "Cashier's statements.csv",
+            loadCsvFixture('sample_en_valid.csv'),
+        ))
+        ->call('verify')
+        ->assertHasNoErrors()
+        ->assertSet('verificationToken', fn (?string $token): bool => is_string($token) && $token !== '');
 });
 
 test('manager verification card uses compact layout without duplicate center block', function () {

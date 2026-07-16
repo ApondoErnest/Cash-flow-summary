@@ -13,7 +13,7 @@
 | BR-001 | Inspection type `C` | Standard initial technical inspection; may be zero TTC |
 | BR-002 | Inspection type `CV` | Counter-visit after failure; usually zero TTC |
 | BR-003 | Category (`Cat.`) | Display exactly as imported; no lookup table in v1 |
-| BR-004 | Negative amounts | Invalid — row rejected |
+| BR-004 | Negative amounts | Invalid — verification hard-fails (no import) |
 | BR-005 | Completed + zero TTC | Valid (e.g. failed counter-visit) |
 | BR-006 | Report periods | Show days with data or explicitly covered by import |
 | BR-007 | Closed days omitted | No missing-submission alert for configured closures |
@@ -22,7 +22,7 @@
 | BR-010 | Holidays/closures | Owner configures calendar exceptions |
 | BR-011 | Cashier historical imports | Allowed |
 | BR-012 | Manager corrections | Manager uploads and submits; Owner approves |
-| BR-013 | Revision approval | Single step; required approve/reject reason |
+| BR-013 | Revision approval | Owner approves changes to **past** business days and all **correction** imports; same-day operational/historical top-ups auto-activate |
 | BR-014 | Historical WhatsApp | No immediate send; activity included in scheduled summaries |
 | BR-024 | WhatsApp summary cadence | Daily; weekly (Saturday); monthly (last day); yearly (31 Dec) |
 | BR-025 | WhatsApp summary time | Per center (`centers.whatsapp_summary_time`); Owner configures |
