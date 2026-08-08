@@ -1,0 +1,100 @@
+name: cashflow-summary
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+      args:
+        APP_IMAGE: cashflow-summary-app:latest
+    image: cashflow-summary-nginx:latest
+    depends_on:
+      app:
+        condition: service_started
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    networks:
+      - cashflow
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_ENV: ${APP_ENV:-production}
+    image: cashflow-summary-app:latest
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./deploy/env/docker.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage
+    networks:
+      - cashflow
+
+  horizon:
+    image: cashflow-summary-app:latest
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: php artisan horizon
+    volumes:
+      - ./deploy/env/docker.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage
+    networks:
+      - cashflow
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-cashflow_summary}
+      MYSQL_USER: ${DB_USERNAME:-cashflow_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in deploy/env/docker.env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks:
+      - cashflow
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - cashflow
+
+networks:
+  cashflow:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    name: cashflow-summary_mysql_data
+  redis_data:
+    name: cashflow-summary_redis_data
+  storage_data:
+    name: cashflow-summary_storage_data

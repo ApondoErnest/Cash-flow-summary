@@ -26,9 +26,15 @@
 
 ### Persistent volumes
 
-- `mysql_data`
-- `storage_data` (private imports, exports)
-- `redis_data` (optional persistence)
+See **[deploy/volumes.md](../../deploy/volumes.md)** (Step 110) for paths, backup outline, and verification.
+
+| Volume | Docker name | Purpose |
+|--------|-------------|---------|
+| `mysql_data` | `cashflow-summary_mysql_data` | MySQL data directory |
+| `storage_data` | `cashflow-summary_storage_data` | Laravel `storage/` (private imports, exports, logs) |
+| `redis_data` | `cashflow-summary_redis_data` | Redis AOF (queue/cache persistence) |
+
+Verify: `./deploy/verify-volumes.sh`
 
 ### Private (not exposed)
 
@@ -45,11 +51,15 @@
 
 ## Environment (production)
 
-Secrets via `.env` on server — never in Git:
+Secrets via environment files on the server — never in Git:
 
-- `APP_KEY`
-- `DB_PASSWORD`
-- `REDIS_PASSWORD` (if set)
+| Environment | File (on server / dev machine) |
+|-------------|--------------------------------|
+| Local dev | `.env` (project root) |
+| Docker | `deploy/env/docker.env` (gitignored) |
+| VPS production | `deploy/env/production.env` (gitignored, on VPS only) |
+
+Required secrets: `APP_KEY`, `DB_PASSWORD`, `REDIS_PASSWORD` (if set).
 
 WhatsApp credentials are stored in **Owner admin settings** (encrypted), not in Git:
 
@@ -85,29 +95,35 @@ Configure Meta webhook URL and verify token on the production VPS only. See [api
 
 ```bash
 git pull origin main
-docker compose pull
-docker compose build app
-docker compose run --rm app php artisan migrate --force
-docker compose up -d
-docker compose exec app php artisan config:cache
-docker compose exec app php artisan route:cache
-docker compose exec app php artisan view:cache
+./deploy/build.sh
+./deploy/compose.sh run --rm app php artisan migrate --force
+./deploy/compose.sh up -d
+./deploy/compose.sh exec app php artisan config:cache
+./deploy/compose.sh exec app php artisan route:cache
+./deploy/compose.sh exec app php artisan view:cache
 ```
 
-Document exact commands in `deploy/` when implemented.
+Document exact commands in [deploy/README.md](../../deploy/README.md).
 
 ---
 
 ## Smoke tests (post-deploy)
 
-- [ ] Health endpoint returns OK
-- [ ] Owner login
-- [ ] Horizon dashboard accessible (protected) **or** `queue:work` running with `--timeout=600`
+Run the automated suite (Step 111 / AC #34):
+
+```bash
+./deploy/smoke-test.sh
+```
+
+Checks: all services up, queue env flags, `/up` and `/login` via nginx, in-container DB/Redis/config (`deploy/smoke-check-app.php`), Horizon running.
+
+Manual checklist (staging / production extras):
+
+- [ ] Owner login in browser
 - [ ] Verify sample CSV end-to-end on staging
 - [ ] *(Recommended)* Import a multi-thousand-row CSV; confirm result page leaves `processing` and masters are created
 - [ ] WhatsApp test message (Meta test number or staging — phone number ID + access token; webhook optional)
 - [ ] *(Production only)* Meta webhook verified; delivery status updates observed
-- [ ] Confirm `.env`: `CSV_IMPORTS_SYNC=false`, `CSV_VERIFICATION_SYNC=false`, `REDIS_QUEUE_RETRY_AFTER` > job timeout
 
 ---
 

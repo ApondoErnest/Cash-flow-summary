@@ -27,8 +27,8 @@ flowchart LR
 | Item | Value |
 |------|-------|
 | Doc set | v2.1.09 |
-| Steps complete | **1–108** |
-| **Next step** | **Step 109** — Docker Compose — nginx, app, mysql, redis, horizon |
+| Steps complete | **1–111** |
+| **Next step** | **Step 112** — Provision Ubuntu VPS |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -146,9 +146,9 @@ flowchart LR
 | 106 | UAT with Owner on staging | User acceptance testing | S8 | Complete |
 | 107 | UAT with Manager/Cashier reps | User acceptance testing | S8 | Complete |
 | 108 | Sign off [acceptance-criteria.md](../testing/acceptance-criteria.md) (55 items) | User acceptance testing | S8 | Complete |
-| 109 | Docker Compose — nginx, app, mysql, redis, horizon | Dockerization | S8 | Not started |
-| 110 | Persistent volumes | Dockerization | S8 | Not started |
-| 111 | Smoke tests in containers | Dockerization | S8 | Not started |
+| 109 | Docker Compose — nginx, app, mysql, redis, horizon | Dockerization | S8 | Complete |
+| 110 | Persistent volumes | Dockerization | S8 | Complete |
+| 111 | Smoke tests in containers | Dockerization | S8 | Complete |
 | 112 | Provision Ubuntu VPS | VPS deployment | S8 | Not started |
 | 113 | SSH, firewall, TLS | VPS deployment | S8 | Not started |
 | 114 | Deploy procedure + rollback | VPS deployment | S8 | Not started |
@@ -1523,6 +1523,12 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [deployment.md](../operations/deployment.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-08 — Docker Compose stack (`nginx`, `app`, `mysql`, `redis`, `horizon`); isolated env via `deploy/env/docker.env` + `./deploy/compose.sh`; host asset build via `./deploy/build-assets.sh`; runbook [deploy/README.md](../../deploy/README.md); stack verified at `http://localhost:8081/up` |
+
+**Deliverables:** `docker-compose.yml`, `Dockerfile`, `docker/nginx/`, `docker/php/`, `docker/entrypoint.sh`, `deploy/README.md`, `deploy/env/docker.env.example`, `deploy/env/vps.env.example`, `deploy/compose.sh`, `deploy/build.sh`, `deploy/build-assets.sh`, `deploy/setup-docker-env.sh`
+
+**Isolation:** local dev uses root `.env`; Docker uses only `deploy/env/docker.env` (never touches `.env`). Run Docker via `./deploy/compose.sh`.
 
 ### Step 110 — Persistent volumes
 
@@ -1530,8 +1536,12 @@ flowchart LR
 |---|---|
 | **Group** | Dockerization (Phase 19) |
 | **Sprint** | S8 |
-| **Reference** | [deployment.md](../operations/deployment.md) |
+| **Reference** | [deployment.md](../operations/deployment.md), [deploy/volumes.md](../../deploy/volumes.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-08 — Named volumes `cashflow-summary_{mysql,redis,storage}_data`; [deploy/volumes.md](../../deploy/volumes.md); `./deploy/verify-volumes.sh` persistence check |
+
+**Deliverables:** [deploy/volumes.md](../../deploy/volumes.md), `./deploy/verify-volumes.sh`, explicit volume names in `docker-compose.yml`
 
 ### Step 111 — Smoke tests in containers
 
@@ -1539,8 +1549,10 @@ flowchart LR
 |---|---|
 | **Group** | Dockerization (Phase 19) |
 | **Sprint** | S8 |
-| **Reference** | [deployment.md](../operations/deployment.md) |
+| **Reference** | [deployment.md](../operations/deployment.md), [deploy/smoke-test.sh](../../deploy/smoke-test.sh) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-08 — `./deploy/smoke-test.sh` (HTTP + in-container checks + Horizon); AC **#34** gate passed on Docker stack at `:8081` |
 
 **Checkpoint after Step 111** (end of Dockerization):
 
