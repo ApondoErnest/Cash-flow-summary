@@ -102,10 +102,40 @@ class WhatsappSettings extends Component
             ->value('id');
 
         try {
-            $message = $notificationService->sendTestMessage(
+            $result = $notificationService->sendTestMessage(
                 organizationId: (int) $this->organization->id,
                 centerId: $centerId !== null ? (int) $centerId : null,
             );
+
+            if ($result->allFailed()) {
+                $firstFailure = $result->failed[0];
+                $this->addError('testMessage', __('settings.whatsapp.test_failed', [
+                    'error' => $firstFailure['error'],
+                ]));
+
+                return;
+            }
+
+            $lastMessage = $result->lastSentMessage();
+            $messageId = $lastMessage?->provider_message_id ?? '—';
+
+            if ($result->hasPartialSuccess()) {
+                $sentPhones = array_map(
+                    static fn ($message): string => $message->recipient_phone,
+                    $result->sent,
+                );
+                $failedSummary = collect($result->failed)
+                    ->map(static fn (array $failure): string => $failure['phone'].': '.$failure['error'])
+                    ->implode('; ');
+
+                $this->testMessageFeedback = __('settings.whatsapp.test_sent_partial', [
+                    'sent_phones' => implode(', ', $sentPhones),
+                    'failed_summary' => $failedSummary,
+                    'message_id' => $messageId,
+                ]);
+
+                return;
+            }
 
             $ownerPhones = OwnerPhoneList::parse($settingsService->get(
                 (int) $this->organization->id,
@@ -115,11 +145,11 @@ class WhatsappSettings extends Component
             $this->testMessageFeedback = count($ownerPhones) > 1
                 ? __('settings.whatsapp.test_sent_all', [
                     'phones' => implode(', ', $ownerPhones),
-                    'message_id' => $message->provider_message_id ?? '—',
+                    'message_id' => $messageId,
                 ])
                 : __('settings.whatsapp.test_sent', [
-                    'phone' => $message->recipient_phone,
-                    'message_id' => $message->provider_message_id ?? '—',
+                    'phone' => $lastMessage?->recipient_phone ?? $ownerPhones[0] ?? '—',
+                    'message_id' => $messageId,
                 ]);
         } catch (WhatsAppApiException $exception) {
             $this->addError('testMessage', __('settings.whatsapp.test_failed', [

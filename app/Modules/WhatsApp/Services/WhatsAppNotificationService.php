@@ -14,6 +14,7 @@ use App\Modules\WhatsApp\Exceptions\WhatsAppNotConfiguredException;
 use App\Modules\WhatsApp\Jobs\SendWhatsAppNotificationJob;
 use App\Modules\WhatsApp\Models\WhatsappMessage;
 use App\Modules\WhatsApp\Support\WhatsAppCredentials;
+use App\Modules\WhatsApp\Support\WhatsAppTestSendResult;
 use Illuminate\Support\Carbon;
 
 final class WhatsAppNotificationService
@@ -359,11 +360,12 @@ final class WhatsAppNotificationService
         ];
     }
 
-    public function sendTestMessage(int $organizationId, ?int $centerId = null): WhatsappMessage
+    public function sendTestMessage(int $organizationId, ?int $centerId = null): WhatsAppTestSendResult
     {
         $credentials = $this->credentialsForOrganization($organizationId);
         $sentAt = now()->format('YmdHisu');
-        $lastMessage = null;
+        $sent = [];
+        $failed = [];
 
         foreach ($credentials->ownerPhones as $recipientPhone) {
             $idempotencyKey = 'test_message:'.$organizationId.':'.ltrim($recipientPhone, '+').':'.$sentAt;
@@ -398,7 +400,11 @@ final class WhatsAppNotificationService
                     'sent_at' => now(),
                 ])->save();
 
-                $lastMessage = $message->fresh();
+                $fresh = $message->fresh();
+
+                if ($fresh !== null) {
+                    $sent[] = $fresh;
+                }
             } catch (WhatsAppApiException $exception) {
                 $message->forceFill([
                     'status' => WhatsappMessageStatus::Failed,
@@ -406,14 +412,17 @@ final class WhatsAppNotificationService
                     'retry_count' => 1,
                 ])->save();
 
-                throw $exception;
+                $failed[] = [
+                    'phone' => $recipientPhone,
+                    'error' => $exception->getMessage(),
+                ];
             }
         }
 
-        if ($lastMessage === null) {
+        if ($sent === [] && $failed === []) {
             throw WhatsAppNotConfiguredException::forOrganization($organizationId);
         }
 
-        return $lastMessage;
+        return new WhatsAppTestSendResult(sent: $sent, failed: $failed);
     }
 }

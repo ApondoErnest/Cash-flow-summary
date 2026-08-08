@@ -190,6 +190,41 @@ test('owner can send whatsapp test message to all saved owner numbers', function
     });
 });
 
+test('whatsapp test message reports partial success when one recipient is rejected by meta', function () {
+    Http::fake([
+        'https://graph.facebook.com/*' => Http::sequence()
+            ->push([
+                'messaging_product' => 'whatsapp',
+                'messages' => [
+                    ['id' => 'wamid.test-settings-message'],
+                ],
+            ], 200)
+            ->push([
+                'error' => [
+                    'message' => '(#131030) Recipient phone number not in allowed list',
+                    'type' => 'OAuthException',
+                    'code' => 131030,
+                ],
+            ], 400),
+    ]);
+
+    actingAsOwnerWithoutActiveCenter();
+
+    Livewire::test(WhatsappSettings::class)
+        ->set('ownerPhone', '+237612345678, +237698765432')
+        ->set('phoneNumberId', '123456789012345')
+        ->set('accessToken', 'EAAtest-access-token-value-123456')
+        ->call('save')
+        ->call('sendTestMessage')
+        ->assertHasNoErrors()
+        ->assertSet('testMessageFeedback', fn (?string $value): bool => is_string($value)
+            && str_contains($value, '+237612345678')
+            && str_contains($value, '+237698765432')
+            && str_contains($value, '131030'));
+
+    Http::assertSentCount(2);
+});
+
 test('owner can send whatsapp test message when outbound settings are configured', function () {
     Http::fake([
         'https://graph.facebook.com/*' => Http::response([
