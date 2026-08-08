@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use App\Modules\Settings\Enums\OrganizationSettingKey;
+use App\Modules\Settings\Services\SettingsService;
 use App\Modules\WhatsApp\Enums\WhatsappEventType;
 use App\Modules\WhatsApp\Enums\WhatsappMessageStatus;
 use App\Modules\WhatsApp\Exceptions\WhatsAppApiException;
@@ -114,6 +116,41 @@ test('whatsapp notification service returns null when outbound settings are inco
     Http::assertNothingSent();
 });
 
+test('whatsapp notification service sends scheduled summary to all owner phone numbers', function () {
+    Http::fake([
+        'https://graph.facebook.com/*' => Http::response([
+            'messages' => [['id' => 'wamid.multi-phone']],
+        ], 200),
+    ]);
+
+    [$center, $owner] = whatsAppScheduledSummaryFixture();
+    app(SettingsService::class)->set(
+        (int) $owner->organization_id,
+        $owner,
+        OrganizationSettingKey::WhatsappOwnerPhone,
+        '+237612345678, +237698765432',
+    );
+
+    $moment = Carbon::parse('2026-07-08 18:00:00', config('app.timezone'));
+
+    $message = app(WhatsAppNotificationService::class)->notifyScheduledSummary(
+        $center,
+        WhatsappEventType::DailySummary,
+        $moment,
+    );
+
+    expect($message)->not->toBeNull()
+        ->and(WhatsappMessage::query()->count())->toBe(2);
+
+    Http::assertSentCount(2);
+
+    Http::assertSent(function ($request): bool {
+        $body = $request->data();
+
+        return in_array($body['to'] ?? null, ['237612345678', '237698765432'], true);
+    });
+});
+
 test('whatsapp notification service respects idempotency key for duplicate requests', function () {
     Http::fake([
         'https://graph.facebook.com/*' => Http::response([
@@ -169,12 +206,14 @@ test('whatsapp notification service builds deterministic scheduled summary idemp
         WhatsappEventType::DailySummary,
         42,
         '2026-07-08',
-    ))->toBe('daily_summary:center:42:2026-07-08')
+        '+237612345678',
+    ))->toBe('daily_summary:center:42:2026-07-08:237612345678')
         ->and($service->scheduledSummaryIdempotencyKey(
             WhatsappEventType::WeeklySummary,
             7,
             '2026-W28',
-        ))->toBe('weekly_summary:center:7:2026-W28');
+            '+237698765432',
+        ))->toBe('weekly_summary:center:7:2026-W28:237698765432');
 });
 
 test('whatsapp notification service resolves weekly summary event type', function () {

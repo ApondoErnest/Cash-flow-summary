@@ -10,6 +10,7 @@ use App\Modules\Centers\Models\Organization;
 use App\Modules\Settings\Enums\OrganizationSettingKey;
 use App\Modules\Settings\Models\OrganizationSetting;
 use App\Modules\Settings\Support\OrganizationProfileData;
+use App\Modules\Settings\Support\OwnerPhoneList;
 use App\Modules\Settings\Support\WhatsAppSettingsData;
 use App\Modules\WhatsApp\Support\WhatsAppCredentials;
 use Illuminate\Support\Facades\Crypt;
@@ -139,7 +140,7 @@ final class SettingsService
         }
 
         return new WhatsAppCredentials(
-            ownerPhone: $settings->ownerPhone,
+            ownerPhones: OwnerPhoneList::parse($settings->ownerPhone),
             phoneNumberId: $settings->phoneNumberId,
             accessToken: $accessToken,
         );
@@ -160,7 +161,7 @@ final class SettingsService
                 (int) $organization->id,
                 $user,
                 OrganizationSettingKey::WhatsappOwnerPhone,
-                $this->normalizePhone($payload['owner_phone']),
+                OwnerPhoneList::normalizeInput($payload['owner_phone']),
             );
 
             $this->set(
@@ -195,7 +196,7 @@ final class SettingsService
                 resourceId: (int) $organization->id,
                 newValues: [
                     'scope' => 'whatsapp',
-                    'owner_phone' => $this->normalizePhone($payload['owner_phone']),
+                    'owner_phone' => OwnerPhoneList::normalizeInput($payload['owner_phone']),
                     'phone_number_id' => trim($payload['phone_number_id']),
                     'access_token' => filled($payload['access_token'] ?? null) ? '[updated]' : '[unchanged]',
                     'webhook_verify_token' => filled($payload['webhook_verify_token'] ?? null) ? '[updated]' : '[unchanged]',

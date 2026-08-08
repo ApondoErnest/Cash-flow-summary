@@ -28,8 +28,11 @@ final class WhatsAppNotificationService
         WhatsappEventType $eventType,
         int $centerId,
         string $periodKey,
+        string $recipientPhone,
     ): string {
-        return "{$eventType->value}:center:{$centerId}:{$periodKey}";
+        $phoneKey = ltrim($recipientPhone, '+');
+
+        return "{$eventType->value}:center:{$centerId}:{$periodKey}:{$phoneKey}";
     }
 
     public function findByIdempotencyKey(string $idempotencyKey): ?WhatsappMessage
@@ -49,23 +52,69 @@ final class WhatsAppNotificationService
             return null;
         }
 
-        $message = $this->prepareScheduledSummary($center, $eventType, $referenceMoment, $forceRebuild);
+        $organizationId = (int) $center->organization_id;
 
-        if ($message === null) {
+        if (! $this->settingsService->whatsAppOutboundConfigured($organizationId)) {
             return null;
         }
 
-        if ($message->status === WhatsappMessageStatus::Queued) {
-            SendWhatsAppNotificationJob::dispatch($message->id);
+        $credentials = $this->credentialsForOrganization($organizationId);
+        $firstMessage = null;
+
+        foreach ($credentials->ownerPhones as $recipientPhone) {
+            $message = $this->prepareScheduledSummaryForRecipient(
+                center: $center,
+                eventType: $eventType,
+                referenceMoment: $referenceMoment,
+                recipientPhone: $recipientPhone,
+                forceRebuild: $forceRebuild,
+            );
+
+            if ($message === null) {
+                continue;
+            }
+
+            $firstMessage ??= $message;
+
+            if ($message->status === WhatsappMessageStatus::Queued) {
+                SendWhatsAppNotificationJob::dispatch($message->id);
+            }
         }
 
-        return $message;
+        return $firstMessage;
     }
 
     public function prepareScheduledSummary(
         Center $center,
         WhatsappEventType $eventType,
         Carbon $referenceMoment,
+        bool $forceRebuild = false,
+    ): ?WhatsappMessage {
+        $credentials = $this->credentialsForOrganization((int) $center->organization_id);
+        $firstMessage = null;
+
+        foreach ($credentials->ownerPhones as $recipientPhone) {
+            $message = $this->prepareScheduledSummaryForRecipient(
+                center: $center,
+                eventType: $eventType,
+                referenceMoment: $referenceMoment,
+                recipientPhone: $recipientPhone,
+                forceRebuild: $forceRebuild,
+            );
+
+            if ($message !== null) {
+                $firstMessage ??= $message;
+            }
+        }
+
+        return $firstMessage;
+    }
+
+    private function prepareScheduledSummaryForRecipient(
+        Center $center,
+        WhatsappEventType $eventType,
+        Carbon $referenceMoment,
+        string $recipientPhone,
         bool $forceRebuild = false,
     ): ?WhatsappMessage {
         $organizationId = (int) $center->organization_id;
@@ -79,6 +128,7 @@ final class WhatsAppNotificationService
             $eventType,
             (int) $center->id,
             $period->periodKey,
+            $recipientPhone,
         );
 
         $existing = $this->findByIdempotencyKey($idempotencyKey);
@@ -105,6 +155,7 @@ final class WhatsAppNotificationService
             centerId: (int) $center->id,
             importId: null,
             payloadSummary: $payloadSummary,
+            recipientPhone: $recipientPhone,
         );
     }
 
@@ -140,13 +191,35 @@ final class WhatsAppNotificationService
         WhatsappEventType $eventType,
         Carbon $referenceMoment,
     ): ?WhatsappMessage {
-        $message = $this->prepareScheduledSummary($center, $eventType, $referenceMoment);
+        $organizationId = (int) $center->organization_id;
 
-        if ($message === null || $message->status !== WhatsappMessageStatus::Queued) {
-            return $message;
+        if (! $this->settingsService->whatsAppOutboundConfigured($organizationId)) {
+            return null;
         }
 
-        return $this->sendMessage($message);
+        $credentials = $this->credentialsForOrganization($organizationId);
+        $firstMessage = null;
+
+        foreach ($credentials->ownerPhones as $recipientPhone) {
+            $message = $this->prepareScheduledSummaryForRecipient(
+                center: $center,
+                eventType: $eventType,
+                referenceMoment: $referenceMoment,
+                recipientPhone: $recipientPhone,
+            );
+
+            if ($message === null) {
+                continue;
+            }
+
+            if ($message->status === WhatsappMessageStatus::Queued) {
+                $message = $this->sendMessage($message);
+            }
+
+            $firstMessage ??= $message;
+        }
+
+        return $firstMessage;
     }
 
     public function resendFailedMessage(WhatsappMessage $message): ?WhatsappMessage
@@ -183,7 +256,10 @@ final class WhatsAppNotificationService
         ?int $centerId,
         ?int $importId,
         array $payloadSummary,
+        ?string $recipientPhone = null,
     ): WhatsappMessage {
+        $recipientPhone ??= $credentials->primaryOwnerPhone();
+
         /** @var WhatsappMessage $message */
         $message = WhatsappMessage::query()->firstOrCreate(
             ['idempotency_key' => $idempotencyKey],
@@ -191,7 +267,7 @@ final class WhatsAppNotificationService
                 'center_id' => $centerId,
                 'import_id' => $importId,
                 'event_type' => $eventType->value,
-                'recipient_phone' => $credentials->ownerPhone,
+                'recipient_phone' => $recipientPhone,
                 'template_name' => $eventType->templateName(),
                 'payload_summary' => $payloadSummary,
                 'status' => WhatsappMessageStatus::Queued,
@@ -286,46 +362,58 @@ final class WhatsAppNotificationService
     public function sendTestMessage(int $organizationId, ?int $centerId = null): WhatsappMessage
     {
         $credentials = $this->credentialsForOrganization($organizationId);
-        $idempotencyKey = 'test_message:'.$organizationId.':'.now()->format('YmdHisu');
+        $sentAt = now()->format('YmdHisu');
+        $lastMessage = null;
 
-        $message = $this->createQueuedMessage(
-            credentials: $credentials,
-            eventType: WhatsappEventType::TestMessage,
-            idempotencyKey: $idempotencyKey,
-            centerId: $centerId,
-            importId: null,
-            payloadSummary: [
-                'event_type' => WhatsappEventType::TestMessage->value,
-                'template' => WhatsappEventType::TestMessage->templateName(),
-                'initiated_at' => now()->timezone(config('app.timezone'))->toIso8601String(),
-            ],
-        );
+        foreach ($credentials->ownerPhones as $recipientPhone) {
+            $idempotencyKey = 'test_message:'.$organizationId.':'.ltrim($recipientPhone, '+').':'.$sentAt;
 
-        try {
-            $result = $this->cloudApiClient->sendTemplateMessage(
+            $message = $this->createQueuedMessage(
                 credentials: $credentials,
-                recipientPhone: $credentials->ownerPhone,
-                templateName: WhatsappEventType::TestMessage->templateName(),
-                languageCode: WhatsappEventType::TestMessage->templateLanguageCode(),
-                bodyParameters: [],
+                eventType: WhatsappEventType::TestMessage,
+                idempotencyKey: $idempotencyKey,
+                centerId: $centerId,
+                importId: null,
+                payloadSummary: [
+                    'event_type' => WhatsappEventType::TestMessage->value,
+                    'template' => WhatsappEventType::TestMessage->templateName(),
+                    'initiated_at' => now()->timezone(config('app.timezone'))->toIso8601String(),
+                ],
+                recipientPhone: $recipientPhone,
             );
 
-            $message->forceFill([
-                'status' => WhatsappMessageStatus::Sent,
-                'provider_message_id' => $result->providerMessageId,
-                'error_reason' => null,
-                'sent_at' => now(),
-            ])->save();
+            try {
+                $result = $this->cloudApiClient->sendTemplateMessage(
+                    credentials: $credentials,
+                    recipientPhone: $recipientPhone,
+                    templateName: WhatsappEventType::TestMessage->templateName(),
+                    languageCode: WhatsappEventType::TestMessage->templateLanguageCode(),
+                    bodyParameters: [],
+                );
 
-            return $message->fresh();
-        } catch (WhatsAppApiException $exception) {
-            $message->forceFill([
-                'status' => WhatsappMessageStatus::Failed,
-                'error_reason' => $exception->getMessage(),
-                'retry_count' => 1,
-            ])->save();
+                $message->forceFill([
+                    'status' => WhatsappMessageStatus::Sent,
+                    'provider_message_id' => $result->providerMessageId,
+                    'error_reason' => null,
+                    'sent_at' => now(),
+                ])->save();
 
-            throw $exception;
+                $lastMessage = $message->fresh();
+            } catch (WhatsAppApiException $exception) {
+                $message->forceFill([
+                    'status' => WhatsappMessageStatus::Failed,
+                    'error_reason' => $exception->getMessage(),
+                    'retry_count' => 1,
+                ])->save();
+
+                throw $exception;
+            }
         }
+
+        if ($lastMessage === null) {
+            throw WhatsAppNotConfiguredException::forOrganization($organizationId);
+        }
+
+        return $lastMessage;
     }
 }

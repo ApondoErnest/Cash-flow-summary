@@ -136,6 +136,60 @@ test('whatsapp settings validates owner phone format', function () {
         ->assertHasErrors(['ownerPhone']);
 });
 
+test('owner can save multiple comma-separated owner phone numbers', function () {
+    $owner = actingAsOwnerWithoutActiveCenter();
+    $organizationId = (int) $owner->organization_id;
+
+    Livewire::test(WhatsappSettings::class)
+        ->set('ownerPhone', '+237612345678, +237698765432')
+        ->set('phoneNumberId', '123456789012345')
+        ->set('accessToken', 'EAAtest-access-token-value-123456')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(app(SettingsService::class)->get($organizationId, OrganizationSettingKey::WhatsappOwnerPhone))
+        ->toBe('+237612345678,+237698765432');
+});
+
+test('owner can send whatsapp test message to all saved owner numbers', function () {
+    Http::fake([
+        'https://graph.facebook.com/*' => Http::response([
+            'messaging_product' => 'whatsapp',
+            'messages' => [
+                ['id' => 'wamid.test-settings-message'],
+            ],
+        ], 200),
+    ]);
+
+    actingAsOwnerWithoutActiveCenter();
+
+    Livewire::test(WhatsappSettings::class)
+        ->set('ownerPhone', '+237612345678, +237698765432')
+        ->set('phoneNumberId', '123456789012345')
+        ->set('accessToken', 'EAAtest-access-token-value-123456')
+        ->call('save')
+        ->call('sendTestMessage')
+        ->assertHasNoErrors()
+        ->assertSet('testMessageFeedback', fn (?string $value): bool => is_string($value)
+            && str_contains($value, '+237612345678')
+            && str_contains($value, '+237698765432')
+            && str_contains($value, 'wamid.test-settings-message'));
+
+    Http::assertSentCount(2);
+
+    Http::assertSent(function ($request): bool {
+        $body = $request->data();
+
+        return ($body['to'] ?? null) === '237612345678';
+    });
+
+    Http::assertSent(function ($request): bool {
+        $body = $request->data();
+
+        return ($body['to'] ?? null) === '237698765432';
+    });
+});
+
 test('owner can send whatsapp test message when outbound settings are configured', function () {
     Http::fake([
         'https://graph.facebook.com/*' => Http::response([

@@ -6,7 +6,9 @@ namespace App\Modules\Settings\Livewire;
 
 use App\Modules\Centers\Models\Center;
 use App\Modules\Centers\Models\Organization;
+use App\Modules\Settings\Enums\OrganizationSettingKey;
 use App\Modules\Settings\Services\SettingsService;
+use App\Modules\Settings\Support\OwnerPhoneList;
 use App\Modules\Settings\Support\WhatsAppSettingsData;
 use App\Modules\WhatsApp\Exceptions\WhatsAppApiException;
 use App\Modules\WhatsApp\Services\WhatsAppNotificationService;
@@ -105,10 +107,20 @@ class WhatsappSettings extends Component
                 centerId: $centerId !== null ? (int) $centerId : null,
             );
 
-            $this->testMessageFeedback = __('settings.whatsapp.test_sent', [
-                'phone' => $message->recipient_phone,
-                'message_id' => $message->provider_message_id ?? '—',
-            ]);
+            $ownerPhones = OwnerPhoneList::parse($settingsService->get(
+                (int) $this->organization->id,
+                OrganizationSettingKey::WhatsappOwnerPhone,
+            ));
+
+            $this->testMessageFeedback = count($ownerPhones) > 1
+                ? __('settings.whatsapp.test_sent_all', [
+                    'phones' => implode(', ', $ownerPhones),
+                    'message_id' => $message->provider_message_id ?? '—',
+                ])
+                : __('settings.whatsapp.test_sent', [
+                    'phone' => $message->recipient_phone,
+                    'message_id' => $message->provider_message_id ?? '—',
+                ]);
         } catch (WhatsAppApiException $exception) {
             $this->addError('testMessage', __('settings.whatsapp.test_failed', [
                 'error' => $exception->getMessage(),
@@ -137,7 +149,15 @@ class WhatsappSettings extends Component
     private function rules(): array
     {
         return [
-            'ownerPhone' => ['required', 'string', 'regex:/^\+[1-9]\d{7,14}$/'],
+            'ownerPhone' => [
+                'required',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value) || ! OwnerPhoneList::isValidInput($value)) {
+                        $fail(__('settings.whatsapp.validation.owner_phone'));
+                    }
+                },
+            ],
             'phoneNumberId' => ['required', 'string', 'max:255', 'regex:/^\d+$/'],
             'accessToken' => [
                 $this->accessTokenConfigured ? 'nullable' : 'required',

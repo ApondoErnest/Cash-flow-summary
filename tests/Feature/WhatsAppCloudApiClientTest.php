@@ -16,7 +16,7 @@ uses(RefreshDatabase::class);
 function whatsAppApiCredentials(): WhatsAppCredentials
 {
     return new WhatsAppCredentials(
-        ownerPhone: '+237612345678',
+        ownerPhones: ['+237612345678'],
         phoneNumberId: '123456789012345',
         accessToken: 'EAAtest-access-token-value-123456',
     );
@@ -111,7 +111,8 @@ test('settings service exposes whatsapp credentials when outbound settings are c
     $credentials = app(SettingsService::class)->whatsAppCredentials((int) $owner->organization_id);
 
     expect($credentials)->not->toBeNull()
-        ->and($credentials->ownerPhone)->toBe('+237612345678')
+        ->and($credentials->ownerPhones)->toBe(['+237612345678'])
+        ->and($credentials->primaryOwnerPhone())->toBe('+237612345678')
         ->and($credentials->phoneNumberId)->toBe('123456789012345')
         ->and($credentials->accessToken)->toBe('EAAtest-access-token-value-123456');
 });
