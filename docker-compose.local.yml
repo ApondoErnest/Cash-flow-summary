@@ -1,0 +1,25 @@
+# Local Docker development overrides.
+# Use: ./deploy/compose.sh up -d
+
+services:
+  nginx:
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+
+  app:
+    volumes:
+      - ./deploy/env/docker.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage
+
+  horizon:
+    volumes:
+      - ./deploy/env/docker.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage
+
+  scheduler:
+    volumes:
+      - ./deploy/env/docker.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage

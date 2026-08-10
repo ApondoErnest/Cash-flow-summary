@@ -133,10 +133,10 @@ Manual checklist (staging / production extras):
 
 ## Rollback
 
-1. `docker compose down`
+1. `./deploy/compose-production.sh down` (VPS) or `./deploy/compose.sh down` (local Docker)
 2. Restore DB snapshot if migration ran
 3. Checkout previous Git tag
-4. `docker compose up -d`
+4. `./deploy/compose-production.sh up -d` or `./deploy/compose.sh up -d`
 
 ---
 

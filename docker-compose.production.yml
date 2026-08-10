@@ -1,6 +1,7 @@
 # Production overrides (VPS — Steps 112–114).
 # Use: ./deploy/compose-production.sh up -d
 #
+# Merged with docker-compose.yml only — never with docker-compose.local.yml.
 # Binds nginx to localhost only — host reverse proxy (Step 113) routes the subdomain.
 
 services:

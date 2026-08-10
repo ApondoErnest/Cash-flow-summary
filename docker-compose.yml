@@ -1,3 +1,8 @@
+# Shared Compose base — no host ports, no environment-specific bind mounts.
+# Local:  docker compose -f docker-compose.yml -f docker-compose.local.yml …
+# VPS:     docker compose -f docker-compose.yml -f docker-compose.production.yml …
+# Prefer:  ./deploy/compose.sh  or  ./deploy/compose-production.sh
+
 name: cashflow-summary
 
 services:
@@ -11,8 +16,8 @@ services:
     depends_on:
       app:
         condition: service_started
-    ports:
-      - "${HTTP_PORT:-8080}:80"
+    expose:
+      - "80"
     networks:
       - cashflow
 
@@ -30,8 +35,6 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./deploy/env/docker.env:/var/www/html/.env
-      - ./deploy:/var/www/html/deploy:ro
       - storage_data:/var/www/html/storage
     networks:
       - cashflow
@@ -48,8 +51,6 @@ services:
         condition: service_healthy
     command: php artisan horizon
     volumes:
-      - ./deploy/env/docker.env:/var/www/html/.env
-      - ./deploy:/var/www/html/deploy:ro
       - storage_data:/var/www/html/storage
     networks:
       - cashflow
@@ -66,8 +67,6 @@ services:
         condition: service_healthy
     command: php artisan schedule:work
     volumes:
-      - ./deploy/env/docker.env:/var/www/html/.env
-      - ./deploy:/var/www/html/deploy:ro
       - storage_data:/var/www/html/storage
     networks:
       - cashflow

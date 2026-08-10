@@ -12,7 +12,31 @@
 
 Root `.env` is **never** read or modified by Docker.
 
-Always run Docker through **`./deploy/compose.sh`** (wraps `docker compose --env-file deploy/env/docker.env`).
+Always run Docker through **`./deploy/compose.sh`** (merges `docker-compose.yml` + `docker-compose.local.yml` with `deploy/env/docker.env`).
+
+On the VPS, use **`./deploy/compose-production.sh`** (`docker-compose.yml` + `docker-compose.production.yml` only — never merge the local file).
+
+---
+
+## Compose files
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.yml` | Shared services (no host ports) |
+| `docker-compose.local.yml` | Local Docker: host port + `deploy/env/docker.env` mounts |
+| `docker-compose.production.yml` | VPS: `127.0.0.1` bind + `deploy/env/production.env` mounts |
+
+Local:
+
+```bash
+./deploy/compose.sh up -d
+```
+
+Production (VPS):
+
+```bash
+./deploy/compose-production.sh up -d
+```
 
 ---
 

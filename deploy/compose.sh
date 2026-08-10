@@ -12,4 +12,8 @@ if [[ ! -f "$ENV_FILE" ]]; then
 fi
 
 cd "$ROOT"
-exec docker compose --env-file "$ENV_FILE" "$@"
+exec docker compose \
+    --env-file "$ENV_FILE" \
+    -f docker-compose.yml \
+    -f docker-compose.local.yml \
+    "$@"
