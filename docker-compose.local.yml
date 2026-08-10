@@ -7,18 +7,24 @@ services:
       - "${HTTP_PORT:-8080}:80"
 
   app:
+    env_file:
+      - ./deploy/env/docker.env
     volumes:
       - ./deploy/env/docker.env:/var/www/html/.env
       - ./deploy:/var/www/html/deploy:ro
       - storage_data:/var/www/html/storage
 
   horizon:
+    env_file:
+      - ./deploy/env/docker.env
     volumes:
       - ./deploy/env/docker.env:/var/www/html/.env
       - ./deploy:/var/www/html/deploy:ro
       - storage_data:/var/www/html/storage
 
   scheduler:
+    env_file:
+      - ./deploy/env/docker.env
     volumes:
       - ./deploy/env/docker.env:/var/www/html/.env
       - ./deploy:/var/www/html/deploy:ro

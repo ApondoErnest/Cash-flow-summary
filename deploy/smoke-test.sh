@@ -44,7 +44,20 @@ grep -qE '^QUEUE_CONNECTION=redis' "$ENV_FILE" || fail "QUEUE_CONNECTION must be
 pass "queue env flags"
 
 echo ""
-echo "3. HTTP smoke (via nginx)"
+echo "3. PHP-FPM environment ($ENV_FILE)"
+APP_KEY_WWWDATA="$("${COMPOSE[@]}" exec -T -u www-data app php -r "
+require 'vendor/autoload.php';
+\$app = require 'bootstrap/app.php';
+\$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+echo config('app.key') ?: '';
+" 2>/dev/null || true)"
+if [[ -z "$APP_KEY_WWWDATA" ]]; then
+    fail "APP_KEY empty for www-data (PHP-FPM) — ensure compose env_file injects $ENV_FILE"
+fi
+pass "APP_KEY visible to www-data"
+
+echo ""
+echo "4. HTTP smoke (via nginx)"
 HEALTH_CODE="$(curl -s -o /dev/null -w '%{http_code}' "${BASE_URL}/up" || echo "000")"
 [[ "$HEALTH_CODE" == "200" ]] || fail "/up returned HTTP ${HEALTH_CODE}"
 pass "/up HTTP 200"
@@ -58,12 +71,12 @@ echo "$LOGIN_BODY" | grep -q 'Sign in' || fail "/login body missing sign-in copy
 pass "/login content"
 
 echo ""
-echo "4. In-container application checks"
+echo "5. In-container application checks"
 "${COMPOSE[@]}" exec -T app php deploy/smoke-check-app.php
 pass "in-container smoke-check-app.php"
 
 echo ""
-echo "5. Horizon worker"
+echo "6. Horizon worker"
 HORIZON_STATUS="$("${COMPOSE[@]}" exec -T app php artisan horizon:status 2>&1 || true)"
 if echo "$HORIZON_STATUS" | grep -qi 'running'; then
     pass "horizon status running"
@@ -75,7 +88,7 @@ else
 fi
 
 echo ""
-echo "6. Scheduler worker"
+echo "7. Scheduler worker"
 if "${COMPOSE[@]}" exec -T scheduler sh -c 'tr "\0" " " < /proc/1/cmdline' 2>/dev/null | grep -q 'schedule:work'; then
     pass "scheduler container command"
 else

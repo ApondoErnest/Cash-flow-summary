@@ -258,7 +258,11 @@ Lock down permissions and verify **no placeholders remain**:
 ```bash
 chmod 600 deploy/env/production.env
 ls -l deploy/env/production.env
+```
 
+`docker-compose.production.yml` injects this file via **`env_file`** into app/horizon/scheduler so PHP-FPM (`www-data`) receives secrets even though it cannot read a mode-600 bind mount. Keep **`chmod 600`** — do not `chmod 644` unless you are on an older compose file without `env_file`.
+
+```bash
 grep -E '^(DB_PASSWORD|DB_ROOT_PASSWORD)=' deploy/env/production.env
 grep -E '^(APP_ENV|APP_DEBUG|APP_URL|HTTP_PORT|DB_HOST|DB_DATABASE|DB_USERNAME|QUEUE_CONNECTION|CACHE_STORE|SESSION_DRIVER|APP_KEY)=' deploy/env/production.env
 ```
@@ -629,6 +633,7 @@ See [../volumes.md](../volumes.md).
 | Login without CSS | Re-run `./deploy/build-production.sh` |
 | CSV import hangs | `./deploy/compose-production.sh logs horizon` |
 | Session issues after HTTPS | `APP_URL=https://cashflow.gsautobilan.com` |
+| `/up` 200 but `/login` 500, log shows `MissingAppKeyException` | PHP-FPM runs as `www-data` and cannot read mode-600 `.env`. Update to latest `docker-compose.production.yml` (has `env_file`) and `./deploy/compose-production.sh up -d --force-recreate app horizon scheduler`. Or interim: `chmod 644 deploy/env/production.env && ./deploy/compose-production.sh restart app` |
 | Empty `APP_KEY` after Phase 3 | Do not continue; re-run `key:generate` and verify mount |
 | Out of memory | `free -h`; upgrade VPS |
 
