@@ -4,7 +4,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 COMPOSE=(./deploy/compose.sh)
-ENV_FILE="deploy/env/docker.env"
+ENV_FILE="${ENV_FILE:-deploy/env/docker.env}"
+
+if [[ -n "${COMPOSE_SCRIPT:-}" ]]; then
+    COMPOSE=("$COMPOSE_SCRIPT")
+fi
 
 if [[ ! -f "$ENV_FILE" ]]; then
     echo "Missing $ENV_FILE" >&2
@@ -24,7 +28,7 @@ echo ""
 
 echo "1. Stack services running"
 RUNNING="$("${COMPOSE[@]}" ps --services --filter status=running 2>/dev/null || true)"
-for service in nginx app mysql redis horizon; do
+for service in nginx app mysql redis horizon scheduler; do
     if echo "$RUNNING" | grep -qx "$service"; then
         pass "$service"
     else
@@ -33,7 +37,7 @@ for service in nginx app mysql redis horizon; do
 done
 
 echo ""
-echo "2. Queue worker configuration (docker.env)"
+echo "2. Queue worker configuration ($ENV_FILE)"
 grep -qE '^CSV_IMPORTS_SYNC=false' "$ENV_FILE" || fail "CSV_IMPORTS_SYNC must be false in $ENV_FILE"
 grep -qE '^CSV_VERIFICATION_SYNC=false' "$ENV_FILE" || fail "CSV_VERIFICATION_SYNC must be false in $ENV_FILE"
 grep -qE '^QUEUE_CONNECTION=redis' "$ENV_FILE" || fail "QUEUE_CONNECTION must be redis in $ENV_FILE"
@@ -68,6 +72,14 @@ elif "${COMPOSE[@]}" exec -T horizon sh -c 'tr "\0" " " < /proc/1/cmdline' 2>/de
 else
     echo "$HORIZON_STATUS" >&2
     fail "horizon is not running"
+fi
+
+echo ""
+echo "6. Scheduler worker"
+if "${COMPOSE[@]}" exec -T scheduler sh -c 'tr "\0" " " < /proc/1/cmdline' 2>/dev/null | grep -q 'schedule:work'; then
+    pass "scheduler container command"
+else
+    fail "scheduler is not running (schedule:work required for WhatsApp summaries)"
 fi
 
 echo ""

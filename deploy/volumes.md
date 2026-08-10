@@ -14,7 +14,7 @@ Local dev (`storage/` on disk + local MySQL) remains **independent** — these v
 |----------------|-------------|------------|----------|
 | `mysql_data` | `cashflow-summary_mysql_data` | MySQL → `/var/lib/mysql` | Database (users, imports, versions, settings, …) |
 | `redis_data` | `cashflow-summary_redis_data` | Redis → `/data` | Queue metadata, AOF (Horizon jobs survive Redis restarts) |
-| `storage_data` | `cashflow-summary_storage_data` | `app` + `horizon` → `/var/www/html/storage` | Private CSVs, exports, logs, framework cache |
+| `storage_data` | `cashflow-summary_storage_data` | `app` + `horizon` + `scheduler` → `/var/www/html/storage` | Private CSVs, exports, logs, framework cache |
 
 ### What lives under `storage_data`
 
@@ -89,7 +89,8 @@ Manual spot-check:
 
 | Asset | Suggested command |
 |-------|-------------------|
-| MySQL | `./deploy/compose.sh exec mysql sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' > backup.sql` |
+| MySQL | `./deploy/compose-production.sh exec -T mysql sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' > backup.sql` |
+| MySQL (script) | `./deploy/backup-production.sh` |
 | Storage files | `docker run --rm -v cashflow-summary_storage_data:/data -v $(pwd):/backup alpine tar czf /backup/storage.tgz -C /data .` |
 
 Restore is the inverse (Step 117 restore drill).

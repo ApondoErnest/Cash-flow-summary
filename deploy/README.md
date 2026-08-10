@@ -8,9 +8,9 @@
 |-------------|-------------|---------|
 | **Local dev** | `.env` (project root) | `php artisan serve`, local MySQL/Redis — **unchanged** |
 | **Docker** | `deploy/env/docker.env` | Docker containers only (mounted as `/var/www/html/.env`) |
-| **VPS / production** | `deploy/env/production.env` on server (future) | Production containers only |
+| **VPS / production** | `deploy/env/production.env` on server | Production containers only |
 
-Root `.env` is **never** read or modified by Docker. Same pattern will apply on the VPS.
+Root `.env` is **never** read or modified by Docker.
 
 Always run Docker through **`./deploy/compose.sh`** (wraps `docker compose --env-file deploy/env/docker.env`).
 
@@ -20,6 +20,7 @@ Always run Docker through **`./deploy/compose.sh`** (wraps `docker compose --env
 
 - Docker Desktop / Engine running
 - Port **8080** free (or change `HTTP_PORT` in `deploy/env/docker.env`)
+- **No host Node, Composer, or PHP required** — builds run inside Docker
 
 ```bash
 docker --version && docker compose version && docker info
@@ -51,21 +52,23 @@ Edit `deploy/env/docker.env`:
 
 ## 3. Build images
 
-Frontend assets are built **on your Mac** (same as local dev), then copied into the Docker image. This avoids Tailwind native-binding issues inside Linux containers.
+The **`Dockerfile`** is multi-stage:
+
+1. **Composer** — PHP dependencies  
+2. **Node 24** — `npm ci && npm run build` (Vite + Tailwind)  
+3. **PHP 8.4 FPM** — runtime image with compiled assets  
 
 ```bash
 ./deploy/build.sh
 ```
 
-This runs `npm ci && npm run build`, then builds **app** and **nginx**.
+Builds **app**, then **nginx**.
 
-Assets only:
+Optional host-only asset build for local Vite iteration (requires Node on your Mac):
 
 ```bash
 ./deploy/build-assets.sh
 ```
-
-Builds **app** first, then **nginx**.
 
 ---
 
@@ -112,6 +115,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/up   # expect 200
 
 ```bash
 ./deploy/compose.sh logs horizon --tail 20
+./deploy/compose.sh logs scheduler --tail 20
 ```
 
 ---
@@ -122,7 +126,7 @@ Use **`./deploy/compose.sh`** instead of `docker compose`:
 
 ```bash
 ./deploy/compose.sh ps
-./deploy/compose.sh logs -f app horizon
+./deploy/compose.sh logs -f app horizon scheduler
 ./deploy/compose.sh exec app php artisan about
 ./deploy/compose.sh down          # stop, keep volumes
 ./deploy/compose.sh down -v       # ⚠ wipe Docker DB/storage volumes
@@ -149,6 +153,7 @@ Use **`./deploy/compose.sh`** instead of `docker compose`:
 | `mysql` | MySQL 8 (internal) |
 | `redis` | Redis 7 (internal) |
 | `horizon` | Queue worker |
+| `scheduler` | `php artisan schedule:work` — WhatsApp summaries, cleanups |
 
 ---
 
@@ -159,9 +164,9 @@ Use **`./deploy/compose.sh`** instead of `docker compose`:
 | `Missing deploy/env/docker.env` | `./deploy/setup-docker-env.sh` |
 | Used `docker compose` directly | Use `./deploy/compose.sh` so Compose reads the right env file |
 | Port in use | Change `HTTP_PORT` in `deploy/env/docker.env` |
-| Build fails: `@tailwindcss/oxide-linux-x64-gnu` | Run `./deploy/build-assets.sh` on the host, then `./deploy/build.sh` (assets are not built inside Docker) |
-| Build fails: `public/build/manifest.json` missing | Run `./deploy/build-assets.sh` before `./deploy/compose.sh build app` |
-| Local dev broken after Docker | Local dev uses root `.env` only — they are independent; restart local MySQL/Redis if needed |
+| Build fails during `npm run build` | Check Docker build log; ensure network access for font CDN |
+| Build fails: `public/build/manifest.json` missing | Re-run `./deploy/build.sh` — assets are built in the Docker image |
+| Local dev broken after Docker | Local dev uses root `.env` only — they are independent |
 
 ---
 
@@ -193,7 +198,7 @@ chmod +x deploy/smoke-test.sh deploy/smoke-check-app.php
 ./deploy/smoke-test.sh
 ```
 
-Validates services, HTTP via nginx, in-container DB/Redis/config, and Horizon.
+Validates services, HTTP via nginx, in-container DB/Redis/config, Horizon, and scheduler.
 
 ---
 
@@ -201,12 +206,27 @@ Validates services, HTTP via nginx, in-container DB/Redis/config, and Horizon.
 
 - [ ] `deploy/env/docker.env` exists (root `.env` untouched)
 - [ ] `./deploy/build.sh` succeeds
-- [ ] `./deploy/compose.sh up -d` — 5 services up
+- [ ] `./deploy/compose.sh up -d` — **6** services up
 - [ ] `./deploy/verify-volumes.sh` passes
 - [ ] `./deploy/smoke-test.sh` passes (AC #34)
 - [ ] App reachable at `http://localhost:${HTTP_PORT}` (e.g. `:8081`)
 
 **Next:** Step 112 (VPS provisioning)
+
+---
+
+## VPS provisioning (Steps 112–114)
+
+| Step | Doc | Scripts |
+|------|-----|---------|
+| **112** | [deploy/vps/PROVISION.md](vps/PROVISION.md) | `bootstrap-server.sh`, `verify-provision.sh` |
+| **112+** | **[deploy/vps/HOSTINGER-SUBDOMAIN.md](vps/HOSTINGER-SUBDOMAIN.md)** | **cashflow.gsautobilan.com** on Hostinger VPS `89.117.37.202` |
+| **113** | *(next)* SSH, UFW, TLS | — |
+| **114** | *(next)* Deploy + rollback | `compose-production.sh`, `build-production.sh` |
+
+Production secrets: **`deploy/env/production.env`** only (template: `production.env.example`).
+
+Run on VPS with **`./deploy/compose-production.sh`**. Back up before updates: **`./deploy/backup-production.sh`**.
 
 ---
 

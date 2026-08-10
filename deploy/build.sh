@@ -8,9 +8,7 @@ if [[ ! -f deploy/env/docker.env ]]; then
     exit 1
 fi
 
-./deploy/build-assets.sh
-
-echo "Building app image..."
+echo "Building app image (Composer + Vite assets inside Docker)..."
 ./deploy/compose.sh build app
 
 echo "Building nginx image..."

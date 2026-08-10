@@ -27,8 +27,8 @@ done
 echo "Writing storage marker via app container..."
 "${COMPOSE[@]}" exec -T app sh -c "mkdir -p storage/app/private && echo step110 > storage/app/private/${MARKER}"
 
-echo "Restarting app and horizon..."
-"${COMPOSE[@]}" restart app horizon >/dev/null
+echo "Restarting app, horizon, and scheduler..."
+"${COMPOSE[@]}" restart app horizon scheduler >/dev/null
 sleep 3
 
 echo "Verifying storage marker after restart..."

@@ -1,0 +1,28 @@
+# Host reverse proxy — Cash Flow Summary subdomain
+# Install: sudo cp deploy/vps/nginx-host/cashflow-summary.conf.example /etc/nginx/sites-available/cashflow-summary.conf
+#          sudo ln -s /etc/nginx/sites-available/cashflow-summary.conf /etc/nginx/sites-enabled/
+#          sudo nginx -t && sudo systemctl reload nginx
+# TLS:     sudo certbot --nginx -d cashflow.YOUR_DOMAIN
+
+# Replace cashflow.YOUR_DOMAIN with your full subdomain (default: cashflow.gsautobilan.com).
+# Replace 8081 if HTTP_PORT in production.env differs.
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name cashflow.gsautobilan.com;
+
+    client_max_body_size 64M;
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 600s;
+    }
+}
+
+# After certbot, this file will gain a second server { listen 443 ssl; ... } block.

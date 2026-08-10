@@ -23,7 +23,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: bcmath, ctype, curl, dom, fileinfo, mbstring, openssl, pdo_mysql, tokenizer, xml, redis
           coverage: none
 
@@ -53,7 +53,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
 
       - name: Install npm dependencies
@@ -61,3 +61,21 @@ jobs:
 
       - name: Build frontend assets
         run: npm run build
+
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Docker env
+        run: |
+          cp deploy/env/docker.env.example deploy/env/docker.env
+          sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=ci-docker-test|' deploy/env/docker.env
+          sed -i 's|^DB_ROOT_PASSWORD=.*|DB_ROOT_PASSWORD=ci-docker-root-test|' deploy/env/docker.env
+
+      - name: Build production Docker images
+        run: |
+          chmod +x deploy/*.sh
+          ./deploy/build.sh

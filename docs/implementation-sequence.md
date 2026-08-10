@@ -27,8 +27,8 @@ flowchart LR
 | Item | Value |
 |------|-------|
 | Doc set | v2.1.09 |
-| Steps complete | **1–111** |
-| **Next step** | **Step 112** — Provision Ubuntu VPS |
+| Steps complete | **1–112** |
+| **Next step** | **Step 113** — SSH, firewall, TLS |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -149,7 +149,7 @@ flowchart LR
 | 109 | Docker Compose — nginx, app, mysql, redis, horizon | Dockerization | S8 | Complete |
 | 110 | Persistent volumes | Dockerization | S8 | Complete |
 | 111 | Smoke tests in containers | Dockerization | S8 | Complete |
-| 112 | Provision Ubuntu VPS | VPS deployment | S8 | Not started |
+| 112 | Provision Ubuntu VPS | VPS deployment | S8 | Complete |
 | 113 | SSH, firewall, TLS | VPS deployment | S8 | Not started |
 | 114 | Deploy procedure + rollback | VPS deployment | S8 | Not started |
 | 115 | Daily DB + file backups | Backup & monitoring | S8 | Not started |
@@ -1524,7 +1524,7 @@ flowchart LR
 | **Reference** | [deployment.md](../operations/deployment.md) |
 | **Done when** | Deliverable complete and locally verified |
 | **Status** | Complete |
-| **Completed** | 2026-08-08 — Docker Compose stack (`nginx`, `app`, `mysql`, `redis`, `horizon`); isolated env via `deploy/env/docker.env` + `./deploy/compose.sh`; host asset build via `./deploy/build-assets.sh`; runbook [deploy/README.md](../../deploy/README.md); stack verified at `http://localhost:8081/up` |
+| **Completed** | 2026-08-08 — Docker Compose stack (`nginx`, `app`, `mysql`, `redis`, `horizon`, `scheduler`); multi-stage `Dockerfile` (Composer + Node 24 Vite build + PHP 8.4); isolated env via `deploy/env/docker.env` + `./deploy/compose.sh`; no host Node on VPS; runbook [deploy/README.md](../../deploy/README.md); stack verified at `http://localhost:8081/up` |
 
 **Deliverables:** `docker-compose.yml`, `Dockerfile`, `docker/nginx/`, `docker/php/`, `docker/entrypoint.sh`, `deploy/README.md`, `deploy/env/docker.env.example`, `deploy/env/vps.env.example`, `deploy/compose.sh`, `deploy/build.sh`, `deploy/build-assets.sh`, `deploy/setup-docker-env.sh`
 
@@ -1568,8 +1568,12 @@ flowchart LR
 |---|---|
 | **Group** | VPS deployment (Phase 20) |
 | **Sprint** | S8 |
-| **Reference** | [deployment.md](../operations/deployment.md) |
+| **Reference** | [deployment.md](../operations/deployment.md), [deploy/vps/PROVISION.md](../../deploy/vps/PROVISION.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-08 — VPS runbook, `bootstrap-server.sh`, `verify-provision.sh`, `production.env.example`, `compose-production.sh`, `docker-compose.production.yml` |
+
+**Deliverables:** [deploy/vps/PROVISION.md](../../deploy/vps/PROVISION.md), `deploy/vps/bootstrap-server.sh`, `deploy/vps/verify-provision.sh`, `deploy/env/production.env.example`, `deploy/compose-production.sh`, `docker-compose.production.yml`
 
 ### Step 113 — SSH, firewall, TLS
 

@@ -1,0 +1,27 @@
+# Production overrides (VPS — Steps 112–114).
+# Use: ./deploy/compose-production.sh up -d
+#
+# Binds nginx to localhost only — host reverse proxy (Step 113) routes the subdomain.
+
+services:
+  nginx:
+    ports:
+      - "127.0.0.1:${HTTP_PORT:-8081}:80"
+
+  app:
+    volumes:
+      - ./deploy/env/production.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage
+
+  horizon:
+    volumes:
+      - ./deploy/env/production.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage
+
+  scheduler:
+    volumes:
+      - ./deploy/env/production.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage

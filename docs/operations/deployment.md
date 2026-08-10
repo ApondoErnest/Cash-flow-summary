@@ -11,6 +11,10 @@
 3. Dockerization
 4. Production VPS
 
+Provision: **[deploy/vps/PROVISION.md](../../deploy/vps/PROVISION.md)** (Step 112).
+
+**Hostinger coexistence (gs-autobilan + subdomain):** **[deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md)** — full runbook for **`https://cashflow.gsautobilan.com`** on `89.117.37.202`.
+
 ---
 
 ## Docker Compose services

@@ -54,6 +54,24 @@ services:
     networks:
       - cashflow
 
+  scheduler:
+    image: cashflow-summary-app:latest
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: php artisan schedule:work
+    volumes:
+      - ./deploy/env/docker.env:/var/www/html/.env
+      - ./deploy:/var/www/html/deploy:ro
+      - storage_data:/var/www/html/storage
+    networks:
+      - cashflow
+
   mysql:
     image: mysql:8.0
     restart: unless-stopped
