@@ -85,15 +85,25 @@ Manual spot-check:
 
 ---
 
-## Backup outline (full procedure in Step 115)
+## Backup procedure (Step 115)
 
-| Asset | Suggested command |
-|-------|-------------------|
-| MySQL | `./deploy/compose-production.sh exec -T mysql sh -c 'mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' > backup.sql` |
-| MySQL (script) | `./deploy/backup-production.sh` |
-| Storage files | `docker run --rm -v cashflow-summary_storage_data:/data -v $(pwd):/backup alpine tar czf /backup/storage.tgz -C /data .` |
+Automated on the VPS via `./deploy/install-backup-cron.sh`. Manual run:
 
-Restore is the inverse (Step 117 restore drill).
+```bash
+./deploy/backup-production.sh run
+./deploy/backup-production.sh verify
+```
+
+| Asset | Command / output |
+|-------|------------------|
+| MySQL | `${BACKUP_ROOT}/runs/<timestamp>/database.sql.gz` |
+| Storage (`imports`, `exports`, `logs`) | `storage-files.tgz` (from `cashflow-summary_storage_data`) |
+| Secrets | `production.env.snapshot` (mode 600) |
+| Metadata | `manifest.json` (sizes + sha256) |
+
+Retention: **28** daily runs on VPS by default (auto-delete older). Weekly/monthly tiers are **off** unless configured in `deploy/env/backup.env`.
+
+Restore: Step **117** restore drill ([backup-monitoring.md](../operations/backup-monitoring.md) § Restore test).
 
 ---
 

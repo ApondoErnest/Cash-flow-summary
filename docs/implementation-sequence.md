@@ -27,8 +27,8 @@ flowchart LR
 | Item | Value |
 |------|-------|
 | Doc set | v2.1.09 |
-| Steps complete | **1–112** |
-| **Next step** | **Step 113** — SSH, firewall, TLS |
+| Steps complete | **1–115** |
+| **Next step** | **Step 116** — Uptime and alert configuration |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -150,9 +150,9 @@ flowchart LR
 | 110 | Persistent volumes | Dockerization | S8 | Complete |
 | 111 | Smoke tests in containers | Dockerization | S8 | Complete |
 | 112 | Provision Ubuntu VPS | VPS deployment | S8 | Complete |
-| 113 | SSH, firewall, TLS | VPS deployment | S8 | Not started |
-| 114 | Deploy procedure + rollback | VPS deployment | S8 | Not started |
-| 115 | Daily DB + file backups | Backup & monitoring | S8 | Not started |
+| 113 | SSH, firewall, TLS | VPS deployment | S8 | Complete |
+| 114 | Deploy procedure + rollback | VPS deployment | S8 | Complete |
+| 115 | Daily DB + file backups | Backup & monitoring | S8 | Complete |
 | 116 | Uptime and alert configuration | Backup & monitoring | S8 | Not started |
 | 117 | Restore drill on staging | Backup & monitoring | S8 | Not started |
 | 118 | Pilot one center | Controlled production rollout | S8 | Not started |
@@ -1581,8 +1581,12 @@ flowchart LR
 |---|---|
 | **Group** | VPS deployment (Phase 20) |
 | **Sprint** | S8 |
-| **Reference** | [deployment.md](../operations/deployment.md) |
+| **Reference** | [deployment.md](../operations/deployment.md), [deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md) (Phases 5–6) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-10 — Host nginx + Certbot for **`https://cashflow.gsautobilan.com`** on Hostinger VPS `89.117.37.202`; SSH key-only, UFW (22/80/443), and unattended upgrades inherited from gs-autobilan baseline |
+
+**Deliverables:** [deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md) (Phases 5–6), `deploy/vps/nginx-host/cashflow.gsautobilan.com.conf`, [deployment.md](../operations/deployment.md) § Hardening
 
 ### Step 114 — Deploy procedure + rollback
 
@@ -1590,14 +1594,18 @@ flowchart LR
 |---|---|
 | **Group** | VPS deployment (Phase 20) |
 | **Sprint** | S8 |
-| **Reference** | [deployment.md](../operations/deployment.md) |
+| **Reference** | [deployment.md](../operations/deployment.md), [deploy/README.md](../../deploy/README.md), [deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md) (Phases 3–4) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-10 — `./deploy/build-production.sh`, migrate, `./deploy/compose-production.sh up`, `./deploy/smoke-test-production.sh` all pass on VPS; `/up` and `/login` HTTP 200 over HTTPS; `env_file` in `docker-compose.production.yml` for PHP-FPM secrets |
+
+**Deliverables:** `deploy/build-production.sh`, `deploy/compose-production.sh`, `deploy/smoke-test-production.sh`, `deploy/backup-production.sh`, `docker-compose.production.yml`, [deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md)
 
 **Checkpoint after Step 114** (end of VPS deployment):
 
-- **Gate:** Production URL serves app over HTTPS
+- **Gate:** Production URL serves app over HTTPS — **passed** (`https://cashflow.gsautobilan.com/up`, `/login`)
 - **Requirements:** —
-- **Gate tests (AC):** —
+- **Gate tests (AC):** AC #34 (`./deploy/smoke-test-production.sh`)
 
 ---
 
@@ -1607,8 +1615,14 @@ flowchart LR
 |---|---|
 | **Group** | Backup & monitoring (Phase 21) |
 | **Sprint** | S8 |
-| **Reference** | [backup-monitoring.md](../operations/backup-monitoring.md) |
+| **Reference** | [backup-monitoring.md](../operations/backup-monitoring.md), [deploy/volumes.md](../../deploy/volumes.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-11 — `backup-production.sh` (run/retention/verify/offsite/config), `install-backup-cron.sh`, `deploy/env/backup.env.example`, daily + weekly cron; **local VPS retention ~28 days** (weekly/monthly off by default) |
+
+**Deliverables:** `deploy/backup-production.sh`, `deploy/install-backup-cron.sh`, `deploy/cron/cashflow-summary-backup.cron`, `deploy/env/backup.env.example`, [backup-monitoring.md](../operations/backup-monitoring.md), [deploy/volumes.md](../../deploy/volumes.md)
+
+**VPS activation:** `./deploy/backup-production.sh run`, `./deploy/backup-production.sh verify`, `./deploy/install-backup-cron.sh` (see [HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md) § Scheduled backups)
 
 ### Step 116 — Uptime and alert configuration
 

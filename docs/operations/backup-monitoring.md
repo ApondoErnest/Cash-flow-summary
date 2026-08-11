@@ -8,21 +8,53 @@
 
 | Asset | Method | Frequency |
 |-------|--------|-----------|
-| MySQL database | mysqldump / snapshot | Daily |
-| Accepted CSV files | `storage/app/private/imports/` sync | Daily |
-| Exports | `storage/app/exports/` | Daily |
-| Application `.env` | Encrypted off-server copy | On change |
-| Docker compose + nginx config | Git + server backup | Weekly |
+| MySQL database | `mysqldump` → `database.sql.gz` | Daily 02:00 |
+| Import CSVs + exports + logs | `storage-files.tgz` from Docker volume | Daily 02:00 |
+| Application `.env` | `production.env.snapshot` in each run | Daily (on change between runs) |
+| Docker compose + nginx config | `backup-production.sh config` | Weekly (Sunday 04:00) |
+
+### Production scripts (VPS)
+
+| Script | Purpose |
+|--------|---------|
+| `./deploy/backup-production.sh run` | Full backup + retention + optional off-site |
+| `./deploy/backup-production.sh verify` | Check latest backup artifacts |
+| `./deploy/backup-production.sh retention` | Apply retention only |
+| `./deploy/backup-production.sh offsite` | rsync to `BACKUP_OFFSITE_RSYNC_DEST` |
+| `./deploy/backup-production.sh config` | Snapshot compose + host nginx |
+| `./deploy/install-backup-cron.sh` | Install cron for daily + weekly jobs |
+
+Optional settings: **`deploy/env/backup.env`** (template: `deploy/env/backup.env.example`).
+
+Default backup root: **`/var/backups/cashflow-summary/`** (`runs/`, optional `weekly/`, `monthly/`, `config/`).
+
+### Local VPS disk policy (default)
+
+On the server, backups auto-prune so disk does not pile up:
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| `RETENTION_DAILY` | **28** | Delete daily runs older than 28 days (~4 weeks) |
+| `RETENTION_WEEKLY` | **0** | No extra weekly copies on VPS |
+| `RETENTION_MONTHLY` | **0** | No extra monthly copies on VPS |
+
+At steady state you keep **at most ~28 daily snapshots** under `runs/` (one per day if cron runs daily). Each snapshot is one DB gzip + one storage tarball — size grows with import/export volume, so monitor `df -h`.
+
+Enable `RETENTION_WEEKLY` / `RETENTION_MONTHLY` only when copying to **off-server** storage (see `BACKUP_OFFSITE_RSYNC_DEST`). Long-term tiers (7 / 4 / 12) in the table below apply to **off-site** archives, not the default VPS layout.
+
+Log file: **`/var/log/cashflow-summary-backup.log`**
+
+See also [deploy/volumes.md](../../deploy/volumes.md) and [deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md) § Scheduled backups.
 
 ### Retention
 
-| Tier | Retention |
-|------|-----------|
-| Daily | 7 days |
-| Weekly full | 4 weeks |
-| Monthly | 12 months |
+| Tier | Retention | Where |
+|------|-----------|--------|
+| Daily | 28 days (default on VPS) | `/var/backups/cashflow-summary/runs/` |
+| Weekly full | 4 weeks | Off-server only (optional; set `RETENTION_WEEKLY=4`) |
+| Monthly | 12 months | Off-server only (optional; set `RETENTION_MONTHLY=12`) |
 
-Off-server backups encrypted at rest.
+Off-server backups encrypted at rest. **Do not** enable weekly/monthly promotion on a small VPS unless you sync to external storage — each tier is a full copy and uses extra disk.
 
 ---
 
@@ -72,9 +104,10 @@ Alert channel: Owner WhatsApp or email to deploy admin (operational, not app ema
 |------|----------|
 | Expire import verifications | Every 15 minutes |
 | Daily summary regeneration | Nightly |
-| Database backup | 02:00 daily |
-| File backup | 03:00 daily |
-| Certificate check | Weekly |
+| Database backup | 02:00 daily (`backup-production.sh run`) |
+| File backup | 02:00 daily (same run as DB) |
+| Config snapshot | Sunday 04:00 (`backup-production.sh config`) |
+| Certificate check | Weekly (`certbot renew --dry-run` on host) |
 
 ---
 

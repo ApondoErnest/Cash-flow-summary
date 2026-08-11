@@ -55,7 +55,7 @@ Host Nginx (:80 / :443)          ← TLS + routing by server_name
 | `./deploy/compose-production.sh` | `./deploy/compose.sh` |
 | `./deploy/build-production.sh` | Root `.env` |
 | `./deploy/smoke-test-production.sh` | `deploy/env/docker.env` |
-| `./deploy/backup-production.sh` | Host Node/npm (not required) |
+| `./deploy/backup-production.sh` | `./deploy/install-backup-cron.sh` (Step 115 cron) |
 
 **VPS host needs only:** Docker, Docker Compose, host nginx, certbot, git, curl. Frontend and Composer build **inside Docker**.
 
@@ -515,6 +515,51 @@ docker ps --format "table {{.Names}}\t{{.Ports}}"
 
 ---
 
+## Scheduled backups (Step 115)
+
+Daily automated backups protect MySQL, import/export files, and `production.env`.
+
+### One-time setup on the VPS
+
+```bash
+cd /var/www/cashflow-summary
+git pull origin main
+
+chmod +x deploy/backup-production.sh deploy/install-backup-cron.sh
+
+# Optional off-site / retention overrides
+cp deploy/env/backup.env.example deploy/env/backup.env
+nano deploy/env/backup.env
+
+sudo mkdir -p /var/backups/cashflow-summary
+sudo chown "$USER:$USER" /var/backups/cashflow-summary
+chmod 700 /var/backups/cashflow-summary
+
+# Manual test
+./deploy/backup-production.sh run
+./deploy/backup-production.sh verify
+
+# Install cron (02:00 daily backup, Sun 04:00 config snapshot)
+./deploy/install-backup-cron.sh
+```
+
+Backups are stored under **`/var/backups/cashflow-summary/`**:
+
+| Path | Contents |
+|------|----------|
+| `runs/YYYYMMDD-HHMMSS/` | Daily MySQL gzip, storage tarball, env snapshot, manifest (~28 days kept) |
+| `weekly/YYYY-WWW/` | Optional — only when `RETENTION_WEEKLY>0` |
+| `monthly/YYYY-MM/` | Optional — only when `RETENTION_MONTHLY>0` |
+| `config/` | Host nginx + compose snapshots |
+
+Log: **`/var/log/cashflow-summary-backup.log`**
+
+Optional off-site copy — set `BACKUP_OFFSITE_RSYNC_DEST` in `deploy/env/backup.env`, then re-run a backup or wait for cron.
+
+Restore procedure: Step **117** ([backup-monitoring.md](../../docs/operations/backup-monitoring.md)).
+
+---
+
 ## Phase 8 — WhatsApp (Meta)
 
 Configure only after **https://cashflow.gsautobilan.com** is fully working.
@@ -544,11 +589,12 @@ Send a test message from WhatsApp settings in the app.
 
 ## Later deploys (updates only)
 
-Back up **before** pulling code:
+Back up **before** pulling code (or rely on nightly cron from Step 115):
 
 ```bash
 cd /var/www/cashflow-summary
-./deploy/backup-production.sh
+./deploy/backup-production.sh run
+./deploy/backup-production.sh verify
 ```
 
 Then deploy:

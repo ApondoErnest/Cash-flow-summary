@@ -1,0 +1,11 @@
+# Cash Flow Summary scheduled backups (Step 115)
+# Installed by: ./deploy/install-backup-cron.sh
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Daily full backup — DB + storage files + production.env (02:00)
+0 2 * * * cd __APP_DIR__ && ./deploy/backup-production.sh run >> /var/log/cashflow-summary-backup.log 2>&1
+
+# Weekly host nginx + compose config snapshot (Sunday 04:00)
+0 4 * * 0 cd __APP_DIR__ && ./deploy/backup-production.sh config >> /var/log/cashflow-summary-backup.log 2>&1

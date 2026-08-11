@@ -245,12 +245,25 @@ Validates services, HTTP via nginx, in-container DB/Redis/config, Horizon, and s
 |------|-----|---------|
 | **112** | [deploy/vps/PROVISION.md](vps/PROVISION.md) | `bootstrap-server.sh`, `verify-provision.sh` |
 | **112+** | **[deploy/vps/HOSTINGER-SUBDOMAIN.md](vps/HOSTINGER-SUBDOMAIN.md)** | **cashflow.gsautobilan.com** on Hostinger VPS `89.117.37.202` |
-| **113** | *(next)* SSH, UFW, TLS | — |
-| **114** | *(next)* Deploy + rollback | `compose-production.sh`, `build-production.sh` |
+| **113** | [HOSTINGER-SUBDOMAIN.md](vps/HOSTINGER-SUBDOMAIN.md) Phases 5–6 | Host nginx, Certbot TLS |
+| **114** | [HOSTINGER-SUBDOMAIN.md](vps/HOSTINGER-SUBDOMAIN.md) Phases 3–4 | `compose-production.sh`, `build-production.sh`, `smoke-test-production.sh` |
+| **115** | [backup-monitoring.md](../docs/operations/backup-monitoring.md) | `backup-production.sh`, `install-backup-cron.sh` |
 
 Production secrets: **`deploy/env/production.env`** only (template: `production.env.example`).
 
-Run on VPS with **`./deploy/compose-production.sh`**. Back up before updates: **`./deploy/backup-production.sh`**.
+Run on VPS with **`./deploy/compose-production.sh`**.
+
+### Backups (Step 115)
+
+| Script | Purpose |
+|--------|---------|
+| `./deploy/backup-production.sh run` | Daily backup (DB + storage + env) |
+| `./deploy/backup-production.sh verify` | Validate latest backup |
+| `./deploy/install-backup-cron.sh` | Install 02:00 daily + Sun 04:00 config cron |
+
+Optional: `deploy/env/backup.env` from `backup.env.example` (off-site rsync, retention).
+
+Back up before updates: **`./deploy/backup-production.sh run`**
 
 ---
 

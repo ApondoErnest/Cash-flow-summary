@@ -13,6 +13,7 @@ local-db.env
 .env.production
 deploy/env/docker.env
 deploy/env/production.env
+deploy/env/backup.env
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
