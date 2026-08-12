@@ -75,14 +75,14 @@ class Login extends Component
         $user = auth()->user();
 
         if ($user === null) {
-            $this->redirect(route('login'), navigate: true);
+            $this->redirect(route('login'), navigate: false);
 
             return;
         }
 
         $twoFactorService->clearVerification();
 
-        $this->redirect($redirectService->nextRoute($user), navigate: true);
+        $this->redirect($redirectService->nextRoute($user), navigate: false);
     }
 
     public function render()

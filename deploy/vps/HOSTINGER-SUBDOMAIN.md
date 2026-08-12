@@ -602,12 +602,13 @@ Then deploy:
 ```bash
 git pull origin main
 ./deploy/build-production.sh
-./deploy/compose-production.sh run --rm app php artisan migrate --force
-./deploy/compose-production.sh up -d
-./deploy/compose-production.sh exec app php artisan config:cache
-./deploy/compose-production.sh exec app php artisan route:cache
-./deploy/compose-production.sh exec app php artisan view:cache
+./deploy/compose-production.sh up -d --force-recreate app nginx horizon scheduler
+./deploy/compose-production.sh exec app php artisan config:clear
+./deploy/compose-production.sh exec app php artisan route:clear
+./deploy/compose-production.sh exec app php artisan view:clear
+./deploy/compose-production.sh exec app php artisan migrate --force
 ./deploy/smoke-test-production.sh
+./deploy/compose-production.sh exec app php deploy/diagnose-login-production.php
 ```
 
 No `--seed` on updates. See [../volumes.md](../volumes.md) for storage volume backups.
@@ -680,6 +681,7 @@ See [../volumes.md](../volumes.md).
 | CSV import hangs | `./deploy/compose-production.sh logs horizon` |
 | Session issues after HTTPS | `APP_URL=https://cashflow.gsautobilan.com` |
 | `/up` 200 but `/login` 500, log shows `MissingAppKeyException` | PHP-FPM runs as `www-data` and cannot read mode-600 `.env`. Update to latest `docker-compose.production.yml` (has `env_file`) and `./deploy/compose-production.sh up -d --force-recreate app horizon scheduler`. Or interim: `chmod 644 deploy/env/production.env && ./deploy/compose-production.sh restart app` |
+| Login button spins forever (no error) | 1) Default seed user is **`owner`** / **`password`** (not a custom username). 2) Clear stale caches: `config:clear`, `route:clear`, restart `app`. 3) Tail `storage/logs/laravel.log` during click — often `419` (session) or cached empty `APP_KEY`. 4) On host nginx `:443` block, ensure `proxy_set_header X-Forwarded-Proto $scheme;` |
 | Empty `APP_KEY` after Phase 3 | Do not continue; re-run `key:generate` and verify mount |
 | Out of memory | `free -h`; upgrade VPS |
 
