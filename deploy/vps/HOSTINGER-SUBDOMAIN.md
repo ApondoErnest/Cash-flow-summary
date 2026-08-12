@@ -682,7 +682,7 @@ See [../volumes.md](../volumes.md).
 | Login without CSS | Re-run `./deploy/build-production.sh` |
 | CSV import hangs | `./deploy/compose-production.sh logs horizon` |
 | Session issues after HTTPS | `APP_URL=https://cashflow.gsautobilan.com` |
-| `/login` or `/up` **500** after deploy | Unreadable bind-mounted `.env` (mode 600/640) breaks PHP-FPM. **Quick:** `chmod 644 deploy/env/production.env && ./deploy/compose-production.sh restart app`. **Proper:** latest compose (no `.env` mount) + rebuild app image (`clear_env=no`) + `--force-recreate app` |
+| `/login` or `/up` **500**, log `Uninitialized string offset` in `Request.php` | Docker nginx passed empty `X-Forwarded-Host` to PHP-FPM. Pull latest (removes that header) and rebuild nginx: `./deploy/build-production.sh && ./deploy/compose-production.sh up -d --force-recreate nginx app` |
 | Login button spins forever (no error) | 1) Default seed user is **`owner`** / **`password`**. 2) Clear caches (`config:clear`, `route:clear`). 3) **`/login` 500 via browser but diagnose passes** — PHP-FPM strips Docker env by default; rebuild app image (`docker/php-fpm/zz-laravel-env.conf`) or interim `chmod 644 deploy/env/production.env`. 4) Host nginx `:443` needs `proxy_set_header X-Forwarded-Proto $scheme;` |
 | Empty `APP_KEY` after Phase 3 | Do not continue; re-run `key:generate` and verify mount |
 | Out of memory | `free -h`; upgrade VPS |

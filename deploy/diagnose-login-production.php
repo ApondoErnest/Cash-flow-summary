@@ -218,6 +218,10 @@ $nginxBody = @file_get_contents('http://nginx/login', false, stream_context_crea
     'http' => [
         'ignore_errors' => true,
         'timeout' => 15,
+        'header' => implode("\r\n", [
+            'Host: '.(parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'cashflow.gsautobilan.com'),
+            'X-Forwarded-Proto: https',
+        ])."\r\n",
     ],
 ]));
 
