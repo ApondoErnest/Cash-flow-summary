@@ -211,6 +211,30 @@ if (! is_file($manifestPath)) {
     note('Vite manifest present');
 }
 
+echo "\n7. PHP-FPM via nginx (real HTTP path — not CLI)\n";
+
+$nginxStatus = 0;
+$nginxBody = @file_get_contents('http://nginx/login', false, stream_context_create([
+    'http' => [
+        'ignore_errors' => true,
+        'timeout' => 15,
+    ],
+]));
+
+if (isset($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $statusMatch)) {
+    $nginxStatus = (int) $statusMatch[1];
+}
+
+if ($nginxStatus !== 200) {
+    fail('/login via nginx→PHP-FPM returned HTTP '.$nginxStatus.' — rebuild app image (PHP-FPM clear_env) or chmod 644 deploy/env/production.env');
+} else {
+    note('/login via nginx→PHP-FPM HTTP 200');
+}
+
+if ($nginxBody === false || ! str_contains($nginxBody, 'Sign in')) {
+    fail('/login via nginx missing expected HTML');
+}
+
 echo "\n";
 
 if ($failures !== []) {
@@ -222,7 +246,8 @@ if ($failures !== []) {
     fwrite(STDERR, "  ./deploy/compose-production.sh exec app php artisan config:clear\n");
     fwrite(STDERR, "  ./deploy/compose-production.sh exec app php artisan route:clear\n");
     fwrite(STDERR, "  ./deploy/compose-production.sh exec app php artisan view:clear\n");
-    fwrite(STDERR, "  ./deploy/compose-production.sh restart app nginx\n");
+    fwrite(STDERR, "  ./deploy/build-production.sh && ./deploy/compose-production.sh up -d --force-recreate app nginx\n");
+    fwrite(STDERR, "  chmod 644 deploy/env/production.env  # interim if .env unreadable by www-data\n");
     fwrite(STDERR, "  sudo grep -R X-Forwarded-Proto /etc/nginx/sites-enabled/\n");
     exit(1);
 }

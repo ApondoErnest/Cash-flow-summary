@@ -96,6 +96,7 @@ RUN mkdir -p \
     && chmod -R ug+rwx storage bootstrap/cache
 
 COPY docker/php/conf.d/99-laravel.ini /usr/local/etc/php/conf.d/99-laravel.ini
+COPY docker/php-fpm/zz-laravel-env.conf /usr/local/etc/php-fpm.d/zz-laravel-env.conf
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

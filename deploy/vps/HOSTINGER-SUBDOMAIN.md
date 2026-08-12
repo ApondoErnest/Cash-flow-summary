@@ -681,7 +681,7 @@ See [../volumes.md](../volumes.md).
 | CSV import hangs | `./deploy/compose-production.sh logs horizon` |
 | Session issues after HTTPS | `APP_URL=https://cashflow.gsautobilan.com` |
 | `/up` 200 but `/login` 500, log shows `MissingAppKeyException` | PHP-FPM runs as `www-data` and cannot read mode-600 `.env`. Update to latest `docker-compose.production.yml` (has `env_file`) and `./deploy/compose-production.sh up -d --force-recreate app horizon scheduler`. Or interim: `chmod 644 deploy/env/production.env && ./deploy/compose-production.sh restart app` |
-| Login button spins forever (no error) | 1) Default seed user is **`owner`** / **`password`** (not a custom username). 2) Clear stale caches: `config:clear`, `route:clear`, restart `app`. 3) Tail `storage/logs/laravel.log` during click — often `419` (session) or cached empty `APP_KEY`. 4) On host nginx `:443` block, ensure `proxy_set_header X-Forwarded-Proto $scheme;` |
+| Login button spins forever (no error) | 1) Default seed user is **`owner`** / **`password`**. 2) Clear caches (`config:clear`, `route:clear`). 3) **`/login` 500 via browser but diagnose passes** — PHP-FPM strips Docker env by default; rebuild app image (`docker/php-fpm/zz-laravel-env.conf`) or interim `chmod 644 deploy/env/production.env`. 4) Host nginx `:443` needs `proxy_set_header X-Forwarded-Proto $scheme;` |
 | Empty `APP_KEY` after Phase 3 | Do not continue; re-run `key:generate` and verify mount |
 | Out of memory | `free -h`; upgrade VPS |
 
