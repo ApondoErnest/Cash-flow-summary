@@ -260,7 +260,7 @@ chmod 600 deploy/env/production.env
 ls -l deploy/env/production.env
 ```
 
-`docker-compose.production.yml` injects this file via **`env_file`** into app/horizon/scheduler so PHP-FPM (`www-data`) receives secrets even though it cannot read a mode-600 bind mount. Keep **`chmod 600`** — do not `chmod 644` unless you are on an older compose file without `env_file`.
+`docker-compose.production.yml` injects this file via **`env_file`** (and PHP-FPM `clear_env=no`). **Do not bind-mount** it as `/var/www/html/.env` — a mode-600/640 mount breaks PHP-FPM even when env vars are set. Keep **`chmod 600`** on the host file.
 
 ```bash
 grep -E '^(DB_PASSWORD|DB_ROOT_PASSWORD)=' deploy/env/production.env
@@ -302,10 +302,12 @@ cd /var/www/cashflow-summary
 ./deploy/build-production.sh
 ```
 
-Generate **`APP_KEY`** — writes into `deploy/env/production.env` via the container mount (`production.env` → `/var/www/html/.env`):
+Generate **`APP_KEY`** — one-off mount writes into `deploy/env/production.env`:
 
 ```bash
-./deploy/compose-production.sh run --rm --no-deps app php artisan key:generate
+./deploy/compose-production.sh run --rm --no-deps \
+  -v ./deploy/env/production.env:/var/www/html/.env \
+  app php artisan key:generate
 grep '^APP_KEY=' deploy/env/production.env
 docker images | grep cashflow-summary
 ```
@@ -680,7 +682,7 @@ See [../volumes.md](../volumes.md).
 | Login without CSS | Re-run `./deploy/build-production.sh` |
 | CSV import hangs | `./deploy/compose-production.sh logs horizon` |
 | Session issues after HTTPS | `APP_URL=https://cashflow.gsautobilan.com` |
-| `/up` 200 but `/login` 500, log shows `MissingAppKeyException` | PHP-FPM runs as `www-data` and cannot read mode-600 `.env`. Update to latest `docker-compose.production.yml` (has `env_file`) and `./deploy/compose-production.sh up -d --force-recreate app horizon scheduler`. Or interim: `chmod 644 deploy/env/production.env && ./deploy/compose-production.sh restart app` |
+| `/login` or `/up` **500** after deploy | Unreadable bind-mounted `.env` (mode 600/640) breaks PHP-FPM. **Quick:** `chmod 644 deploy/env/production.env && ./deploy/compose-production.sh restart app`. **Proper:** latest compose (no `.env` mount) + rebuild app image (`clear_env=no`) + `--force-recreate app` |
 | Login button spins forever (no error) | 1) Default seed user is **`owner`** / **`password`**. 2) Clear caches (`config:clear`, `route:clear`). 3) **`/login` 500 via browser but diagnose passes** — PHP-FPM strips Docker env by default; rebuild app image (`docker/php-fpm/zz-laravel-env.conf`) or interim `chmod 644 deploy/env/production.env`. 4) Host nginx `:443` needs `proxy_set_header X-Forwarded-Proto $scheme;` |
 | Empty `APP_KEY` after Phase 3 | Do not continue; re-run `key:generate` and verify mount |
 | Out of memory | `free -h`; upgrade VPS |
@@ -734,7 +736,9 @@ grep -E '^(DB_PASSWORD|DB_ROOT_PASSWORD|APP_URL|HTTP_PORT|APP_KEY)=' deploy/env/
 
 # Phase 3
 ./deploy/build-production.sh
-./deploy/compose-production.sh run --rm --no-deps app php artisan key:generate
+./deploy/compose-production.sh run --rm --no-deps \
+  -v ./deploy/env/production.env:/var/www/html/.env \
+  app php artisan key:generate
 grep '^APP_KEY=' deploy/env/production.env
 if ! grep -q '^APP_KEY=base64:' deploy/env/production.env; then echo "ERROR: APP_KEY missing" >&2; exit 1; fi
 

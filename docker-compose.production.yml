@@ -10,12 +10,12 @@ services:
       - "127.0.0.1:${HTTP_PORT:-8081}:80"
 
   app:
-    # Inject secrets into the container env (PHP-FPM runs as www-data and cannot
-    # read a mode-600 bind-mounted .env). The mount remains for artisan key:generate.
+    # Secrets via env_file only — do not bind-mount .env (unreadable mode-600/640 breaks PHP-FPM).
+    # For key:generate: ./deploy/compose-production.sh run --rm --no-deps \
+    #   -v ./deploy/env/production.env:/var/www/html/.env app php artisan key:generate
     env_file:
       - ./deploy/env/production.env
     volumes:
-      - ./deploy/env/production.env:/var/www/html/.env
       - ./deploy:/var/www/html/deploy:ro
       - storage_data:/var/www/html/storage
 
@@ -23,7 +23,6 @@ services:
     env_file:
       - ./deploy/env/production.env
     volumes:
-      - ./deploy/env/production.env:/var/www/html/.env
       - ./deploy:/var/www/html/deploy:ro
       - storage_data:/var/www/html/storage
 
@@ -31,6 +30,5 @@ services:
     env_file:
       - ./deploy/env/production.env
     volumes:
-      - ./deploy/env/production.env:/var/www/html/.env
       - ./deploy:/var/www/html/deploy:ro
       - storage_data:/var/www/html/storage
