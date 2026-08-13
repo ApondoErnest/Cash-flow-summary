@@ -239,6 +239,80 @@ if ($nginxBody === false || ! str_contains($nginxBody, 'Sign in')) {
     fail('/login via nginx missing expected HTML');
 }
 
+echo "\n8. Livewire POST via nginx (browser submit path, with CSRF)\n";
+
+if (! preg_match('#(/livewire-[a-f0-9]+/update)#', $nginxBody, $updateMatch)) {
+    fail('Login HTML via nginx missing Livewire update URI');
+}
+
+$updatePath = $updateMatch[1];
+
+if (! preg_match('/data-csrf="([^"]+)"/', $nginxBody, $csrfMatch)) {
+    fail('Login HTML via nginx missing data-csrf token');
+}
+
+$csrfToken = $csrfMatch[1];
+
+if (! preg_match('/wire:snapshot="([^"]+)"/', $nginxBody, $snapshotMatch)) {
+    fail('Login HTML via nginx missing Livewire login snapshot');
+}
+
+$snapshotJson = html_entity_decode($snapshotMatch[1], ENT_QUOTES);
+
+$livewirePayload = json_encode([
+    '_token' => $csrfToken,
+    'components' => [[
+        'snapshot' => $snapshotJson,
+        'updates' => [
+            'username' => env('SEED_OWNER_USERNAME', 'owner'),
+            'password' => env('SEED_OWNER_PASSWORD', 'password'),
+        ],
+        'calls' => [[
+            'path' => '',
+            'method' => 'authenticate',
+            'params' => [],
+        ]],
+    ]],
+], JSON_THROW_ON_ERROR);
+
+$livewireContext = stream_context_create([
+    'http' => [
+        'method' => 'POST',
+        'ignore_errors' => true,
+        'timeout' => 30,
+        'header' => implode("\r\n", [
+            'Host: '.(parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'cashflow.gsautobilan.com'),
+            'Content-Type: application/json',
+            'X-Livewire: true',
+            'X-CSRF-TOKEN: '.$csrfToken,
+            'Referer: '.rtrim((string) config('app.url'), '/').'/login',
+            'Content-Length: '.strlen($livewirePayload),
+        ])."\r\n",
+        'content' => $livewirePayload,
+    ],
+]);
+
+$livewireBody = @file_get_contents('http://nginx'.$updatePath, false, $livewireContext);
+$livewireStatus = 0;
+
+if (isset($http_response_header[0])) {
+    foreach ($http_response_header as $headerLine) {
+        if (preg_match('/^HTTP\/\S+\s(\d{3})/', $headerLine, $statusMatch)) {
+            $livewireStatus = (int) $statusMatch[1];
+        }
+    }
+}
+
+if ($livewireStatus === 419) {
+    fail('Livewire POST via nginx returned 419 (CSRF/session) — browser spin likely; clear site cookies');
+} elseif ($livewireStatus !== 200) {
+    fail('Livewire POST via nginx returned HTTP '.$livewireStatus);
+} elseif ($livewireBody === false || ! str_contains($livewireBody, 'password/change')) {
+    fail('Livewire POST via nginx did not redirect to password/change');
+} else {
+    note('Livewire POST via nginx HTTP 200 → password/change');
+}
+
 echo "\n";
 
 if ($failures !== []) {
@@ -257,4 +331,5 @@ if ($failures !== []) {
 }
 
 echo "All login diagnostics passed in-container.\n";
-echo "If the browser still spins, open DevTools → Network → click Sign in → check POST /livewire/update status (419/500/502).\n";
+echo "Also run on the VPS (tests host nginx :443): ./deploy/test-livewire-login-https.sh\n";
+echo "In the browser DevTools → Network, click Sign in and inspect POST /livewire-…/update (not GET livewire.min.js).\n";

@@ -79,3 +79,7 @@ test('content security policy builder joins directives', function () {
 
     expect($policy)->toBe("default-src 'self'; script-src 'self' 'unsafe-inline'");
 });
+
+test('production csp allows unsafe-eval for livewire and alpine', function () {
+    expect(config('production_security.csp.script-src'))->toContain("'unsafe-eval'");
+});

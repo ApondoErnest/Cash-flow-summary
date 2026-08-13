@@ -88,7 +88,7 @@ PII in import_rows protected by center isolation and private storage.
 
 - HTTPS only; HSTS
 - Secure cookie flags
-- CSP headers
+- CSP headers (`script-src` includes `'unsafe-eval'` for Livewire/Alpine/Flux)
 - `.env` secrets not in Git
 - WhatsApp tokens in encrypted settings (access token always; webhook verify token when production webhooks enabled)
 - SSH key VPS access; firewall; non-root deploy user

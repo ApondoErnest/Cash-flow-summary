@@ -38,8 +38,11 @@ return [
     | Content Security Policy
     |--------------------------------------------------------------------------
     |
-    | Livewire and Flux require 'unsafe-inline' for scripts/styles. Assets are
-    | served from the application origin (Vite build + Bunny fonts bundled).
+    | Livewire, Alpine (via Flux), and Flux UI require:
+    | - 'unsafe-inline' for bootstrapping scripts/styles
+    | - 'unsafe-eval' for wire:click/submit expressions and x-data (Alpine evaluator)
+    | Without 'unsafe-eval', login and forms fail silently in the browser (CSP blocks eval).
+    | Assets are served from the application origin (Vite build + Bunny fonts bundled).
     |
     */
 
@@ -51,7 +54,7 @@ return [
         'img-src' => "'self' data: blob:",
         'font-src' => "'self' data:",
         'style-src' => "'self' 'unsafe-inline'",
-        'script-src' => "'self' 'unsafe-inline'",
+        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval'",
         'connect-src' => "'self'",
         'object-src' => "'none'",
     ],

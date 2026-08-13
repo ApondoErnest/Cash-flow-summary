@@ -683,7 +683,8 @@ See [../volumes.md](../volumes.md).
 | CSV import hangs | `./deploy/compose-production.sh logs horizon` |
 | Session issues after HTTPS | `APP_URL=https://cashflow.gsautobilan.com` |
 | `/login` or `/up` **500**, log `Uninitialized string offset` in `Request.php` | Docker nginx passed empty `X-Forwarded-Host` to PHP-FPM. Pull latest (removes that header) and rebuild nginx: `./deploy/build-production.sh && ./deploy/compose-production.sh up -d --force-recreate nginx app` |
-| Login button spins forever (no error) | 1) Default seed user is **`owner`** / **`password`**. 2) Clear caches (`config:clear`, `route:clear`). 3) **`/login` 500 via browser but diagnose passes** — PHP-FPM strips Docker env by default; rebuild app image (`docker/php-fpm/zz-laravel-env.conf`) or interim `chmod 644 deploy/env/production.env`. 4) Host nginx `:443` needs `proxy_set_header X-Forwarded-Proto $scheme;` |
+| Login button spins / no POST / Alpine CSP errors in console | Browser console: `unsafe-eval is not an allowed source of script` — production CSP must include **`'unsafe-eval'`** in `script-src` for Livewire/Alpine/Flux (fixed in `config/production_security.php`). Pull latest, rebuild app, hard-refresh browser. Local Docker works because `APP_ENV=local` disables CSP |
+| Login button spins forever (no error) | See CSP row above first. Also: default user **`owner`** / **`password`**; `config:clear` + `route:clear`; host nginx `:443` needs `proxy_set_header X-Forwarded-Proto $scheme;` |
 | Empty `APP_KEY` after Phase 3 | Do not continue; re-run `key:generate` and verify mount |
 | Out of memory | `free -h`; upgrade VPS |
 
