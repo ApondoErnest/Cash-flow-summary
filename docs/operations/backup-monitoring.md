@@ -60,12 +60,44 @@ Off-server backups encrypted at rest. **Do not** enable weekly/monthly promotion
 
 ## Restore test
 
-Quarterly restore to staging:
+Quarterly restore drill (Step **117**, AC **#35**):
 
-1. Restore MySQL dump
-2. Restore file storage
-3. Run smoke tests
-4. Document duration and issues
+1. Validate backup artifacts (`verify-backup`)
+2. Restore MySQL dump + storage files to an **isolated** Docker stack (`cashflow-restore-drill_*` volumes, port **8082**)
+3. Run smoke tests (`./deploy/smoke-test.sh` via restore drill compose)
+4. Write a report under `deploy/reports/restore-drill-*.txt` (duration + backup path)
+5. Tear down the drill stack when finished
+
+**Production is never modified** — restore drill uses separate volumes from `cashflow-summary_*`.
+
+### Restore drill scripts
+
+| Script | Purpose |
+|--------|---------|
+| `./deploy/restore-drill.sh verify-backup` | Check gzip/tar + optional manifest sha256 |
+| `./deploy/restore-drill.sh run` | Full drill: restore + smoke tests + report |
+| `./deploy/restore-drill.sh run --teardown` | Same, then remove drill stack automatically |
+| `./deploy/restore-drill.sh smoke` | Re-run smoke tests on running drill stack |
+| `./deploy/restore-drill.sh teardown` | Stop drill stack and delete `cashflow-restore-drill_*` volumes |
+| `./deploy/compose-restore-drill.sh` | Compose wrapper for isolated stack |
+
+Uses `production.env.snapshot` from the backup run as `deploy/env/restore-drill.env` (gitignored).
+
+### VPS example
+
+```bash
+cd /var/www/cashflow-summary
+
+./deploy/restore-drill.sh verify-backup
+./deploy/restore-drill.sh run
+# Optional: open http://127.0.0.1:8082/login on the VPS (SSH tunnel)
+
+./deploy/restore-drill.sh teardown
+```
+
+Production keeps running on `127.0.0.1:8081` / `https://cashflow.gsautobilan.com` throughout the drill.
+
+See [deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md) § Restore drill.
 
 ---
 

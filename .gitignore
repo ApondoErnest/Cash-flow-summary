@@ -15,6 +15,8 @@ deploy/env/docker.env
 deploy/env/production.env
 deploy/env/backup.env
 deploy/env/monitor.env
+deploy/env/restore-drill.env
+deploy/reports/*.txt
 .phpactor.json
 .phpunit.result.cache
 Homestead.json

@@ -57,6 +57,7 @@ Host Nginx (:80 / :443)          ← TLS + routing by server_name
 | `./deploy/smoke-test-production.sh` | `deploy/env/docker.env` |
 | `./deploy/backup-production.sh` | `./deploy/install-backup-cron.sh` (Step 115 cron) |
 | `./deploy/monitor-production.sh` | `./deploy/install-monitor-cron.sh` (Step 116 cron) |
+| `./deploy/restore-drill.sh` | Isolated restore drill on `:8082` (Step 117) |
 
 **VPS host needs only:** Docker, Docker Compose, host nginx, certbot, git, curl. Frontend and Composer build **inside Docker**.
 
@@ -560,6 +561,34 @@ Log: **`/var/log/cashflow-summary-backup.log`**
 Optional off-site copy — set `BACKUP_OFFSITE_RSYNC_DEST` in `deploy/env/backup.env`, then re-run a backup or wait for cron.
 
 Restore procedure: Step **117** ([backup-monitoring.md](../../docs/operations/backup-monitoring.md)).
+
+---
+
+## Restore drill (Step 117)
+
+Validate that backups are restorable **without touching production** (isolated Docker project on `127.0.0.1:8082`).
+
+```bash
+cd /var/www/cashflow-summary
+git pull origin main
+
+chmod +x deploy/restore-drill.sh deploy/compose-restore-drill.sh
+
+# Validate artifacts only
+./deploy/restore-drill.sh verify-backup
+
+# Full drill (restore + smoke tests + report)
+./deploy/restore-drill.sh run
+
+# Optional: inspect http://127.0.0.1:8082/login via SSH tunnel, then:
+./deploy/restore-drill.sh teardown
+```
+
+Auto-cleanup after success: `./deploy/restore-drill.sh run --teardown`
+
+Reports: `deploy/reports/restore-drill-*.txt`
+
+Production (`:8081` / https://cashflow.gsautobilan.com) keeps running throughout.
 
 ---
 

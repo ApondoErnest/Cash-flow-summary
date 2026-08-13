@@ -249,6 +249,7 @@ Validates services, HTTP via nginx, in-container DB/Redis/config, Horizon, and s
 | **114** | [HOSTINGER-SUBDOMAIN.md](vps/HOSTINGER-SUBDOMAIN.md) Phases 3–4 | `compose-production.sh`, `build-production.sh`, `smoke-test-production.sh` |
 | **115** | [backup-monitoring.md](../docs/operations/backup-monitoring.md) | `backup-production.sh`, `install-backup-cron.sh` |
 | **116** | [backup-monitoring.md](../docs/operations/backup-monitoring.md) | `monitor-production.sh`, `install-monitor-cron.sh` |
+| **117** | [backup-monitoring.md](../docs/operations/backup-monitoring.md) | `restore-drill.sh`, `compose-restore-drill.sh` |
 
 Production secrets: **`deploy/env/production.env`** only (template: `production.env.example`).
 
@@ -276,6 +277,16 @@ Back up before updates: **`./deploy/backup-production.sh run`**
 | `./deploy/install-monitor-cron.sh` | Install `*/5` monitoring cron |
 
 Optional: `deploy/env/monitor.env` from `monitor.env.example` (`ALERT_EMAIL`, `ALERT_WEBHOOK_URL`, thresholds).
+
+### Restore drill (Step 117)
+
+| Script | Purpose |
+|--------|---------|
+| `./deploy/restore-drill.sh verify-backup` | Validate backup artifacts |
+| `./deploy/restore-drill.sh run` | Restore to isolated stack on `:8082` + smoke tests |
+| `./deploy/restore-drill.sh teardown` | Remove drill stack and volumes |
+
+Does **not** touch production volumes (`cashflow-summary_*`).
 
 ---
 

@@ -158,30 +158,35 @@ check_backup_freshness() {
 }
 
 check_tls_expiry() {
-    local host days
+    local host end_line end_epoch days_left
 
     if [[ -z "$MONITOR_PUBLIC_URL" ]]; then
         return
     fi
 
     host="$(printf '%s' "$MONITOR_PUBLIC_URL" | sed -E 's#^https?://([^/]+).*#\1#')"
-    days="$(
+    end_line="$(
         echo | openssl s_client -servername "$host" -connect "${host}:443" 2>/dev/null \
             | openssl x509 -noout -enddate 2>/dev/null \
-            | xargs -I{} date -d {} +%s 2>/dev/null \
             || true
     )"
 
-    if [[ -z "$days" ]]; then
+    if [[ -z "$end_line" ]]; then
         warn "could not read TLS certificate for ${host}"
         return
     fi
 
-    days=$(( ( days - $(date +%s) ) / 86400 ))
-    if [[ "$days" -lt "$TLS_WARN_DAYS" ]]; then
-        warn "TLS certificate for ${host} expires in ${days} days (threshold ${TLS_WARN_DAYS})"
+    end_epoch="$(date -d "${end_line#notAfter=}" +%s 2>/dev/null || true)"
+    if [[ -z "$end_epoch" ]]; then
+        warn "could not parse TLS expiry for ${host} (${end_line})"
+        return
+    fi
+
+    days_left=$(( ( end_epoch - $(date +%s) ) / 86400 ))
+    if [[ "$days_left" -lt "$TLS_WARN_DAYS" ]]; then
+        warn "TLS certificate for ${host} expires in ${days_left} days (threshold ${TLS_WARN_DAYS})"
     else
-        pass "TLS certificate for ${host} expires in ${days} days"
+        pass "TLS certificate for ${host} expires in ${days_left} days"
     fi
 }
 

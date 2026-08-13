@@ -103,7 +103,7 @@ Automated on the VPS via `./deploy/install-backup-cron.sh`. Manual run:
 
 Retention: **28** daily runs on VPS by default (auto-delete older). Weekly/monthly tiers are **off** unless configured in `deploy/env/backup.env`.
 
-Restore: Step **117** restore drill ([backup-monitoring.md](../operations/backup-monitoring.md) § Restore test).
+Restore: Step **117** — `./deploy/restore-drill.sh run` ([backup-monitoring.md](../docs/operations/backup-monitoring.md) § Restore test).
 
 ---
 

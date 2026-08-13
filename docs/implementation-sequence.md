@@ -27,8 +27,8 @@ flowchart LR
 | Item | Value |
 |------|-------|
 | Doc set | v2.1.09 |
-| Steps complete | **1–116** |
-| **Next step** | **Step 117** — Restore drill on staging |
+| Steps complete | **1–117** |
+| **Next step** | **Step 118** — Pilot one center |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -154,7 +154,7 @@ flowchart LR
 | 114 | Deploy procedure + rollback | VPS deployment | S8 | Complete |
 | 115 | Daily DB + file backups | Backup & monitoring | S8 | Complete |
 | 116 | Uptime and alert configuration | Backup & monitoring | S8 | Complete |
-| 117 | Restore drill on staging | Backup & monitoring | S8 | Not started |
+| 117 | Restore drill on staging | Backup & monitoring | S8 | Complete |
 | 118 | Pilot one center | Controlled production rollout | S8 | Not started |
 | 119 | Expand to all centers | Controlled production rollout | S8 | Not started |
 | 120 | Owner production sign-off | Controlled production rollout | S8 | Not started |
@@ -1647,6 +1647,12 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [backup-monitoring.md](../operations/backup-monitoring.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-13 — `restore-drill.sh` (verify-backup/run/smoke/teardown), isolated `docker-compose.restore-drill.yml` on port 8082; smoke tests + report; production volumes untouched |
+
+**Deliverables:** `deploy/restore-drill.sh`, `deploy/compose-restore-drill.sh`, `docker-compose.restore-drill.yml`, `deploy/env/restore-drill.env.example`, `deploy/reports/`, [backup-monitoring.md](../operations/backup-monitoring.md), [deploy/volumes.md](../../deploy/volumes.md)
+
+**VPS drill:** `./deploy/restore-drill.sh verify-backup`, `./deploy/restore-drill.sh run`, `./deploy/restore-drill.sh teardown` (production stays on `:8081`)
 
 **Checkpoint after Step 117** (end of Backup & monitoring):
 
