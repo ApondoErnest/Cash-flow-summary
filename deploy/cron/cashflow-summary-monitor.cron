@@ -1,0 +1,8 @@
+# Cash Flow Summary monitoring + alerts (Step 116)
+# Installed by: ./deploy/install-monitor-cron.sh
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Every 5 minutes — containers, /up, disk, backups, TLS, Redis, queue
+*/5 * * * * cd __APP_DIR__ && ./deploy/monitor-production.sh check >> /var/log/cashflow-summary-monitor.log 2>&1

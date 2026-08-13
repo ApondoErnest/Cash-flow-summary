@@ -248,6 +248,7 @@ Validates services, HTTP via nginx, in-container DB/Redis/config, Horizon, and s
 | **113** | [HOSTINGER-SUBDOMAIN.md](vps/HOSTINGER-SUBDOMAIN.md) Phases 5–6 | Host nginx, Certbot TLS |
 | **114** | [HOSTINGER-SUBDOMAIN.md](vps/HOSTINGER-SUBDOMAIN.md) Phases 3–4 | `compose-production.sh`, `build-production.sh`, `smoke-test-production.sh` |
 | **115** | [backup-monitoring.md](../docs/operations/backup-monitoring.md) | `backup-production.sh`, `install-backup-cron.sh` |
+| **116** | [backup-monitoring.md](../docs/operations/backup-monitoring.md) | `monitor-production.sh`, `install-monitor-cron.sh` |
 
 Production secrets: **`deploy/env/production.env`** only (template: `production.env.example`).
 
@@ -264,6 +265,17 @@ Run on VPS with **`./deploy/compose-production.sh`**.
 Optional: `deploy/env/backup.env` from `backup.env.example` (off-site rsync, retention).
 
 Back up before updates: **`./deploy/backup-production.sh run`**
+
+### Monitoring and alerts (Step 116)
+
+| Script | Purpose |
+|--------|---------|
+| `./deploy/monitor-production.sh status` | Run checks; print summary (no alerts) |
+| `./deploy/monitor-production.sh check` | Run checks; alert on failure (cron) |
+| `./deploy/monitor-production.sh alert-test` | Send a test alert |
+| `./deploy/install-monitor-cron.sh` | Install `*/5` monitoring cron |
+
+Optional: `deploy/env/monitor.env` from `monitor.env.example` (`ALERT_EMAIL`, `ALERT_WEBHOOK_URL`, thresholds).
 
 ---
 

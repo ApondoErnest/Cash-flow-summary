@@ -56,6 +56,7 @@ Host Nginx (:80 / :443)          ← TLS + routing by server_name
 | `./deploy/build-production.sh` | Root `.env` |
 | `./deploy/smoke-test-production.sh` | `deploy/env/docker.env` |
 | `./deploy/backup-production.sh` | `./deploy/install-backup-cron.sh` (Step 115 cron) |
+| `./deploy/monitor-production.sh` | `./deploy/install-monitor-cron.sh` (Step 116 cron) |
 
 **VPS host needs only:** Docker, Docker Compose, host nginx, certbot, git, curl. Frontend and Composer build **inside Docker**.
 
@@ -559,6 +560,42 @@ Log: **`/var/log/cashflow-summary-backup.log`**
 Optional off-site copy — set `BACKUP_OFFSITE_RSYNC_DEST` in `deploy/env/backup.env`, then re-run a backup or wait for cron.
 
 Restore procedure: Step **117** ([backup-monitoring.md](../../docs/operations/backup-monitoring.md)).
+
+---
+
+## Monitoring and alerts (Step 116)
+
+Automated checks every **5 minutes**: Docker services, local + public `/up`, disk, backup freshness, TLS expiry, Redis memory, queue depth.
+
+### One-time setup on the VPS
+
+```bash
+cd /var/www/cashflow-summary
+git pull origin main
+
+chmod +x deploy/monitor-production.sh deploy/install-monitor-cron.sh
+
+cp deploy/env/monitor.env.example deploy/env/monitor.env
+nano deploy/env/monitor.env
+# Set ALERT_EMAIL and/or ALERT_WEBHOOK_URL (Slack incoming webhook works)
+
+sudo mkdir -p /var/lib/cashflow-summary
+sudo chown "$USER:$USER" /var/lib/cashflow-summary
+chmod 700 /var/lib/cashflow-summary
+
+# Manual test (no alert unless something fails)
+./deploy/monitor-production.sh status
+
+# Send a test alert
+./deploy/monitor-production.sh alert-test
+
+# Install cron (every 5 minutes)
+./deploy/install-monitor-cron.sh
+```
+
+Log: **`/var/log/cashflow-summary-monitor.log`**
+
+Uptime alerts fire after **`UPTIME_ALERT_MINUTES`** (default 2) of `/up` failure. Duplicate alerts are suppressed for **`ALERT_COOLDOWN_MINUTES`** (default 30).
 
 ---
 

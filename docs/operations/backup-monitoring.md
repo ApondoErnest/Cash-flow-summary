@@ -71,22 +71,49 @@ Quarterly restore to staging:
 
 ## Monitoring
 
+Production checks run every **5 minutes** via cron (`monitor-production.sh check`).
+
+| Script | Purpose |
+|--------|---------|
+| `./deploy/monitor-production.sh check` | Run all checks; alert on failure (cron) |
+| `./deploy/monitor-production.sh status` | Print checks only; no alerts |
+| `./deploy/monitor-production.sh alert-test` | Send a test alert |
+| `./deploy/install-monitor-cron.sh` | Install `*/5` monitoring cron |
+
+Optional settings: **`deploy/env/monitor.env`** (template: `deploy/env/monitor.env.example`).
+
+State file: **`/var/lib/cashflow-summary/monitor-state`** (downtime + alert cooldown).
+
+Log file: **`/var/log/cashflow-summary-monitor.log`**
+
+| Signal | Check | Alert if |
+|--------|-------|----------|
+| Docker stack | 6 services running (`nginx`, `app`, `mysql`, `redis`, `horizon`, `scheduler`) | Any container down |
+| Application uptime | `GET /up` (local `:8081` + public URL) | HTTP ≠ 200 for **> 2 min** |
+| Backup freshness | Latest run under `/var/backups/cashflow-summary/runs/` | Missing, incomplete, or **> 26 h** old |
+| Server disk | `df` on `/` and backup root | **> 85%** (warning in alert body) |
+| TLS certificate | `openssl s_client` on public host | **< 14 days** to expiry (warning) |
+| Redis memory | `INFO memory` in container | **> 80%** of `maxmemory` (warning) |
+| Queue backlog | `LLEN queues:default` | **≥ 100** jobs (warning) |
+
+Alert destinations (set at least one on the VPS): **`ALERT_EMAIL`** and/or **`ALERT_WEBHOOK_URL`** (Slack-compatible JSON `{"text": "..."}`).
+
+Duplicate alerts for the same incident are suppressed for **`ALERT_COOLDOWN_MINUTES`** (default 30). Send **`ALERT_ON_OK=true`** recovery messages when checks pass again after downtime.
+
+See [deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md) § Monitoring and alerts.
+
+### Application signals (future)
+
+These remain documented for Horizon/log review; not yet wired into `monitor-production.sh`:
+
 | Signal | Alert if |
 |--------|----------|
-| Application uptime | Down > 2 min |
 | Failed imports | > 3 in 1 hour |
 | Verification failures | Spike vs baseline |
 | Reconciliation failures | Any in production |
 | Pending revisions | > N days (configurable) |
-| Queue backlog | > 100 jobs 15 min |
 | WhatsApp failures | Any failed after max retries |
 | MySQL disk | > 80% |
-| Redis memory | > 80% maxmemory |
-| Server disk | > 85% |
-| Backup job | Failed |
-| TLS certificate | < 14 days to expiry |
-
-Alert channel: Owner WhatsApp or email to deploy admin (operational, not app email feature).
 
 ---
 
@@ -107,15 +134,16 @@ Alert channel: Owner WhatsApp or email to deploy admin (operational, not app ema
 | Database backup | 02:00 daily (`backup-production.sh run`) |
 | File backup | 02:00 daily (same run as DB) |
 | Config snapshot | Sunday 04:00 (`backup-production.sh config`) |
+| Monitoring checks | Every 5 min (`monitor-production.sh check`) |
 | Certificate check | Weekly (`certbot renew --dry-run` on host) |
 
 ---
 
 ## Health endpoint
 
-`GET /health` → `{ "status": "ok", "database": "ok", "redis": "ok" }`
+`GET /up` → Laravel health check (HTTP 200 when app, database, and Redis are OK).
 
-Used by Docker healthcheck and external uptime monitor.
+Used by Docker healthcheck, smoke tests, and **`monitor-production.sh`**.
 
 ---
 

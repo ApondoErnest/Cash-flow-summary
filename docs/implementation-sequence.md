@@ -27,8 +27,8 @@ flowchart LR
 | Item | Value |
 |------|-------|
 | Doc set | v2.1.09 |
-| Steps complete | **1–115** |
-| **Next step** | **Step 116** — Uptime and alert configuration |
+| Steps complete | **1–116** |
+| **Next step** | **Step 117** — Restore drill on staging |
 | **Global UI rule** | Every screen: professional design, blended Midnight Finance colors — [design-system.md § Design quality standard](../design/design-system.md#design-quality-standard-project-wide) |
 | Guide | [setup.md](../operations/setup.md) |
 
@@ -153,7 +153,7 @@ flowchart LR
 | 113 | SSH, firewall, TLS | VPS deployment | S8 | Complete |
 | 114 | Deploy procedure + rollback | VPS deployment | S8 | Complete |
 | 115 | Daily DB + file backups | Backup & monitoring | S8 | Complete |
-| 116 | Uptime and alert configuration | Backup & monitoring | S8 | Not started |
+| 116 | Uptime and alert configuration | Backup & monitoring | S8 | Complete |
 | 117 | Restore drill on staging | Backup & monitoring | S8 | Not started |
 | 118 | Pilot one center | Controlled production rollout | S8 | Not started |
 | 119 | Expand to all centers | Controlled production rollout | S8 | Not started |
@@ -1632,6 +1632,12 @@ flowchart LR
 | **Sprint** | S8 |
 | **Reference** | [backup-monitoring.md](../operations/backup-monitoring.md) |
 | **Done when** | Deliverable complete and locally verified |
+| **Status** | Complete |
+| **Completed** | 2026-08-13 — `monitor-production.sh` (check/status/alert-test), `install-monitor-cron.sh`, `deploy/env/monitor.env.example`, cron every 5 min; alerts via email/webhook with 2 min uptime delay + 30 min cooldown |
+
+**Deliverables:** `deploy/monitor-production.sh`, `deploy/install-monitor-cron.sh`, `deploy/cron/cashflow-summary-monitor.cron`, `deploy/env/monitor.env.example`, [backup-monitoring.md](../operations/backup-monitoring.md), [deploy/vps/HOSTINGER-SUBDOMAIN.md](../../deploy/vps/HOSTINGER-SUBDOMAIN.md) § Monitoring
+
+**VPS activation:** `cp deploy/env/monitor.env.example deploy/env/monitor.env`, set `ALERT_EMAIL` and/or `ALERT_WEBHOOK_URL`, `./deploy/monitor-production.sh status`, `./deploy/monitor-production.sh alert-test`, `./deploy/install-monitor-cron.sh`
 
 ### Step 117 — Restore drill on staging
 
