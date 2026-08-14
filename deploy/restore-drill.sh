@@ -21,7 +21,7 @@ REPORT_DIR="${RESTORE_DRILL_REPORT_DIR:-$ROOT/deploy/reports}"
 
 BACKUP_ROOT="${BACKUP_ROOT:-/var/backups/cashflow-summary}"
 RUNS_DIR="${BACKUP_ROOT}/runs"
-STORAGE_VOLUME="${RESTORE_DRILL_STORAGE_VOLUME:-cashflow-restore-drill_storage_data}"
+DRILL_STORAGE_VOLUME="${RESTORE_DRILL_STORAGE_VOLUME:-cashflow-restore-drill_storage_data}"
 RESTORE_DRILL_HTTP_PORT="${RESTORE_DRILL_HTTP_PORT:-8082}"
 LOG_TAG="cashflow-restore-drill"
 
@@ -37,6 +37,9 @@ load_config() {
         set +a
         RUNS_DIR="${BACKUP_ROOT}/runs"
     fi
+
+    # backup.env may define STORAGE_VOLUME for production — never use it in the drill.
+    DRILL_STORAGE_VOLUME="${RESTORE_DRILL_STORAGE_VOLUME:-cashflow-restore-drill_storage_data}"
 }
 
 log() {
@@ -54,7 +57,7 @@ assert_isolated_volumes() {
     local vol
 
     for vol in \
-        "${RESTORE_DRILL_STORAGE_VOLUME}" \
+        "${DRILL_STORAGE_VOLUME}" \
         "cashflow-restore-drill_mysql_data" \
         "cashflow-restore-drill_redis_data"; do
         if [[ "$vol" == cashflow-summary_* ]]; then
@@ -214,9 +217,9 @@ restore_storage() {
     log "Stopping app workers before storage restore ..."
     "${COMPOSE[@]}" stop nginx app horizon scheduler >/dev/null 2>&1 || true
 
-    log "Restoring storage volume ${STORAGE_VOLUME} ..."
+    log "Restoring storage volume ${DRILL_STORAGE_VOLUME} ..."
     docker run --rm \
-        -v "${STORAGE_VOLUME}:/data" \
+        -v "${DRILL_STORAGE_VOLUME}:/data" \
         -v "${BACKUP_DIR}:/backup:ro" \
         alpine:3.20 \
         sh -c 'find /data -mindepth 1 -maxdepth 1 -exec rm -rf {} +; tar xzf /backup/storage-files.tgz -C /data'
